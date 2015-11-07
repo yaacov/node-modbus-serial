@@ -45,13 +45,13 @@ var modbusRTU = new ModbusRTU(serialPort);
 modbusRTU.open();
 
 // write the values 0, 0xffff to registers starting at address 5
-// on device null 1.
+// on device number 1.
 setTimeout(function() {
      modbusRTU.writeFC16(1, 5, [0 , 0xffff]);
 }, 1000);
 
 // read the values of 2 registers starting at address 5
-// on device null 1. and log the values to the console.
+// on device number 1. and log the values to the console.
 setTimeout(function() {
      modbusRTU.writeFC4(1, 5, 2, function(err, data) {
          console.log(data);
