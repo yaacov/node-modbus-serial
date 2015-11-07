@@ -1,4 +1,4 @@
-# node-modbus-rtu
+# modbus-serial
 A pure JavaScript implemetation of MODBUS-RTU for NodeJS
 
 This class makes ModbusRTU calls fun and easy.
