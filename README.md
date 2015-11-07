@@ -10,7 +10,7 @@ easy to deploy and maintain.
 ## Install
 
 ```
-npm install modbus-rtu
+npm install modbus-serial
 ```
 
 ## What can I do with this module ?
