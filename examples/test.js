@@ -3,7 +3,7 @@ var SerialPort = require("serialport").SerialPort;
 var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
 
 // Create modbus
-var ModbusRTU = require("./modbusrtu");
+var ModbusRTU = require("modbusrtu");
 var modbusRTU = new ModbusRTU(serialPort);
 
 // Open modbus communication.
