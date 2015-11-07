@@ -8,7 +8,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/yaacov/node-modbus-rtu.git"
+    "url": "git+https://github.com/yaacov/node-modbus-serial.git"
   },
   "keywords": [
     "modbus",
@@ -21,9 +21,9 @@
   "author": "Yaacov Zamir <kobi.zamir@gmail.com>",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/yaacov/node-modbus-rtu/issues"
+    "url": "https://github.com/yaacov/node-modbus-serial/issues"
   },
-  "homepage": "https://github.com/yaacov/node-modbus-rtu#readme",
+  "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
   "devDependencies": {
     "chai": "^3.4.0",
     "mocha": "^2.3.3"
