@@ -1,6 +1,8 @@
 # modbus-serial
 A pure JavaScript implemetation of MODBUS-RTU for NodeJS
 
+[![NPM Version](https://img.shields.io/npm/v/gm.svg?style=flat)](https://www.npmjs.com/package/modbus-serial)
+
 This class makes ModbusRTU calls fun and easy.
 
 Modbus is a serial communications protocol, first used in 1979.
