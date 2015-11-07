@@ -1,5 +1,5 @@
 {
-  "name": "modbus-rtu",
+  "name": "modbus-serial",
   "version": "1.0.0",
   "description": "A pure JavaScript implemetation of MODBUS-RTU for NodeJS.",
   "main": "index.js",
