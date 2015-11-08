@@ -9,33 +9,40 @@ Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and 
 easy to deploy and maintain.
 
-## Install
+#### Install
 
 ```
 npm install modbus-serial
 ```
 
-## What can I do with this module ?
+#### What can I do with this module ?
 
 This class makes it fun and easy to communicate with electronic
 devices such as irrigation controllers, protocol droids and robots.
 It talks with devices that use a serial line (e.g. RS485, RS232).
 Many industrial electronic devices implement modbus.
 Arduino can also talk modbus and you can control your projects and robots
-using modbus. Arduino library for modbus slave:
+using modbus. 
+
+Arduino library for modbus slave:
      https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
      
-## Compatibility
+Arduino sketch for irrigation timer with modbus support:
+     https://github.com/yaacov/irrigation-timer-for-arduino
+     
+#### Compatibility
 
 This class implements FC4 (Read Input Registers) and 
 FC16 (Preset Multiple Registers) of modbus-RTU.
 
-## Requires
+#### Requires
 
-node-serialport - for using the serial port.
-     https://github.com/voodootikigod/node-serialport
+###### node-serialport - for using the serial port.
+https://github.com/voodootikigod/node-serialport
      
-## Example
+#### Examples
+----
+###### Read and Write
 ``` javascript
 var SerialPort = require("serialport").SerialPort;
 var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
@@ -63,44 +70,63 @@ setTimeout(function() {
    serialPort.close();
 }, 3000);
 ```
+----
+###### Logger
+``` javascript
+var SerialPort = require("serialport").SerialPort;
+var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+var ModbusRTU = require("modbus-serial");
+var modbusRTU = new ModbusRTU(serialPort);
 
-## Methods
+modbusRTU.open();
 
-### .open(callback)
+// read the values of 10 registers starting at address 0
+// on device number 1. and log the values to the console.
+setInterval(function() {
+    modbusRTU.writeFC4(1, 0, 10, function(err, data) {
+        console.log(data.data);
+    });
+}, 1000);
+```
+#### Methods
+----
+##### .open(callback)
 Opens a modbus connection using the given serial port.
 
-#### callback (optional)
+###### callback (optional)
 Called when a connection has been opened.
 
-### .writeFC4 (unit, address, length, callback)
+----
+##### .writeFC4 (unit, address, length, callback)
 Writes Read Input Registers (FC=04) request to serial port.
 
-#### unit
+###### unit
 The slave unit address.
 
-#### address
+###### address
 The Data Address of the first register.
 
-#### length
+###### length
 The total number of registers requested.
 
-#### callback (optional)
+###### callback (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 
-### .writeFC16 (unit, address, array, callback)
+----
+##### .writeFC16 (unit, address, array, callback)
 Writes Preset Multiple Registers (FC=16) request to serial port.
 
-#### unit
+###### unit
 The slave unit address.
 
-#### address
+###### address
 The Data Address of the first register.
 
-#### array
+###### array
 The array of values to set into the registers.
 
-#### callback (optional)
+###### callback (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 
