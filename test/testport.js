@@ -6,7 +6,6 @@ var events = require('events');
  * Simulate a serial port with modbus-rtu slave replay
  */
 var TestPort = function() {
-    this._buffer = new Buffer('', 'hex');
     events.call(this);
 }
 util.inherits(TestPort, events);
