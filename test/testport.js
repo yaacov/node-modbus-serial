@@ -16,7 +16,7 @@ util.inherits(TestPort, events);
  *
  * @param {buffer} buf the buffer to to crc on.
  *
- * @return {number} the calculated CRC16
+ * @return {number} the calculated crc16
  */
 function crc16(buf) {
     var length = buf.length - 2;

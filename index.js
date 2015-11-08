@@ -101,7 +101,7 @@ var ModbusRTU = function (port) {
     this._port = port;
     
     // state variables
-    this._nextAddress = null; // unit adress of current function call.
+    this._nextAddress = null; // unit address of current function call.
     this._nextCode = null; // function code of current function call.
     this._nextLength = 0; // number of bytes in current answer.
     this._next = null; // the function to call on success or failure
