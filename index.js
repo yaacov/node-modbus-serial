@@ -73,7 +73,7 @@ function _readFC4(data, next) {
     }
     
     if (next)
-        next(null, {"Data": contents});
+        next(null, {"data": contents});
 }
 
 /** 
@@ -88,7 +88,7 @@ function _readFC16(data, next) {
     var length = data.readUInt16BE(4);
     
     if (next)
-        next(null, {"Adress": dataAddress, "Length": length});
+        next(null, {"address": dataAddress, "length": length});
 }
 
 /**
