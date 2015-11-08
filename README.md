@@ -27,6 +27,9 @@ using modbus.
 Arduino library for modbus slave:
      https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
      
+Arduino sketch for irrigation timer with modbus support:
+     https://github.com/yaacov/irrigation-timer-for-arduino
+     
 #### Compatibility
 
 This class implements FC4 (Read Input Registers) and 
