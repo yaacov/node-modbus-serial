@@ -32,7 +32,7 @@ Arduino sketch for irrigation timer with modbus support:
      
 #### Compatibility
 
-This class implements FC4 "Read Input Registers" and 
+This class implements FC3 "Read Holding Registers", FC4 "Read Input Registers" and 
 FC16 "Preset Multiple Registers" of modbus-RTU.
 
 #### Requires
@@ -155,11 +155,12 @@ The total number of registers requested.
 ###### callback (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
-
+```
 error - null on success, error string o/w
 data - an object with two fildes:
     data.data: array of unsinged 16 bit registers registers.
     data.buffer: raw baffer of bytes returned by slave.
+```
 
 ----
 ##### .writeFC16 (unit, address, array, callback)
