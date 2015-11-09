@@ -1,9 +1,9 @@
 # modbus-serial
-A pure JavaScript implemetation of MODBUS-RTU for NodeJS
+A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS
 
 [![NPM Version](https://img.shields.io/npm/v/gm.svg?style=flat)](https://www.npmjs.com/package/modbus-serial)
 
-This class makes ModbusRTU calls fun and easy.
+This class makes ModbusRTU (and TCP) calls fun and easy.
 
 Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and 
@@ -88,6 +88,25 @@ setInterval(function() {
     });
 }, 1000);
 ```
+----
+###### Logger-TCP
+``` javascript
+var TcpPort = require("modbus-serial").TcpPort;
+var tcpPort = new TcpPort("192.168.1.42");
+var ModbusRTU = require("modbus-serial");
+var modbusRTU = new ModbusRTU(tcpPort);
+
+modbusRTU.open();
+
+// read the values of 10 registers starting at address 0
+// on device number 1. and log the values to the console.
+setInterval(function() {
+    modbusRTU.writeFC4(1, 0, 10, function(err, data) {
+        console.log(data.data);
+    });
+}, 1000);
+```
+
 #### Methods
 ----
 ##### .open(callback)

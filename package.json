@@ -1,7 +1,7 @@
 {
   "name": "modbus-serial",
-  "version": "1.1.1",
-  "description": "A pure JavaScript implemetation of MODBUS-RTU for NodeJS.",
+  "version": "1.2.0",
+  "description": "A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
     "test": "mocha"
