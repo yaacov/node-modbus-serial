@@ -271,3 +271,4 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
 }
 
 module.exports = ModbusRTU;
+module.exports.TcpPort = require('./tcpport');

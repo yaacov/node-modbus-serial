@@ -48,7 +48,16 @@ function crc16(buf) {
  * Simulate successful port open
  */
 TestPort.prototype.open = function (callback) {
-    callback(null);
+    if (callback)
+        callback(null);
+}
+
+/**
+ * Simulate successful close port
+ */
+TestPort.prototype.close = function (callback) {
+    if (callback)
+        callback(null);
 }
 
 /**

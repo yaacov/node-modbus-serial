@@ -7,6 +7,7 @@ var modbusRTU = new ModbusRTU(testPort);
 var expect = require('chai').expect;
 
 describe('ModbusRTU', function() {
+  
   describe('#open() - open serial port.', function () {
     it('should open the port without errors', function (done) {
       modbusRTU.open(function(err) {
@@ -18,7 +19,7 @@ describe('ModbusRTU', function() {
   });
   
   describe('#writeFC4() - read registers.', function () {
-    it('should return 3 registers [8, 9, 10] without errors', function (done) {
+    it('should read 3 registers [8, 9, 10] without errors', function (done) {
         modbusRTU.writeFC4(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
@@ -87,7 +88,7 @@ describe('ModbusRTU', function() {
   });
   
   describe('#writeFC4() - read registers after write.', function () {
-    it('should return 3 registers [42, 128, 5] without errors', function (done) {
+    it('should read 3 registers [42, 128, 5] without errors', function (done) {
         modbusRTU.writeFC4(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
@@ -96,5 +97,6 @@ describe('ModbusRTU', function() {
         });
     });
   });
+  
 });
 
