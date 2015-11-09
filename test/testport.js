@@ -3,9 +3,15 @@ var util = require('util');
 var events = require('events');
 
 /**
- * Simulate a serial port with modbus-rtu slave replay
+ * Simulate a serial port with 4 modbus-rtu slaves connected
+ * 1 - a modbus slave working correctly
+ * 2 - a modbus slave that answer short replays
+ * 3 - a modbus slave that answer with bad crc
+ * 4 - a modbus slave that answer with bad unit number
  */
 var TestPort = function() {
+    // simulate 14 registers
+    this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
     events.call(this);
 }
 util.inherits(TestPort, events);
@@ -50,6 +56,12 @@ TestPort.prototype.open = function (callback) {
  */
 TestPort.prototype.write = function (buf) {
     var buffer = null;
+    
+    // if length is too short, ignore message
+    if (buf.length < 8) {
+        return;
+    }
+    
     var unitNumber = buf[0];
     var functionCode = buf[1];
     var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
@@ -61,49 +73,74 @@ TestPort.prototype.write = function (buf) {
     
     // function code 4
     if (functionCode == 4) {
-        switch (unitNumber) {
-            case 1:
-                // unit 1: answers correctly
-                buffer = new Buffer('010402000A3937', 'hex');
-                break;
-            case 2:
-                // unit 2: answers short data
-                buffer = new Buffer('020402000A', 'hex');
-                break;
-            case 3:
-                // unit 3: answers with bad crc
-                buffer = new Buffer('030402000A3937', 'hex');
-                break;
-            case 4:
-                // unit 4: answers with bad unit number
-                buffer = new Buffer('010402000A3937', 'hex');
-                break;
+        var address = buf.readUInt16BE(2);
+        var length = buf.readUInt16BE(4);
+        
+        // if length is bad, ignore message
+        if (buf.length != 8) {
+            return;
+        }
+        
+        // build answer
+        buffer = new Buffer(3 + length * 2 + 2);
+        buffer.writeUInt8(length * 2, 2);
+        
+        // read registers
+        for (var i = 0; i < length; i++) {
+            buffer.writeUInt16BE(this._registers[address + i], 3 + i * 2);
         }
     }
     
     // function code 16
     if (functionCode == 16) {
-        switch (unitNumber) {
-            case 1:
-                // unit 1: answers correctly
-                buffer = new Buffer('0110000100021008', 'hex');
-                break;
-            case 2:
-                // unit 2: answers short data
-                buffer = new Buffer('0210000100', 'hex');
-                break;
-            case 3:
-                // unit 3: answers with bad crc
-                buffer = new Buffer('0310000100021008', 'hex');
-                break;
-            case 4:
-                // unit 4: answers with bad unit number
-                buffer = new Buffer('0110000100021010', 'hex');
-                break;
+        var address = buf.readUInt16BE(2);
+        var length = buf.readUInt16BE(4);
+        
+        // if length is bad, ignore message
+        if (buf.length != (7 + length * 2 + 2)) {
+            return;
+        }
+        
+        // build answer
+        buffer = new Buffer(8);
+        buffer.writeUInt16BE(address, 2);
+        buffer.writeUInt16BE(length, 4);
+        
+        // write registers
+        for (var i = 0; i < length; i++) {
+            this._registers[address + i] = buf.readUInt16BE(7 + i * 2);
         }
     }
     
+    // send data back
     if (buffer) {
+        // add unit number and function code
+        buffer.writeUInt8(unitNumber, 0);
+        buffer.writeUInt8(functionCode, 1);
+        
+        // add crc
+        crc = crc16(buffer);
+        buffer.writeUInt16LE(crc, buffer.length - 2);
+        
+        // corrupt the answer
+        switch (unitNumber) {
+            case 1:
+                // unit 1: answers correctly
+                break;
+            case 2:
+                // unit 2: answers short data
+                buffer = buffer.slice(0, buffer.length - 5);
+                break;
+            case 3:
+                // unit 3: answers with bad crc
+                buffer.writeUInt16LE(crc + 1, buffer.length - 2);
+                break;
+            case 4:
+                // unit 4: answers with bad unit number
+                buffer[0] = unitNumber + 2;
+                break;
+        }
+        
         this.emit('data', buffer);
     }
 }
