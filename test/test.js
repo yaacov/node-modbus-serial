@@ -7,7 +7,7 @@ var modbusRTU = new ModbusRTU(testPort);
 var expect = require('chai').expect;
 
 describe('ModbusRTU', function() {
-  describe('#open()', function () {
+  describe('#open() - open serial port.', function () {
     it('should open the port without errors', function (done) {
       modbusRTU.open(function(err) {
         expect(err).to.be.a('null');
@@ -17,12 +17,12 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC4()', function () {
-    it('should return one register without errors', function (done) {
-        modbusRTU.writeFC4(1, 8, 1, function(err, data) {
+  describe('#writeFC4() - read registers.', function () {
+    it('should return 3 registers [8, 9, 10] without errors', function (done) {
+        modbusRTU.writeFC4(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');
-            expect(data).to.have.property('data').with.length(1);
-            
+            expect(data).to.have.property('data').with.length(3);
+            expect(data.data.toString()).to.equal([8, 9, 10].toString());
             done()
         });
     });
@@ -52,9 +52,9 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC16()', function () {
-    it('should return without errors', function (done) {
-        modbusRTU.writeFC16(1, 8, [0x0000, 0xffff], function(err, data) {
+  describe('#writeFC16() - write registers.', function () {
+    it('should write 3 registors [42, 128, 5] without errors', function (done) {
+        modbusRTU.writeFC16(1, 8, [42, 128, 5], function(err, data) {
             expect(err).to.be.a('null');
             
             done()
@@ -62,7 +62,7 @@ describe('ModbusRTU', function() {
     });
     
     it('should fail on short data answer', function (done) {
-        modbusRTU.writeFC16(2, 8, [0x0000, 0xffff], function(err, data) {
+        modbusRTU.writeFC16(2, 8, [42, 128, 5], function(err, data) {
             expect(err).to.equal('Data length error');
             
             done()
@@ -70,7 +70,7 @@ describe('ModbusRTU', function() {
     });
     
     it('should fail on CRC error', function (done) {
-        modbusRTU.writeFC16(3, 8, [0x0000, 0xffff], function(err, data) {
+        modbusRTU.writeFC16(3, 8, [42, 128, 5], function(err, data) {
             expect(err).to.equal('CRC error');
             
             done()
@@ -78,9 +78,20 @@ describe('ModbusRTU', function() {
     });
     
     it('should fail on unexpected replay', function (done) {
-        modbusRTU.writeFC16(4, 8, [0x0000, 0xffff], function(err, data) {
+        modbusRTU.writeFC16(4, 8, [42, 128, 5], function(err, data) {
             expect(err).to.equal('Unexpected data error');
             
+            done()
+        });
+    });
+  });
+  
+  describe('#writeFC4() - read registers after write.', function () {
+    it('should return 3 registers [42, 128, 5] without errors', function (done) {
+        modbusRTU.writeFC4(1, 8, 3, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('data').with.length(3);
+            expect(data.data.toString()).to.equal([42, 128, 5].toString());
             done()
         });
     });
