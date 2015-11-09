@@ -39,7 +39,9 @@ FC16 "Preset Multiple Registers" of modbus-RTU.
 
 ###### node-serialport - for using the serial port.
 https://github.com/voodootikigod/node-serialport
-     
+
+[ modbus-TCP connection is done using an internal port (see examples) ]
+
 #### Examples
 ----
 ###### Read and Write
