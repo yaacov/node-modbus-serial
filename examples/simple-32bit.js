@@ -10,7 +10,7 @@ var modbusRTU = new ModbusRTU(serialPort);
 // Open modbus communication.
 modbusRTU.open();
 
-/* read 2 16bit registers to get one 32 bit number:
+/* read 2 16bit registers to get one 32bit number:
  * 1 - The Slave Address.
  * 2 - The Data Address of the first register.
  * 2 - Number of registers to read.

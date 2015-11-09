@@ -118,7 +118,7 @@ var modbusRTU = new ModbusRTU(serialPort);
 
 modbusRTU.open();
 
-// read 2 16bit-registers to get one 32 bit number
+// read 2 16bit-registers to get one 32bit number
 setTimeout(function() {
     modbusRTU.writeFC4(1, 5, 2, function(err, data) {
         console.log(data.buffer.readUInt32BE());
