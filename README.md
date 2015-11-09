@@ -136,7 +136,7 @@ that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
-    data.data: array of unsinged 16 bit registers registers.
+    data.data: array of unsinged 16 bit registers.
     data.buffer: raw baffer of bytes returned by slave.
 ```
 
@@ -159,7 +159,7 @@ that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
-    data.data: array of unsinged 16 bit registers registers.
+    data.data: array of unsinged 16 bit registers.
     data.buffer: raw baffer of bytes returned by slave.
 ```
 
