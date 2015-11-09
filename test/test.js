@@ -18,7 +18,27 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC4() - read registers.', function () {
+  describe('#writeFC3() - read holding registers.', function () {
+    it('should read 3 registers [0xa12b, 0xffff, 0xb21a] without errors', function (done) {
+        modbusRTU.writeFC3(1, 8, 3, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('data').with.length(3);
+            expect(data.data.toString()).to.equal([0xa12b, 0xffff, 0xb21a].toString());
+            done()
+        });
+    });
+    
+    it('should read raw buffer "a12bffffb21a" without errors', function (done) {
+        modbusRTU.writeFC3(1, 8, 3, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('buffer');
+            expect(data.buffer.toString('hex')).to.equal("a12bffffb21a");
+            done()
+        });
+    });
+  });
+  
+  describe('#writeFC4() - read input registers.', function () {
     it('should read 3 registers [8, 9, 10] without errors', function (done) {
         modbusRTU.writeFC4(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');
@@ -87,7 +107,7 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC4() - read registers after write.', function () {
+  describe('#writeFC4() - read input registers after write.', function () {
     it('should read 3 registers [42, 128, 5] without errors', function (done) {
         modbusRTU.writeFC4(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');

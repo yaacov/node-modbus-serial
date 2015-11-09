@@ -58,7 +58,7 @@ function _CRC16(buf, length) {
 
 /** 
  * Parse the data for a Modbus -
- * Read Input Registers (FC=04)
+ * Read Input Registers (FC=04,03)
  *
  * @param {buffer} data the data buffer to parse.
  * @param {function} next the function to call next.
@@ -73,7 +73,7 @@ function _readFC4(data, next) {
     }
     
     if (next)
-        next(null, {"data": contents});
+        next(null, {"data": contents, "buffer": data.slice(3, 3 + length)});
 }
 
 /** 
@@ -187,8 +187,10 @@ ModbusRTU.prototype.open = function (callback) {
                 /* parse incoming data
                  */
                  
-                // Read Input Registers (FC=04)
-                if (code == 4) {
+                /* Read Input Registers (FC=04)
+                 * Read Holding Registers (FC=03)
+                 */
+                if (code == 4 || code == 3) {
                     _readFC4(data, next);
                 }
                 
@@ -202,15 +204,28 @@ ModbusRTU.prototype.open = function (callback) {
 };
 
 /** 
- * Write a Modbus Read Input Registers (FC=04) to serial port.
+ * Write a Modbus "Read Holding Registers" (FC=03) to serial port.
  *
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first register.
  * @param {number} length the total number of registers requested.
  * @param {function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next) {
-    var code = 4;
+ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next) {
+    this.writeFC4(address, dataAddress, length, next, 3);
+}
+
+/** 
+ * Write a Modbus "Read Input Registers" (FC=04) to serial port.
+ *
+ * @param {number} address the slave unit address.
+ * @param {number} dataAddress the Data Address of the first register.
+ * @param {number} length the total number of registers requested.
+ * @param {function} next the function to call next.
+ */
+ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, code) {
+    // function code defaults to 4
+    if (!code) code = 4;
     
     // set state variables
     this._nextAddress = address;
@@ -234,7 +249,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next) {
 }
 
 /** 
- * Write a Modbus Preset Multiple Registers (FC=16) to serial port.
+ * Write a Modbus "Preset Multiple Registers" (FC=16) to serial port.
  *
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first register.

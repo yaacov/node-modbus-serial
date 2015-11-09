@@ -11,7 +11,8 @@ var events = require('events');
  */
 var TestPort = function() {
     // simulate 14 registers
-    this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13];
+    this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
     events.call(this);
 }
 util.inherits(TestPort, events);
@@ -78,6 +79,26 @@ TestPort.prototype.write = function (buf) {
     // if crc is bad, ignore message
     if (crc != crc16(buf)) {
         return;
+    }
+    
+    // function code 3
+    if (functionCode == 3) {
+        var address = buf.readUInt16BE(2);
+        var length = buf.readUInt16BE(4);
+        
+        // if length is bad, ignore message
+        if (buf.length != 8) {
+            return;
+        }
+        
+        // build answer
+        buffer = new Buffer(3 + length * 2 + 2);
+        buffer.writeUInt8(length * 2, 2);
+        
+        // read registers
+        for (var i = 0; i < length; i++) {
+            buffer.writeUInt16BE(this._holding_registers[address + i], 3 + i * 2);
+        }
     }
     
     // function code 4
