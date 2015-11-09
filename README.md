@@ -108,6 +108,28 @@ setInterval(function() {
     });
 }, 1000);
 ```
+----
+###### Read raw buffer
+``` javascript
+var SerialPort = require("serialport").SerialPort;
+var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+var ModbusRTU = require("modbus-serial");
+var modbusRTU = new ModbusRTU(serialPort);
+
+modbusRTU.open();
+
+// read 2 16bit-registers to get one 32 bit number
+setTimeout(function() {
+    modbusRTU.writeFC4(1, 5, 2, function(err, data) {
+        console.log(data.buffer.readUInt32BE());
+    });
+}, 2000);
+
+// close communication
+setTimeout(function() {
+   serialPort.close();
+}, 3000);
+```
 
 #### Methods
 ----
