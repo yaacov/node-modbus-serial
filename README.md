@@ -32,8 +32,8 @@ Arduino sketch for irrigation timer with modbus support:
      
 #### Compatibility
 
-This class implements FC4 (Read Input Registers) and 
-FC16 (Preset Multiple Registers) of modbus-RTU.
+This class implements FC4 "Read Input Registers" and 
+FC16 "Preset Multiple Registers" of modbus-RTU.
 
 #### Requires
 
@@ -117,7 +117,7 @@ Called when a connection has been opened.
 
 ----
 ##### .writeFC4 (unit, address, length, callback)
-Writes Read Input Registers (FC=04) request to serial port.
+Writes "Read Input Registers" (FC=04) request to serial port.
 
 ###### unit
 The slave unit address.
@@ -134,7 +134,7 @@ that looks like: function (error, data) { ... }
 
 ----
 ##### .writeFC16 (unit, address, array, callback)
-Writes Preset Multiple Registers (FC=16) request to serial port.
+Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
 ###### unit
 The slave unit address.
