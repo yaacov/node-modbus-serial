@@ -19,9 +19,9 @@ setTimeout(function() {
     modbusRTU.writeFC4(1, 5, 2, function(err, data) {
         console.log(data.buffer.readUInt32BE());
     });
-}, 2000);
+}, 500);
 
 // Close communication.
 setTimeout(function() {
     serialPort.close();
-}, 3000);
+}, 1000);
