@@ -33,7 +33,7 @@ setTimeout(function() {
     modbusRTU.writeFC16(1, 5, [0x0800, 0x0000, 0x1800]);
 }, 1000);
 
-/* read 2 registers:
+/* read 3 registers:
  * 1 - The Slave Address.
  * 5 - The Data Address of the first register.
  * 2 - Number of registers to read.
