@@ -22,7 +22,7 @@
  * Modbus is simple and robust, openly published, royalty-free and 
  * easy to deploy and maintain.
  */
- 
+
 /** 
  * Calculate buffer CRC16 and add it to the
  * end of the buffer.

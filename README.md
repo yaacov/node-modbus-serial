@@ -15,6 +15,13 @@ easy to deploy and maintain.
 npm install modbus-serial
 ```
 
+For use over serial port (ModbusRTU), also install node-serialport:
+```
+npm install serialport
+```
+
+[ TCP/IP connection does not require the node-serialport package. ]
+
 #### What can I do with this module ?
 
 This class makes it fun and easy to communicate with electronic
@@ -39,8 +46,6 @@ FC16 "Preset Multiple Registers" of modbus-RTU.
 
 ###### node-serialport - for using the serial port.
 https://github.com/voodootikigod/node-serialport
-
-[ modbus-TCP connection is done using an internal port (see examples) ]
 
 #### Examples
 ----
