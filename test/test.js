@@ -1,7 +1,7 @@
 'use strict';
-var TestPort = require("./testport");
-var testPort = new TestPort();
 var ModbusRTU = require("../index");
+var TestPort = ModbusRTU.TestPort;
+var testPort = new TestPort();
 var modbusRTU = new ModbusRTU(testPort);
 
 var expect = require('chai').expect;
