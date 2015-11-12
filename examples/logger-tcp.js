@@ -3,7 +3,7 @@
 var TcpPort = require("../index").TcpPort;
 var tcpPort = new TcpPort("192.168.1.42");
 
-// Create modbus
+// Create modbus master
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var modbusRTU = new ModbusRTU(tcpPort);
