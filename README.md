@@ -12,7 +12,7 @@ easy to deploy and maintain.
 - [modbus-serial](#modbus-serial)
       - [Install](#install)
       - [Requires](#requires)
-      - [What can I do with this module ?](#what-can-i-do-with-this-module-?)
+      - [What can I do with this module ?](#what-can-i-do-with-this-module-)
       - [Compatibility](#compatibility)
       - [Examples](#examples)
       - [Methods](#methods)
