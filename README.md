@@ -35,12 +35,15 @@ Arduino library for modbus slave:
      https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
      
 Arduino sketch for irrigation timer with modbus support:
-     https://github.com/yaacov/irrigation-timer-for-arduino
+     https://github.com/yaacov/arduino-irrigation-timer
      
 #### Compatibility
 
-This class implements FC3 "Read Holding Registers", FC4 "Read Input Registers" and 
-FC16 "Preset Multiple Registers" of modbus-RTU.
+######This class implements:
+
+* FC3 "Read Holding Registers"
+* FC4 "Read Input Registers"
+* FC16 "Preset Multiple Registers"
 
 #### Requires
 
