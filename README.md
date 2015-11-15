@@ -9,16 +9,30 @@ Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and 
 easy to deploy and maintain.
 
+- [modbus-serial](#modbus-serial)
+      - [Install](#install)
+      - [Requires](#requires)
+      - [What can I do with this module ?](#what-can-i-do-with-this-module-?)
+      - [Compatibility](#compatibility)
+      - [Examples](#examples)
+      - [Methods](#methods)
+
 #### Install
 
 ```
 npm install modbus-serial
 ```
 
+#### Requires
+
+###### node-serialport - for using the serial port.
+
 For use over serial port (ModbusRTU), also install node-serialport:
 ```
 npm install serialport
 ```
+
+https://github.com/voodootikigod/node-serialport
 
 [ TCP/IP connection does not require the node-serialport package. ]
 
@@ -44,11 +58,6 @@ Arduino sketch for irrigation timer with modbus support:
 * FC3 "Read Holding Registers"
 * FC4 "Read Input Registers"
 * FC16 "Preset Multiple Registers"
-
-#### Requires
-
-###### node-serialport - for using the serial port.
-https://github.com/voodootikigod/node-serialport
 
 #### Examples
 ----
