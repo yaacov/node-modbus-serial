@@ -53,7 +53,7 @@ Arduino sketch for irrigation timer with modbus support:
      
 #### Compatibility
 
-######This class implements:
+###### This class implements:
 
 * FC1 "Read Coil Status"
 * FC2 "Read Input Status"
