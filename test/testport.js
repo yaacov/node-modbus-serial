@@ -10,9 +10,13 @@ var events = require('events');
  * 4 - a modbus slave that answer with bad unit number
  */
 var TestPort = function() {
-    // simulate 14 registers
+    // simulate 14 input registers
     this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+    
+    // simulate 14 holding registers
     this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
+    
+    // simulate 16 coils / digital inputs
     this._coils = 0x0000;
     
     events.call(this);
@@ -83,7 +87,7 @@ TestPort.prototype.write = function (buf) {
         return;
     }
     
-    // function code 1
+    // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
@@ -97,7 +101,7 @@ TestPort.prototype.write = function (buf) {
         buffer = new Buffer(3 + parseInt((length - 1) / 8 + 1) + 2);
         buffer.writeUInt8(parseInt((length - 1) / 8 + 1), 2);
         
-        // read registers
+        // read coils
         buffer.writeUInt16LE(this._coils >> address, 3);
     }
     

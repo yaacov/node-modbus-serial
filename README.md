@@ -160,6 +160,52 @@ Opens a modbus connection using the given serial port.
 Called when a connection has been opened.
 
 ----
+##### .writeFC1 (unit, address, length, callback)
+Writes "Read coil status" (FC=01) request to serial port.
+
+###### unit
+The slave unit address.
+
+###### address
+The Data Address of the first coil.
+
+###### length
+The total number of coils requested.
+
+###### callback (optional)
+Called once the unit returns an answer. The callback should be a function 
+that looks like: function (error, data) { ... }
+```
+error - null on success, error string o/w
+data - an object with two fildes:
+    data.data: array of boolean coils (in multiples of 8 = one byte).
+    data.buffer: raw baffer of bytes returned by slave.
+```
+
+----
+##### .writeFC2 (unit, address, length, callback)
+Writes "Read input status" (FC=02) request to serial port.
+
+###### unit
+The slave unit address.
+
+###### address
+The Data Address of the first digital input.
+
+###### length
+The total number of digital inputs requested.
+
+###### callback (optional)
+Called once the unit returns an answer. The callback should be a function 
+that looks like: function (error, data) { ... }
+```
+error - null on success, error string o/w
+data - an object with two fildes:
+    data.data: array of boolean digital inputs (in multiples of 8 = one byte).
+    data.buffer: raw baffer of bytes returned by slave.
+```
+
+----
 ##### .writeFC3 (unit, address, length, callback)
 Writes "Read Holding Registers" (FC=03) request to serial port.
 
