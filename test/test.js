@@ -73,7 +73,7 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC16() - write registers.', function () {
+  describe('#writeFC16() - write holding registers.', function () {
     it('should write 3 registors [42, 128, 5] without errors', function (done) {
         modbusRTU.writeFC16(1, 8, [42, 128, 5], function(err, data) {
             expect(err).to.be.a('null');
@@ -107,12 +107,50 @@ describe('ModbusRTU', function() {
     });
   });
   
-  describe('#writeFC4() - read input registers after write.', function () {
+  describe('#writeFC3() - read holding registers after write.', function () {
     it('should read 3 registers [42, 128, 5] without errors', function (done) {
-        modbusRTU.writeFC4(1, 8, 3, function(err, data) {
+        modbusRTU.writeFC3(1, 8, 3, function(err, data) {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
             expect(data.data.toString()).to.equal([42, 128, 5].toString());
+            done()
+        });
+    });
+  });
+  
+  describe('#writeFC5() - force one coil.', function () {
+    it('should force coil 3 to be true, without errors', function (done) {
+        modbusRTU.writeFC5(1, 3, true, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('state');
+            expect(data.state).to.equal(true);
+            
+            done()
+        });
+    });
+  });
+  
+  describe('#writeFC1() - read coils after force coil.', function () {
+    it('should read coil 3 to be true, without errors', function (done) {
+        modbusRTU.writeFC1(1, 3, 9, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('data');
+            expect(data.data[0]).to.equal(true);
+            expect(data.data[3]).to.equal(false);
+            
+            done()
+        });
+    });
+  });
+  
+  describe('#writeFC1() - read inputs.', function () {
+    it('should read input 0 to be false, without errors', function (done) {
+        modbusRTU.writeFC1(1, 0, 9, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('data');
+            expect(data.data[0]).to.equal(false);
+            expect(data.data[3]).to.equal(true);
+            
             done()
         });
     });

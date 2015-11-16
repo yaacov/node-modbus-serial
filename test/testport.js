@@ -13,6 +13,8 @@ var TestPort = function() {
     // simulate 14 registers
     this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
+    this._coils = 0x0000;
+    
     events.call(this);
 }
 util.inherits(TestPort, events);
@@ -81,6 +83,24 @@ TestPort.prototype.write = function (buf) {
         return;
     }
     
+    // function code 1
+    if (functionCode == 1 || functionCode == 2) {
+        var address = buf.readUInt16BE(2);
+        var length = buf.readUInt16BE(4);
+        
+        // if length is bad, ignore message
+        if (buf.length != 8) {
+            return;
+        }
+        
+        // build answer
+        buffer = new Buffer(3 + parseInt((length - 1) / 8 + 1) + 2);
+        buffer.writeUInt8(parseInt((length - 1) / 8 + 1), 2);
+        
+        // read registers
+        buffer.writeUInt16LE(this._coils >> address, 3);
+    }
+    
     // function code 3
     if (functionCode == 3) {
         var address = buf.readUInt16BE(2);
@@ -121,6 +141,29 @@ TestPort.prototype.write = function (buf) {
         }
     }
     
+    // function code 5
+    if (functionCode == 5) {
+        var address = buf.readUInt16BE(2);
+        var state = buf.readUInt16BE(4);
+        
+        // if length is bad, ignore message
+        if (buf.length != 8) {
+            return;
+        }
+        
+        // build answer
+        buffer = new Buffer(8);
+        buffer.writeUInt16BE(address, 2);
+        buffer.writeUInt16BE(state, 4);
+        
+        // write coil
+        if (state == 0xff00) {
+            this._coils |= 1 << address; 
+        } else {
+            this._coils &= ~(1 << address); 
+        }
+    }
+    
     // function code 16
     if (functionCode == 16) {
         var address = buf.readUInt16BE(2);
@@ -138,7 +181,7 @@ TestPort.prototype.write = function (buf) {
         
         // write registers
         for (var i = 0; i < length; i++) {
-            this._registers[address + i] = buf.readUInt16BE(7 + i * 2);
+            this._holding_registers[address + i] = buf.readUInt16BE(7 + i * 2);
         }
     }
     

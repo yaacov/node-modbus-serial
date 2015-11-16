@@ -55,8 +55,11 @@ Arduino sketch for irrigation timer with modbus support:
 
 ######This class implements:
 
+* FC1 "Read Coil Status"
+* FC2 "Read Input Status"
 * FC3 "Read Holding Registers"
 * FC4 "Read Input Registers"
+* FC5 "Force Single Coil"
 * FC16 "Preset Multiple Registers"
 
 #### Examples
@@ -201,6 +204,23 @@ data - an object with two fildes:
     data.data: array of unsinged 16 bit registers.
     data.buffer: raw baffer of bytes returned by slave.
 ```
+
+----
+##### .writeFC5 (unit, address, state, callback)
+Writes "Force Single Coil" (FC=05) request to serial port.
+
+###### unit
+The slave unit address.
+
+###### address
+The Data Address of the coil.
+
+###### state
+The state to set into the coil (true / false).
+
+###### callback (optional)
+Called once the unit returns an answer. The callback should be a function 
+that looks like: function (error, data) { ... }
 
 ----
 ##### .writeFC16 (unit, address, array, callback)
