@@ -16,7 +16,7 @@ modbusRTU.open();
  * false - The values to write.
  */
 setTimeout(function() {
-    modbusRTU.writeFC5(1, 11, true);
+    modbusRTU.writeFC5(1, 11, false);
 }, 500);
 
 /* read coils:
@@ -25,7 +25,7 @@ setTimeout(function() {
  * 2 - Number of registers to read.
  */
 setTimeout(function() {
-    modbusRTU.writeFC1(1, 0, 9, function(err, data) {
+    modbusRTU.writeFC1(1, 5, 2, function(err, data) {
         console.log(data);
     });
 }, 1000);

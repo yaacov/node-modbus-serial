@@ -227,7 +227,7 @@ ModbusRTU.prototype.open = function (callback) {
                 /* parse incoming data
                  */
                 
-                /* RRead Coil Status (FC=01)
+                /* Read Coil Status (FC=01)
                  * Read Input Status (FC=02)
                  */
                 if (code == 2 || code == 1) {
