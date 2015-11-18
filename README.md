@@ -290,6 +290,8 @@ The array of values to set into the registers.
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 
+----
+
 #### Methods That return a promise
 
 All the communication functions have an wrapper function that use
