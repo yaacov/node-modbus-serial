@@ -16,16 +16,16 @@ modbusRTU.open();
  * false - The values to write.
  */
 setTimeout(function() {
-    modbusRTU.writeFC5(1, 11, false);
+    modbusRTU.writeFC5(1, 11, true);
 }, 500);
 
-/* read coils:
+/* read discreet inputs:
  * 1 - The Slave Address.
- * 5 - The Data Address of the first coil.
- * 2 - Number of registers to read.
+ * 10 - The Data Address of the first input.
+ * 8 - Number of inputs to read.
  */
 setTimeout(function() {
-    modbusRTU.writeFC1(1, 5, 2, function(err, data) {
+    modbusRTU.writeFC2(1, 10, 8, function(err, data) {
         console.log(data);
     });
 }, 1000);

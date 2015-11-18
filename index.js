@@ -1,3 +1,4 @@
+'use strict';
 /**
  * Copyright (c) 2015, Yaacov Zamir <kobi.zamir@gmail.com>
  *
@@ -144,6 +145,8 @@ var ModbusRTU = function (port) {
     this._nextCode = null; // function code of current function call.
     this._nextLength = 0; // number of bytes in current answer.
     this._next = null; // the function to call on success or failure
+    
+    this._unitID = 1;
 };
 
 /**
@@ -420,6 +423,10 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     this._port.write(buf);
 }
 
+// add the promise API
+require('./promise_api')(ModbusRTU);
+
+// exports
 module.exports = ModbusRTU;
 module.exports.TestPort = require('./test/testport');
 module.exports.TcpPort = require('./tcpport');
