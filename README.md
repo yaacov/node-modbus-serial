@@ -17,8 +17,8 @@ easy to deploy and maintain.
       - [Examples](#examples)
       - [Methods](#methods)
             - [API](#api)
-      - [Methods That return a promise](#methods-that-return-a-promise)
             - [API Promises](#api-promises)
+            - [API connection shorthand](#api-connection-shorthand)
 
 #### Install
 
@@ -291,8 +291,8 @@ Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 
 ----
-
 ###### API promises
+----
 
 All the communication functions have an wrapper function that use
 a pre-set unit-id and return a promise.
@@ -377,8 +377,8 @@ The Data Address of the first register.
 The array of values to set into the registers.
 
 ----
-
-###### API connectio shorthand
+###### API connection shorthand
+----
 
 The shorthand connection functions creates a port and open it.
 
