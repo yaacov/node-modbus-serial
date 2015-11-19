@@ -16,11 +16,9 @@
  */
 
 /**
- * Take a modbus serial function and convert it
- * to use promises
+ * Take a modbus serial function and convert it to use promises.
  *
  * @param {function} f the function to convert
- *
  * @return a function that calls function "f" and return a promise.
  */
 var convert = function(f) {
@@ -30,7 +28,7 @@ var convert = function(f) {
         
         /* the function check for a callback
          * if we have a callback, use it
-         * o/w build a promise
+         * o/w build a promise.
          */
         if (next) {
             // if we have a callback, use the callback
@@ -39,8 +37,11 @@ var convert = function(f) {
             // o/w use  a promise
             var promise = new Promise( function (resolve, reject) {
                 function cb(err, data) {
-                    if (err) reject(err);
-                    else resolve(data);
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(data);
+                    }
                 }
                 
                 f.bind(client)(id, address, arg, cb);
@@ -54,7 +55,7 @@ var convert = function(f) {
 }
 
 /**
- * Adds promise API to a modbus-serial client
+ * Adds promise API to a Modbus objext
  *
  * @param {ModbusRTU} client the ModbusRTU object.
  */
@@ -66,7 +67,7 @@ var addPromiseAPI = function(Modbus) {
     cl.setID = function(id) {this._unitID = id;}
     cl.getID = function() {return this._unitID;}
     
-    // convert functions to promises
+    // convert functions to return promises
     cl.readCoils = convert(cl.writeFC1);
     cl.readDiscreteInputs = convert(cl.writeFC2);
     cl.readHoldingRegisters = convert(cl.writeFC3);

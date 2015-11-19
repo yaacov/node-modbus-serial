@@ -292,7 +292,7 @@ that looks like: function (error, data) { ... }
 
 ----
 
-#### Methods That return a promise
+###### API promises
 
 All the communication functions have an wrapper function that use
 a pre-set unit-id and return a promise.
@@ -309,7 +309,6 @@ client.readDiscreteInputs(10, 8)
     });
 ```
 
-###### API promises
 ----
 ##### .setID(id)
 Sets the unit id
@@ -377,3 +376,48 @@ The Data Address of the first register.
 ###### array
 The array of values to set into the registers.
 
+----
+
+###### API connectio shorthand
+
+The shorthand connection functions creates a port and open it.
+
+Long way, without shorthand:
+``` javascript
+// open a serial port
+var SerialPort = require("serialport").SerialPort;
+var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+
+// create a modbus client using the serial port
+var ModbusRTU = require("modbus-serial");
+var client = new ModbusRTU(serialPort);
+
+// open connection to a serial port
+client.open();
+
+// tell your coffee machine to do something ...
+```
+
+Using shorthand:
+``` javascript
+// create an empty modbus client
+var ModbusRTU = require("modbus-serial");
+var client = new ModbusRTU();
+
+// open connection to a serial port
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
+
+// tell your robot to do something ...
+```
+
+Using shorthand (TCP):
+``` javascript
+// create an empty modbus client
+var ModbusRTU = require("modbus-serial");
+var client = new ModbusRTU();
+
+// open connection to a serial port
+client.connectTCP("192.168.1.42");
+
+// tell your robot to do something ...
+```
