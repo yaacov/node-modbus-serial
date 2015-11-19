@@ -67,48 +67,68 @@ Arduino sketch for irrigation timer with modbus support:
 
 #### Examples
 ----
+###### Logger
+``` javascript
+// create an empty modbus client
+var ModbusRTU = require("modbus-serial");
+var client = new ModbusRTU();
+
+// open connection to a tcp line
+client.connectTCP("192.168.1.42", run);
+client.setID(1);
+
+// read the values of 10 registers starting at address 0
+// on device number 1. and log the values to the console.
+function run() {
+    client.readInputRegisters(0, 10)
+        .then(console.log)
+        .then(run);
+}
+```
+
+----
 ###### Read and Write
 ``` javascript
-var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+// create an empty modbus client
 var ModbusRTU = require("modbus-serial");
-var modbusRTU = new ModbusRTU(serialPort);
+var client = new ModbusRTU();
 
-modbusRTU.open();
+// open connection to a serial port
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
 
 // write the values 0, 0xffff to registers starting at address 5
 // on device number 1.
 setTimeout(function() {
-     modbusRTU.writeFC16(1, 5, [0 , 0xffff]);
+     client.writeFC16(1, 5, [0 , 0xffff]);
 }, 1000);
 
 // read the values of 2 registers starting at address 5
 // on device number 1. and log the values to the console.
 setTimeout(function() {
-     modbusRTU.writeFC4(1, 5, 2, function(err, data) {
+     client.writeFC4(1, 5, 2, function(err, data) {
          console.log(data);
      });
 }, 2000);
 
 // close communication
 setTimeout(function() {
-   serialPort.close();
+   client._port.close();
 }, 3000);
 ```
 ----
 ###### Logger
 ``` javascript
-var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+// create an empty modbus client
 var ModbusRTU = require("modbus-serial");
-var modbusRTU = new ModbusRTU(serialPort);
+var client = new ModbusRTU();
 
-modbusRTU.open();
+// open connection to a serial port
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
 
 // read the values of 10 registers starting at address 0
 // on device number 1. and log the values to the console.
 setInterval(function() {
-    modbusRTU.writeFC4(1, 0, 10, function(err, data) {
+    client.writeFC4(1, 0, 10, function(err, data) {
         console.log(data.data);
     });
 }, 1000);
@@ -116,17 +136,17 @@ setInterval(function() {
 ----
 ###### Logger-TCP
 ``` javascript
-var TcpPort = require("modbus-serial").TcpPort;
-var tcpPort = new TcpPort("192.168.1.42");
+// create an empty modbus client
 var ModbusRTU = require("modbus-serial");
-var modbusRTU = new ModbusRTU(tcpPort);
+var client = new ModbusRTU();
 
-modbusRTU.open();
+// open connection to a tcp line
+client.connectTCP("192.168.1.42");
 
 // read the values of 10 registers starting at address 0
 // on device number 1. and log the values to the console.
 setInterval(function() {
-    modbusRTU.writeFC4(1, 0, 10, function(err, data) {
+    client.writeFC4(1, 0, 10, function(err, data) {
         console.log(data.data);
     });
 }, 1000);
@@ -134,24 +154,24 @@ setInterval(function() {
 ----
 ###### Read raw buffer
 ``` javascript
-var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+// create an empty modbus client
 var ModbusRTU = require("modbus-serial");
-var modbusRTU = new ModbusRTU(serialPort);
+var client = new ModbusRTU();
 
-modbusRTU.open();
+// open connection to a serial port
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
 
 // read 2 16bit-registers to get one 32bit number
 setTimeout(function() {
-    modbusRTU.writeFC4(1, 5, 2, function(err, data) {
+    client.writeFC4(1, 5, 2, function(err, data) {
         console.log(data.buffer.readUInt32BE());
     });
-}, 2000);
+}, 1000);
 
 // close communication
 setTimeout(function() {
-   serialPort.close();
-}, 3000);
+   client._port.close();
+}, 2000);
 ```
 
 #### Methods
