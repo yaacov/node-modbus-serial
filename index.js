@@ -423,55 +423,8 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     this._port.write(buf);
 }
 
-/** 
- * Connect to a communication port, using SerialPort.
- *
- * @param {string} path the path to the Serial Port - required.
- * @param {object} options - the serial port options - optional.
- * @param {function} next the function to call next.
- */
-ModbusRTU.prototype.connectRTU = function (path, options, next) {
-    // check if we have options
-    if (typeof(next) == 'undefined' && typeof(options) == 'function') {
-        next = options;
-        options = {};
-    }
-    
-    // create the SerialPort
-    var SerialPort = require("serialport").SerialPort;
-    var serialPort = new SerialPort(path, options);
-    
-    // re-set the serial port to use
-    this._port = serialPort;
-    
-    // open and call next
-    this.open(next);
-}
-
-/** 
- * Connect to a communication port, using TcpPort.
- *
- * @param {string} ip the ip of theTCP Port - required.
- * @param {object} options - the serial port options - optional.
- * @param {function} next the function to call next.
- */
-ModbusRTU.prototype.connectTCP = function (ip, options, next) {
-    // check if we have options
-    if (typeof(next) == 'undefined' && typeof(options) == 'function') {
-        next = options;
-        options = {};
-    }
-    
-    // create the SerialPort
-    var TcpPort = require('./tcpport');
-    var tcpPort = new TcpPort(ip);
-    
-    // re-set the serial port to use
-    this._port = tcpPort;
-    
-    // open and call next
-    this.open(next);
-}
+// add the connection shorthand API
+require('./connection_api')(ModbusRTU);
 
 // add the promise API
 require('./promise_api')(ModbusRTU);

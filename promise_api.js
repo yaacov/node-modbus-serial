@@ -57,7 +57,7 @@ var convert = function(f) {
 /**
  * Adds promise API to a Modbus objext
  *
- * @param {ModbusRTU} client the ModbusRTU object.
+ * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
 var addPromiseAPI = function(Modbus) {
     
