@@ -75,11 +75,12 @@ var client = new ModbusRTU();
 
 // open connection to a tcp line
 client.connectTCP("192.168.1.42", run);
-client.setID(1);
 
 // read the values of 10 registers starting at address 0
 // on device number 1. and log the values to the console.
 function run() {
+    client.setID(1);
+    
     client.readInputRegisters(0, 10)
         .then(console.log)
         .then(run);
@@ -94,27 +95,23 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
-client.setID(1);
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600}, write);
 
-// write the values 0, 0xffff to registers starting at address 5
-// on device number 1.
-setTimeout(function() {
-     client.writeRegisters(5, [0 , 0xffff]);
-}, 1000);
+function write() {
+    client.setID(1);
 
-// read the values of 2 registers starting at address 5
-// on device number 1. and log the values to the console.
-setTimeout(function() {
-     client.writeFC4(1, 5, 2, function(err, data) {
-         console.log(data);
-     });
-}, 2000);
+    // write the values 0, 0xffff to registers starting at address 5
+    // on device number 1.
+    client.writeRegisters(5, [0 , 0xffff])
+        .then(read);
+}
 
-// close communication
-setTimeout(function() {
-   client._port.close();
-}, 3000);
+function read() {
+    // write the values 0, 0xffff to registers starting at address 5
+    // on device number 1.
+    client.readHoldingRegisters(5, 2)
+        .then(console.log);
+}
 ```
 ----
 ###### Logger
@@ -171,11 +168,6 @@ setTimeout(function() {
         console.log(data.buffer.readUInt32BE());
     });
 }, 1000);
-
-// close communication
-setTimeout(function() {
-   client._port.close();
-}, 2000);
 ```
 
 #### Methods
