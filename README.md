@@ -107,7 +107,7 @@ function write() {
 }
 
 function read() {
-    // write the values 0, 0xffff to registers starting at address 5
+    // read the 2 registers starting at address 5
     // on device number 1.
     client.readHoldingRegisters(5, 2)
         .then(console.log);
