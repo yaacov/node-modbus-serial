@@ -436,7 +436,7 @@ Called once the client is connected.
 
 ----
 ##### .connectTCP (ip, options, callback)
-Connect using serial port.
+Connect using tcp/ip.
 
 ###### ip
 The port ip (e.g. "24.230.1.42")
