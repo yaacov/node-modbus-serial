@@ -416,8 +416,34 @@ Using shorthand (TCP):
 var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
-// open connection to a serial port
+// open connection to a tcp line
 client.connectTCP("192.168.1.42");
 
 // tell your robot to do something ...
 ```
+----
+##### .connectRTU (path, options, callback)
+Connect using serial port.
+
+###### path
+The port path (e.g. "/dev/ttyS0")
+
+###### options (optional)
+The options for this connection.
+
+###### callback (optional)
+Called once the client is connected.
+
+----
+##### .connectTCP (ip, options, callback)
+Connect using serial port.
+
+###### ip
+The port ip (e.g. "24.230.1.42")
+
+###### options (optional)
+The options for this connection.
+
+###### callback (optional)
+Called once the client is connected.
+
