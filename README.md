@@ -294,7 +294,7 @@ that looks like: function (error, data) { ... }
 ###### API promises
 ----
 
-All the communication functions have an wrapper function that use
+The communication functions have a wrapper function that use
 a pre-set unit-id and return a promise.
 
 ```javascript
@@ -302,7 +302,7 @@ a pre-set unit-id and return a promise.
 client.setID(1);
 
 // read 8 discrete inputs starting at input 10
-// (we use the unit id 1, we set earlier)
+// (function use the unit id 1, we set earlier)
 client.readDiscreteInputs(10, 8)
     .then(function(data) {
         console.log(data);
