@@ -1,6 +1,5 @@
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
+var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a tcp line
@@ -11,6 +10,6 @@ client.setID(1);
 // on device number 1. and log the values to the console.
 function run() {
     client.readInputRegisters(0, 10)
-        .then(console.log)
+        .then(console.lot)
         .then(run);
 }

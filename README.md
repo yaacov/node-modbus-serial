@@ -159,15 +159,17 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", {baudrate: 9600});
-client.setID(1);
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600}, run);
 
-// read 2 16bit-registers to get one 32bit number
-setTimeout(function() {
+function run() {
+    client.setID(1);
+
+    // read 2 16bit-registers to get one 32bit number
     client.readInputRegisters(5, 2, function(err, data) {
-        console.log(data.buffer.readUInt32BE());
+        var int32 = data.buffer.readUInt32BE();
+        console.log(int32);
     });
-}, 1000);
+}
 ```
 
 #### Methods
