@@ -4,7 +4,7 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // open connection to a tcp line
-client.connectTCP("192.168.1.24");
+client.connectTCP("192.168.1.42");
 
 /* read 10 registers every one second 
  * 1 - The Slave Address.
