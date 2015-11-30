@@ -9,6 +9,8 @@ Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and 
 easy to deploy and maintain.
 
+----
+
 - [Install](#install)
 - [What can I do with this module ?](#what-can-i-do-with-this-module-)
 - [Compatibility](#compatibility)
@@ -17,6 +19,8 @@ easy to deploy and maintain.
       - [API Promises](#api-promises)
       - [API Callbacks](#api-callbacks)
       - [API connection shorthand](#api-connection-shorthand)
+
+----
 
 #### Install
 
