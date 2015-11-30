@@ -1,17 +1,10 @@
-'use strict';
-// Create serial port
-var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
-
-// Create modbus master
+// create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
-var client = new ModbusRTU(serialPort);
+var client = new ModbusRTU();
 
-// Open modbus communication.
-// and set the client unit id to 1
-client.setID(1);
-client.open(stage1);
+// open connection to a serial port
+client.connectRTU("/dev/ttyUSB0", {baudrate: 9600}, stage1);
 
 // use callback, if function get a callback it
 // will not return a promise
