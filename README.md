@@ -25,8 +25,6 @@ easy to deploy and maintain.
 npm install modbus-serial
 ```
 
-###### Requires
-
 For use over serial port (ModbusRTU), also install node-serialport:
 ```
 npm install serialport
