@@ -16,8 +16,8 @@ easy to deploy and maintain.
       - [Compatibility](#compatibility)
       - [Examples](#examples)
       - [Methods](#methods)
-            - [API](#api)
             - [API Promises](#api-promises)
+            - [API](#api)
             - [API connection shorthand](#api-connection-shorthand)
 
 #### Install
