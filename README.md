@@ -32,7 +32,7 @@ npm install modbus-serial
 For use over serial port (ModbusRTU), also install node-serialport:
 ```
 npm install serialport
-
+```
 [ TCP/IP connection does not require the node-serialport package. ]
 
 #### What can I do with this module ?
