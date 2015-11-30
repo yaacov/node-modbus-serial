@@ -63,11 +63,11 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
         
-        // create the SerialPort
+        // create the TcpPort
         var TcpPort = require('./tcpport');
         var tcpPort = new TcpPort(ip);
         
-        // re-set the serial port to use
+        // re-set the port to use
         this._port = tcpPort;
         
         // open and call next

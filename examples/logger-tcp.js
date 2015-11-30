@@ -1,15 +1,10 @@
-// Create tcp port
-//var TcpPort = require("modbus-serial").TcpPort;
-var TcpPort = require("../index").TcpPort;
-var tcpPort = new TcpPort("192.168.1.42");
-
-// Create modbus master
+// create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
-var modbusRTU = new ModbusRTU(tcpPort);
+var client = new ModbusRTU();
 
-// Open modbus communication.
-modbusRTU.open();
+// open connection to a tcp line
+client.connectTCP("192.168.1.24");
 
 /* read 10 registers every one second 
  * 1 - The Slave Address.
@@ -17,7 +12,7 @@ modbusRTU.open();
  * 10 - Number of registers to read.
  */
 setInterval(function() {
-    modbusRTU.writeFC4(1, 0, 10, function(err, data) {
+    client.writeFC4(1, 0, 10, function(err, data) {
         console.log(data.data);
     });
 }, 1000);

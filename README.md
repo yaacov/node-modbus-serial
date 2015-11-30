@@ -48,12 +48,16 @@ Many industrial electronic devices implement modbus.
 Arduino can also talk modbus and you can control your projects and robots
 using modbus. 
 
-Arduino library for modbus slave:
-     https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
-     
+Arduino libraries for modbus slave:
+    https://github.com/yaacov/arduino-modbus-slave
+    https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
+    
 Arduino sketch for irrigation timer with modbus support:
-     https://github.com/yaacov/arduino-irrigation-timer
-     
+    https://github.com/yaacov/arduino-irrigation-timer
+    
+Node Modbus-WebSocket bridge:
+    https://github.com/yaacov/node-modbus-ws
+    
 #### Compatibility
 
 ###### This class implements:
@@ -174,6 +178,93 @@ function run() {
 
 #### Methods
 
+----
+###### API promises
+----
+
+The communication functions have a wrapper function that use
+a pre-set unit-id and return a promise.
+
+```javascript
+// set the client's unit id
+client.setID(1);
+
+// read 8 discrete inputs starting at input 10
+// (function use the unit id 1, we set earlier)
+client.readDiscreteInputs(10, 8)
+    .then(function(data) {
+        console.log(data);
+    });
+```
+
+----
+##### .setID(id)
+Sets the unit id
+
+###### id
+The new client id
+
+----
+##### .readCoils (address, length)
+Writes "Read Coils" (FC=1) request to serial port.
+
+###### address
+The Data Address of the first register.
+
+###### length
+The total number of registers requested.
+
+----
+##### .readDiscreteInputs (address, length)
+Writes "Read Discrete Inputs" (FC=2) request to serial port.
+
+###### address
+The Data Address of the first register.
+
+###### length
+The total number of registers requested.
+
+----
+##### .readHoldingRegisters (address, length)
+Writes "Read Holding Registers" (FC=3) request to serial port.
+
+###### address
+The Data Address of the first register.
+
+###### length
+The total number of registers requested.
+
+----
+##### .readInputRegisters (address, length)
+Writes "Read Input Registers" (FC=4) request to serial port.
+
+###### address
+The Data Address of the first register.
+
+###### length
+The total number of registers requested.
+
+----
+##### .writeCoil(address, state)
+Writes "Force Coil Status" (FC=5) request to serial port.
+
+###### address
+The Data Address of the coil.
+
+###### state
+The state to force into coil.
+
+----
+##### .writeRegisters (address, array)
+Writes "Preset Multiple Registers" (FC=16) request to serial port.
+
+###### address
+The Data Address of the first register.
+
+###### array
+The array of values to set into the registers.
+
+----
 ###### API
 ----
 ##### .open(callback)
@@ -307,92 +398,6 @@ The array of values to set into the registers.
 ###### callback (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
-
-----
-###### API promises
-----
-
-The communication functions have a wrapper function that use
-a pre-set unit-id and return a promise.
-
-```javascript
-// set the client's unit id
-client.setID(1);
-
-// read 8 discrete inputs starting at input 10
-// (function use the unit id 1, we set earlier)
-client.readDiscreteInputs(10, 8)
-    .then(function(data) {
-        console.log(data);
-    });
-```
-
-----
-##### .setID(id)
-Sets the unit id
-
-###### id
-The new client id
-
-----
-##### .readCoils (address, length)
-Writes "Read Coils" (FC=1) request to serial port.
-
-###### address
-The Data Address of the first register.
-
-###### length
-The total number of registers requested.
-
-----
-##### .readDiscreteInputs (address, length)
-Writes "Read Discrete Inputs" (FC=2) request to serial port.
-
-###### address
-The Data Address of the first register.
-
-###### length
-The total number of registers requested.
-
-----
-##### .readHoldingRegisters (address, length)
-Writes "Read Holding Registers" (FC=3) request to serial port.
-
-###### address
-The Data Address of the first register.
-
-###### length
-The total number of registers requested.
-
-----
-##### .readInputRegisters (address, length)
-Writes "Read Input Registers" (FC=4) request to serial port.
-
-###### address
-The Data Address of the first register.
-
-###### length
-The total number of registers requested.
-
-----
-##### .writeCoil(address, state)
-Writes "Force Coil Status" (FC=5) request to serial port.
-
-###### address
-The Data Address of the coil.
-
-###### state
-The state to force into coil.
-
-----
-##### .writeRegisters (address, array)
-Writes "Preset Multiple Registers" (FC=16) request to serial port.
-
-###### address
-The Data Address of the first register.
-
-###### array
-The array of values to set into the registers.
 
 ----
 ###### API connection shorthand

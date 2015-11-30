@@ -83,7 +83,6 @@ TcpPort.prototype.write = function (data) {
     var buffer = new Buffer(data.length + 6 - 2);
     buffer.writeUInt16BE(1, 0);
     buffer.writeUInt16BE(0, 2);
-    // subtract crc bytes
     buffer.writeUInt16BE(data.length - 2, 4);
     data.copy(buffer, 6);
     
