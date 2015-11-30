@@ -11,7 +11,6 @@ easy to deploy and maintain.
 
 - [modbus-serial](#modbus-serial)
       - [Install](#install)
-      - [Requires](#requires)
       - [What can I do with this module ?](#what-can-i-do-with-this-module-)
       - [Compatibility](#compatibility)
       - [Examples](#examples)
@@ -26,16 +25,13 @@ easy to deploy and maintain.
 npm install modbus-serial
 ```
 
-#### Requires
+###### Requires
 
-###### node-serialport - for using the serial port.
+*node-serialport - for using the serial port*
 
 For use over serial port (ModbusRTU), also install node-serialport:
 ```
 npm install serialport
-```
-
-https://github.com/voodootikigod/node-serialport
 
 [ TCP/IP connection does not require the node-serialport package. ]
 
