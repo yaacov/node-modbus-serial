@@ -49,14 +49,17 @@ Arduino can also talk modbus and you can control your projects and robots
 using modbus. 
 
 Arduino libraries for modbus slave:
-    https://github.com/yaacov/arduino-modbus-slave
-    https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
+
+* https://github.com/yaacov/arduino-modbus-slave
+* https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
     
 Arduino sketch for irrigation timer with modbus support:
-    https://github.com/yaacov/arduino-irrigation-timer
+
+* https://github.com/yaacov/arduino-irrigation-timer
     
 Node Modbus-WebSocket bridge:
-    https://github.com/yaacov/node-modbus-ws
+
+* https://github.com/yaacov/node-modbus-ws
     
 #### Compatibility
 
