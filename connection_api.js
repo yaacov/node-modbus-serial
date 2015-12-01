@@ -82,15 +82,22 @@ var addConnctionAPI = function(Modbus) {
      * @param {function} next the function to call next.
      */
     cl.connectTelnet = function (ip, options, next) {
+        var port;
+        
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
             options = {};
         }
         
+        // check for port
+        if (options && options.port) {
+            port = options.port;
+        }
+        
         // create the TcpPort
         var TelnetPort = require('./telnetport');
-        var telnetPort = new TelnetPort(ip);
+        var telnetPort = new TelnetPort(ip, port);
         
         // re-set the port to use
         this._port = telnetPort;
