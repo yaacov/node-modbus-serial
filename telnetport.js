@@ -4,7 +4,6 @@ var events = require('events');
 var net = require('net');
 
 var TELNET_PORT = 2217;
-var MAX_BUFFER = 64;
 
 /**
  * calculate crc16
@@ -45,12 +44,11 @@ function checkData(modbus, buf) {
     
     // calculate crc16
     var crcIn = buf.readUInt16LE(buf.length - 2);
-    var crc = crc16(buf);
     
     // check buffer unit-id, command and crc
     return (buf[0] == modbus._id && 
         buf[1] == modbus._cmd &&
-        crcIn == crc);
+        crcIn == crc16(buf));
 }
 
 /**
@@ -73,33 +71,35 @@ var TelnetPort = function(ip, port) {
     // register the port data event
     var modbus = this;
     this._client.on('data', function(data) {
-        /* add data to buffer and check new buffer size
+        /* add data to buffer
          */
         modbus._buffer = Buffer.concat([modbus._buffer, data]);
-        
-        // check for buffer overflow
-        if (modbus._buffer.length > MAX_BUFFER) {
-            modbus._buffer = modbus._buffer.slice(modbus._buffer.length - MAX_BUFFER);
-        }
         
         /* check if buffer include a complete modbus answer
          */
         var length = modbus._length;
         var bufferLength = modbus._buffer.length ;
         
+        // loop and check length-sized buffer chunks
         for (var i = 0; i < (bufferLength - length + 1); i++) {
             // cut a length of bytes from buffer
             var _data = modbus._buffer.slice(i, i + length);
             
             // check if this is the data we are waiting for
             if (checkData(modbus, _data)) {
+                // adjust i to end of data chunk
+                i = i + length;
+                
                 // emit a data signal
                 _tcpport.emit('data', _data);
             }
         }
         
-        // adjust buffer size
-        modbus._buffer = modbus._buffer.slice(i);
+        /* cut checked data from buffer
+         */
+        if (i) {
+            modbus._buffer = modbus._buffer.slice(i);
+        }
     });
 
     events.call(this);
