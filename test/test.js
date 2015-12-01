@@ -50,7 +50,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on short data answer', function (done) {
         modbusRTU.writeFC4(2, 8, 1, function(err, data) {
-            expect(err).to.equal('Data length error');
+            expect(err).to.have.string('Data length error');
             
             done()
         });
@@ -58,7 +58,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on CRC error', function (done) {
         modbusRTU.writeFC4(3, 8, 1, function(err, data) {
-            expect(err).to.equal('CRC error');
+            expect(err).to.have.string('CRC error');
             
             done()
         });
@@ -66,7 +66,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on unexpected replay', function (done) {
         modbusRTU.writeFC4(4, 8, 1, function(err, data) {
-            expect(err).to.equal('Unexpected data error');
+            expect(err).to.have.string('Unexpected data error');
             
             done()
         });
@@ -84,7 +84,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on short data answer', function (done) {
         modbusRTU.writeFC16(2, 8, [42, 128, 5], function(err, data) {
-            expect(err).to.equal('Data length error');
+            expect(err).to.have.string('Data length error');
             
             done()
         });
@@ -92,7 +92,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on CRC error', function (done) {
         modbusRTU.writeFC16(3, 8, [42, 128, 5], function(err, data) {
-            expect(err).to.equal('CRC error');
+            expect(err).to.have.string('CRC error');
             
             done()
         });
@@ -100,7 +100,7 @@ describe('ModbusRTU', function() {
     
     it('should fail on unexpected replay', function (done) {
         modbusRTU.writeFC16(4, 8, [42, 128, 5], function(err, data) {
-            expect(err).to.equal('Unexpected data error');
+            expect(err).to.have.string('Unexpected data error');
             
             done()
         });
