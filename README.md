@@ -63,6 +63,12 @@ Node Modbus-WebSocket bridge:
 * FC5 "Force Single Coil"
 * FC16 "Preset Multiple Registers"
 
+###### Connects types:
+
+* Modbus-RTU: Over serial line [require node serialport].
+* modbus-TCP: Over TCP/IP line.
+* modbus-RTU: Over Telnet server, TCP/IP serial bridge.
+
 #### Examples
 ----
 ###### Logger
