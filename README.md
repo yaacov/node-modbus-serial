@@ -9,18 +9,15 @@ Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and 
 easy to deploy and maintain.
 
-----
-
-- [Install](#install)
-- [What can I do with this module ?](#what-can-i-do-with-this-module-)
-- [Compatibility](#compatibility)
-- [Examples](#examples)
-- [Methods](#methods)
-      - [API Promises](#api-promises)
-      - [API Callbacks](#api-callbacks)
-      - [API connection shorthand](#api-connection-shorthand)
-
-----
+- [modbus-serial](#modbus-serial)
+      - [Install](#install)
+      - [What can I do with this module ?](#what-can-i-do-with-this-module-)
+      - [Compatibility](#compatibility)
+      - [Examples](#examples)
+      - [Methods](#methods)
+            - [API Promises](#api-promises)
+            - [API](#api)
+            - [API connection shorthand](#api-connection-shorthand)
 
 #### Install
 
@@ -176,9 +173,8 @@ function run() {
 ###### API promises
 ----
 
-This communication functions use
-a pre-set unit-id and can return a promise.
-Using callbacks is optional.
+The communication functions have a wrapper function that use
+a pre-set unit-id and return a promise.
 
 ```javascript
 // set the client's unit id
@@ -260,23 +256,7 @@ The Data Address of the first register.
 The array of values to set into the registers.
 
 ----
-###### API Callbacks
-----
-
-This communication functions use callbacks.
-
-```javascript
-
-// read 8 holding registers starting at register 10
-// (function use the unit id 1)
-client.writeFC3(1, 10, 8, function(err, data) {
-      if (err) {
-            console.log(err);
-      } else {
-            console.log(data);
-      });
-```
-
+###### API
 ----
 ##### .open(callback)
 Opens a modbus connection using the given serial port.
@@ -481,3 +461,15 @@ The options for this connection.
 ###### callback (optional)
 Called once the client is connected.
 
+----
+##### .connectTelnet (ip, options, callback)
+Connect using a telnet server
+
+###### ip
+The port ip (e.g. "24.230.1.42")
+
+###### options (optional)
+The options for this connection.
+
+###### callback (optional)
+Called once the client is connected.

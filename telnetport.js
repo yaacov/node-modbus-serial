@@ -10,7 +10,6 @@ var MAX_BUFFER = 64;
  * calculate crc16
  *
  * @param {buffer} buf the buffer to to crc on.
- *
  * @return {number} the calculated crc16
  */
 function crc16(buf) {
@@ -37,8 +36,7 @@ function crc16(buf) {
 /**
  * check if a buffer chunk can be a modbus answer
  *
- * @param {buffer} buf the buffer to to crc on.
- *
+ * @param {buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
  */
 function checkData(modbus, buf) {
@@ -61,7 +59,7 @@ function checkData(modbus, buf) {
 var TelnetPort = function(ip, port) {
     var _tcpport = this;
     this.ip = ip;
-    this.port = port || TELNET_PORT; // telnet port
+    this.port = port || TELNET_PORT; // telnet server port
     
     // internal buffer
     this._buffer = new Buffer(0);
