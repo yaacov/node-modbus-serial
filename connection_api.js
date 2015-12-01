@@ -52,7 +52,7 @@ var addConnctionAPI = function(Modbus) {
     /** 
      * Connect to a communication port, using TcpPort.
      *
-     * @param {string} ip the ip of theTCP Port - required.
+     * @param {string} ip the ip of the TCP Port - required.
      * @param {object} options - the serial port options - optional.
      * @param {function} next the function to call next.
      */
@@ -69,6 +69,31 @@ var addConnctionAPI = function(Modbus) {
         
         // re-set the port to use
         this._port = tcpPort;
+        
+        // open and call next
+        this.open(next);
+    }
+    
+    /** 
+     * Connect to a communication port, using TelnetPort.
+     *
+     * @param {string} ip the ip of the TelnetPort - required.
+     * @param {object} options - the serial port options - optional.
+     * @param {function} next the function to call next.
+     */
+    cl.connectTelnet = function (ip, options, next) {
+        // check if we have options
+        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+            next = options;
+            options = {};
+        }
+        
+        // create the TcpPort
+        var TelnetPort = require('./telnetport');
+        var telnetPort = new TelnetPort(ip);
+        
+        // re-set the port to use
+        this._port = telnetPort;
         
         // open and call next
         this.open(next);

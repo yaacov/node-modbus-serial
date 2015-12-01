@@ -183,13 +183,14 @@ ModbusRTU.prototype.open = function (callback) {
                 
                 /* check incoming data
                  */
-                 
+                
                 /* check message length
                  * if we do not expect this data
                  * raise an error
                  */
                 if (data.length != length) {
-                    error = "Data length error";
+                    error = "Data length error, expected " + 
+                        length + " got " + data.length;
                     if (next)
                         next(error);
                     return;
@@ -203,7 +204,8 @@ ModbusRTU.prototype.open = function (callback) {
                  * raise an error
                  */
                 if (address != modbus._nextAddress || code != modbus._nextCode) {
-                    error = "Unexpected data error";
+                    error = "Unexpected data error, expected " +
+                        modbus._nextAddress + " got " + address;
                     if (next)
                         next(error);
                     return;
@@ -218,7 +220,7 @@ ModbusRTU.prototype.open = function (callback) {
                  * if CRC is bad raise an error
                  */
                 var crcIn = data.readUInt16LE(length - 2);
-                var crc = _CRC16(data, length - 2)
+                var crc = _CRC16(data, length - 2);
                 
                 if (crcIn != crc) {
                     error = "CRC error";
@@ -433,3 +435,4 @@ require('./promise_api')(ModbusRTU);
 module.exports = ModbusRTU;
 module.exports.TestPort = require('./test/testport');
 module.exports.TcpPort = require('./tcpport');
+module.exports.TelnetPort = require('./telnetport');

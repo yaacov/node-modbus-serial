@@ -1,0 +1,167 @@
+'use strict';
+var util = require('util');
+var events = require('events');
+var net = require('net');
+
+var TELNET_PORT = 2217;
+var MAX_BUFFER = 64;
+
+/**
+ * calculate crc16
+ *
+ * @param {buffer} buf the buffer to to crc on.
+ *
+ * @return {number} the calculated crc16
+ */
+function crc16(buf) {
+    var length = buf.length - 2;
+    var crc = 0xFFFF;
+    var tmp;
+    
+    // calculate crc16
+    for (var i = 0; i < length; i++) {
+        crc = crc ^ buf[i];
+        
+        for (var j = 0; j < 8; j++) {
+            tmp = crc & 0x0001;
+            crc = crc >> 1;
+            if (tmp) {
+              crc = crc ^ 0xA001;
+            }
+        }
+    }
+    
+    return crc;
+}
+
+/**
+ * check if a buffer chunk can be a modbus answer
+ *
+ * @param {buffer} buf the buffer to to crc on.
+ *
+ * @return {boolean} if the buffer can be an answer
+ */
+function checkData(modbus, buf) {
+    // check buffer size
+    if (buf.length != modbus._length) return false;
+    
+    // calculate crc16
+    var crcIn = buf.readUInt16LE(buf.length - 2);
+    var crc = crc16(buf);
+    
+    // check buffer unit-id, command and crc
+    return (buf[0] == modbus._id && 
+        buf[1] == modbus._cmd &&
+        crcIn == crc);
+}
+
+/**
+ * Simulate a modbus-RTU port using Telent connection
+ */
+var TelnetPort = function(ip, port) {
+    var _tcpport = this;
+    this.ip = ip;
+    this.port = port || TELNET_PORT; // telnet port
+    
+    // internal buffer
+    this._buffer = new Buffer(0);
+    this._id = 0;
+    this._cmd = 0;
+    this._length = 0;
+    
+    // create a socket
+    this._client = new net.Socket();
+    
+    // register the port data event
+    var modbus = this;
+    this._client.on('data', function(data) {
+        /* add data to buffer and check new buffer size
+         */
+        modbus._buffer = Buffer.concat([modbus._buffer, data]);
+        
+        // check for buffer overflow
+        if (modbus._buffer.length > MAX_BUFFER) {
+            modbus._buffer = modbus._buffer.slice(modbus._buffer.length - MAX_BUFFER);
+        }
+        
+        /* check if buffer include a complete modbus answer
+         */
+        var length = modbus._length;
+        var bufferLength = modbus._buffer.length ;
+        
+        for (var i = 0; i < (bufferLength - length + 1); i++) {
+            // cut a length of bytes from buffer
+            var _data = modbus._buffer.slice(i, i + length);
+            
+            // check if this is the data we are waiting for
+            if (checkData(modbus, _data)) {
+                // emit a data signal
+                _tcpport.emit('data', _data);
+            }
+        }
+        
+        // adjust buffer size
+        modbus._buffer = modbus._buffer.slice(i);
+    });
+
+    events.call(this);
+}
+util.inherits(TelnetPort, events);
+
+/**
+ * Simulate successful port open
+ */
+TelnetPort.prototype.open = function (callback) {
+    this._client.connect(this.port, this.ip, callback);
+}
+
+/**
+ * Simulate successful close port
+ */
+TelnetPort.prototype.close = function (callback) {
+    this._client.end();
+    if (callback)
+        callback(null);
+}
+
+/**
+ * Send data to a modbus slave via telnet server
+ */
+TelnetPort.prototype.write = function (data) {
+    // check data length
+    if (data.length < 6) {
+        // raise an error ?
+        return;
+    }
+    
+    // remember current unit and command
+    this._id = data[0];
+    this._cmd = data[1];
+    
+    // calculate expected answer length
+    switch (this._cmd) {
+        case 1:
+        case 2:
+            var length = data.readUInt16BE(4);
+            this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
+            break;
+        case 3:
+        case 4:
+            var length = data.readUInt16BE(4);
+            this._length = 3 + 2 * length + 2;
+            break;
+        case 5:
+        case 16:
+            this._length = 6 + 2;
+            break;
+        default:
+            // raise and error ?
+            this._length = 0;
+            break;
+    }
+    
+    // send buffer to slave
+    this._client.write(data);
+}
+
+module.exports = TelnetPort;
