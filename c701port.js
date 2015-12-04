@@ -55,7 +55,7 @@ function checkData(modbus, buf) {
  * Simulate a modbus-RTU port using C701 UDP-to-Serial bridge
  */
 var UdpPort = function(ip, port) {
-    var _tcpport = this;
+    var modbus = this;
     this.ip = ip;
     this.port = port || C701_PORT; // C701 port
     
@@ -65,17 +65,17 @@ var UdpPort = function(ip, port) {
     // wait for answer
     this._client.on('message', function(data) {
         // check message length
-        if (data.length < (116 + _tcpport.length)) return;
+        if (data.length < (116 + modbus.length)) return;
         
         // check the C701 packet magic
         if (data.readUInt16LE(2) != 602) return;
         
         // get the serial data from the C701 packet
-        var buffer = data.slice(data.length - _tcpport._length);
+        var buffer = data.slice(data.length - modbus._length);
         
         //check the serial data
-        if (checkData(_tcpport, buffer)) {
-            _tcpport.emit('data', buffer);
+        if (checkData(modbus, buffer)) {
+            modbus.emit('data', buffer);
         }
     });
 

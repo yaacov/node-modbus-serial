@@ -4,7 +4,7 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // open connection to a C701 UDP-to-Serial bridge
-client.connectC701("72.155.72.186", {"port": 28674}, run);
+client.connectC701("2.55.72.186", {"port": 28674}, run);
 client.setID(1);
 
 setInterval(run, 1000);

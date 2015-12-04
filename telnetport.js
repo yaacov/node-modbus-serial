@@ -55,7 +55,7 @@ function checkData(modbus, buf) {
  * Simulate a modbus-RTU port using Telent connection
  */
 var TelnetPort = function(ip, port) {
-    var _tcpport = this;
+    var modbus = this;
     this.ip = ip;
     this.port = port || TELNET_PORT; // telnet server port
     
@@ -69,7 +69,6 @@ var TelnetPort = function(ip, port) {
     this._client = new net.Socket();
     
     // register the port data event
-    var modbus = this;
     this._client.on('data', function(data) {
         /* add data to buffer
          */
@@ -91,7 +90,7 @@ var TelnetPort = function(ip, port) {
                 i = i + length;
                 
                 // emit a data signal
-                _tcpport.emit('data', _data);
+                modbus.emit('data', _data);
             }
         }
         
