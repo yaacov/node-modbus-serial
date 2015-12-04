@@ -57,15 +57,22 @@ var addConnctionAPI = function(Modbus) {
      * @param {function} next the function to call next.
      */
     cl.connectTCP = function (ip, options, next) {
+        var port;
+        
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
             options = {};
         }
         
+        // check for port
+        if (options && options.port) {
+            port = options.port;
+        }
+        
         // create the TcpPort
         var TcpPort = require('./tcpport');
-        var tcpPort = new TcpPort(ip);
+        var tcpPort = new TcpPort(ip, port);
         
         // re-set the port to use
         this._port = tcpPort;

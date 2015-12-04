@@ -3,6 +3,8 @@ var util = require('util');
 var events = require('events');
 var net = require('net');
 
+var MODBUS_PORT = 502; // modbus port
+
 /**
  * calculate crc16
  *
@@ -34,10 +36,10 @@ function crc16(buf) {
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
  */
-var TcpPort = function(ip) {
+var TcpPort = function(ip, port) {
     var _tcpport = this;
     this.ip = ip;
-    this.port = 502; // modbus port
+    this.port = port || MODBUS_PORT; // modbus port
     
     // create a socket
     this._client = new net.Socket();
