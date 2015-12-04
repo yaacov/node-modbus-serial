@@ -426,14 +426,14 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
 }
 
 // add the connection shorthand API
-require('./connection_api')(ModbusRTU);
+require('./apis/connection')(ModbusRTU);
 
 // add the promise API
-require('./promise_api')(ModbusRTU);
+require('./apis/promise')(ModbusRTU);
 
 // exports
 module.exports = ModbusRTU;
-module.exports.TestPort = require('./test/testport');
-module.exports.TcpPort = require('./tcpport');
-module.exports.TelnetPort = require('./telnetport');
-module.exports.C701Port = require('./c701port');
+module.exports.TestPort = require('./ports/testport');
+module.exports.TcpPort = require('./ports/tcpport');
+module.exports.TelnetPort = require('./ports/telnetport');
+module.exports.C701Port = require('./ports/c701port');
