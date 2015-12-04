@@ -61,7 +61,6 @@ var UdpPort = function(ip, port) {
     
     // create a socket
     this._client = dgram.createSocket("udp4");
-    //this._client.bind(this.port);
     
     // wait for answer
     this._client.on('message', function(data) {
