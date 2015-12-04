@@ -105,6 +105,38 @@ var addConnctionAPI = function(Modbus) {
         // open and call next
         this.open(next);
     }
+    
+    /** 
+     * Connect to a communication port, using C701 UDP-to-Serial bridge.
+     *
+     * @param {string} ip the ip of the TelnetPort - required.
+     * @param {object} options - the serial port options - optional.
+     * @param {function} next the function to call next.
+     */
+    cl.connectC701 = function (ip, options, next) {
+        var port;
+        
+        // check if we have options
+        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+            next = options;
+            options = {};
+        }
+        
+        // check for port
+        if (options && options.port) {
+            port = options.port;
+        }
+        
+        // create the TcpPort
+        var C701Port = require('./c701port');
+        var c701Port = new C701Port(ip, port);
+        
+        // re-set the port to use
+        this._port = c701Port;
+        
+        // open and call next
+        this.open(next);
+    }
 }
 
 module.exports = addConnctionAPI;

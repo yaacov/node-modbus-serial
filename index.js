@@ -436,3 +436,4 @@ module.exports = ModbusRTU;
 module.exports.TestPort = require('./test/testport');
 module.exports.TcpPort = require('./tcpport');
 module.exports.TelnetPort = require('./telnetport');
+module.exports.C701Port = require('./c701port');
