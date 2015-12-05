@@ -8,10 +8,9 @@ client.connectRTU("/dev/ttyUSB0", {baudrate: 9600}, stage1);
 
 // use callback
 function stage1() {
-    // det client id
+    // set client id
     client.setID(1);
     
-    // same as using client.writeFC5
     client.writeCoil(13, true, function(err, d) {
         console.log("writeCoil 13: ", d.state);
         stage2();
