@@ -201,67 +201,67 @@ client.readDiscreteInputs(10, 8)
 ##### .setID(id)
 Sets the unit id
 
-###### id
+*id {number}:*
 The new client id
 
 ----
 ##### .readCoils (address, length)
 Writes "Read Coils" (FC=1) request to serial port.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
 ----
 ##### .readDiscreteInputs (address, length)
 Writes "Read Discrete Inputs" (FC=2) request to serial port.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
 ----
 ##### .readHoldingRegisters (address, length)
 Writes "Read Holding Registers" (FC=3) request to serial port.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
 ----
 ##### .readInputRegisters (address, length)
 Writes "Read Input Registers" (FC=4) request to serial port.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
 ----
 ##### .writeCoil(address, state)
 Writes "Force Coil Status" (FC=5) request to serial port.
 
-###### address
-The Data Address of the coil.
+*address {number}:*
+The Data Address of the first register.
 
-###### state
+*state {boolean}:*
 The state to force into coil.
 
 ----
 ##### .writeRegisters (address, array)
 Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### array
+*array {array}:*
 The array of values to set into the registers.
 
 ----
@@ -293,16 +293,16 @@ Called when a connection has been opened.
 ##### .writeFC1 (unit, address, length, callback)
 Writes "Read coil status" (FC=01) request to serial port.
 
-###### unit
+*unit {number}:*
 The slave unit address.
 
-###### address
-The Data Address of the first coil.
+*address {number}:*
+The Data Address of the first register.
 
-###### length
-The total number of coils requested.
+*length {number}:*
+The total number of registers requested.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 ```
@@ -316,16 +316,16 @@ data - an object with two fildes:
 ##### .writeFC2 (unit, address, length, callback)
 Writes "Read input status" (FC=02) request to serial port.
 
-###### unit
+*unit {number}:*
 The slave unit address.
 
-###### address
-The Data Address of the first digital input.
+*address {number}:*
+The Data Address of the first register.
 
-###### length
-The total number of digital inputs requested.
+*length {number}:*
+The total number of registers requested.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 ```
@@ -339,16 +339,16 @@ data - an object with two fildes:
 ##### .writeFC3 (unit, address, length, callback)
 Writes "Read Holding Registers" (FC=03) request to serial port.
 
-###### unit
+*unit {number}:*
 The slave unit address.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 ```
@@ -362,16 +362,16 @@ data - an object with two fildes:
 ##### .writeFC4 (unit, address, length, callback)
 Writes "Read Input Registers" (FC=04) request to serial port.
 
-###### unit
+*unit {number}:*
 The slave unit address.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### length
+*length {number}:*
 The total number of registers requested.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 ```
@@ -385,16 +385,16 @@ data - an object with two fildes:
 ##### .writeFC5 (unit, address, state, callback)
 Writes "Force Single Coil" (FC=05) request to serial port.
 
-###### unit
+*unit {number}:*
 The slave unit address.
 
-###### address
-The Data Address of the coil.
+*address {number}:*
+The Data Address of the first register.
 
-###### state
-The state to set into the coil (true / false).
+*state {boolean}:*
+The coil state.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 
@@ -402,16 +402,16 @@ that looks like: function (error, data) { ... }
 ##### .writeFC16 (unit, address, array, callback)
 Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
-###### unit
+#*unit {number}:*
 The slave unit address.
 
-###### address
+*address {number}:*
 The Data Address of the first register.
 
-###### array
-The array of values to set into the registers.
+*array {array}:*
+The array of values to sent to unit.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function 
 that looks like: function (error, data) { ... }
 
@@ -464,37 +464,37 @@ client.connectTCP("192.168.1.42");
 ##### .connectRTU (path, options, callback)
 Connect using serial port.
 
-###### path
+*path {string}:*
 The port path (e.g. "/dev/ttyS0")
 
-###### options (optional)
+*options {object}:* (optional)
 The options for this connection.
 
-###### callback (optional)
+*callback {function}* (optional)
 Called once the client is connected.
 
 ----
 ##### .connectTCP (ip, options, callback)
 Connect using tcp/ip.
 
-###### ip
+*ip {string}:*
 The port ip (e.g. "24.230.1.42")
 
-###### options (optional)
+*options {object}:* (optional)
 The options for this connection.
 
-###### callback (optional)
+*callback {function}* (optional)
 Called once the client is connected.
 
 ----
 ##### .connectTelnet (ip, options, callback)
 Connect using a telnet server
 
-###### ip
+*ip {string}:*
 The port ip (e.g. "24.230.1.42")
 
-###### options (optional)
+*options {object}:* (optional)
 The options for this connection.
 
-###### callback (optional)
+*callback {function}* (optional)
 Called once the client is connected.
