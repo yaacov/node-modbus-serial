@@ -199,14 +199,14 @@ client.readDiscreteInputs(10, 8)
 
 ----
 ##### .setID(id)
-Sets the unit id
+      Sets the unit id
 
 *id {number}:*
 The new client id
 
 ----
 ##### .readCoils (address, length)
-Writes "Read Coils" (FC=1) request to serial port.
+      Writes "Read Coils" (FC=1) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -216,7 +216,7 @@ The total number of registers requested.
 
 ----
 ##### .readDiscreteInputs (address, length)
-Writes "Read Discrete Inputs" (FC=2) request to serial port.
+      Writes "Read Discrete Inputs" (FC=2) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -226,7 +226,7 @@ The total number of registers requested.
 
 ----
 ##### .readHoldingRegisters (address, length)
-Writes "Read Holding Registers" (FC=3) request to serial port.
+      Writes "Read Holding Registers" (FC=3) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -236,7 +236,7 @@ The total number of registers requested.
 
 ----
 ##### .readInputRegisters (address, length)
-Writes "Read Input Registers" (FC=4) request to serial port.
+      Writes "Read Input Registers" (FC=4) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -246,7 +246,7 @@ The total number of registers requested.
 
 ----
 ##### .writeCoil(address, state)
-Writes "Force Coil Status" (FC=5) request to serial port.
+      Writes "Force Coil Status" (FC=5) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -256,7 +256,7 @@ The state to force into coil.
 
 ----
 ##### .writeRegisters (address, array)
-Writes "Preset Multiple Registers" (FC=16) request to serial port.
+      Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
 *address {number}:*
 The Data Address of the first register.
@@ -284,14 +284,14 @@ client.writeFC3(1, 10, 8, function(err, data) {
 
 ----
 ##### .open(callback)
-Opens a modbus connection using the given serial port.
+      Opens a modbus connection using the given serial port.
 
-###### callback (optional)
+*callback {function}:* (optional)
 Called when a connection has been opened.
 
 ----
 ##### .writeFC1 (unit, address, length, callback)
-Writes "Read coil status" (FC=01) request to serial port.
+      Writes "Read coil status" (FC=01) request to serial port.
 
 *unit {number}:*
 The slave unit address.
@@ -314,7 +314,7 @@ data - an object with two fildes:
 
 ----
 ##### .writeFC2 (unit, address, length, callback)
-Writes "Read input status" (FC=02) request to serial port.
+      Writes "Read input status" (FC=02) request to serial port.
 
 *unit {number}:*
 The slave unit address.
@@ -337,7 +337,7 @@ data - an object with two fildes:
 
 ----
 ##### .writeFC3 (unit, address, length, callback)
-Writes "Read Holding Registers" (FC=03) request to serial port.
+      Writes "Read Holding Registers" (FC=03) request to serial port.
 
 *unit {number}:*
 The slave unit address.
@@ -360,7 +360,7 @@ data - an object with two fildes:
 
 ----
 ##### .writeFC4 (unit, address, length, callback)
-Writes "Read Input Registers" (FC=04) request to serial port.
+      Writes "Read Input Registers" (FC=04) request to serial port.
 
 *unit {number}:*
 The slave unit address.
@@ -383,7 +383,7 @@ data - an object with two fildes:
 
 ----
 ##### .writeFC5 (unit, address, state, callback)
-Writes "Force Single Coil" (FC=05) request to serial port.
+      Writes "Force Single Coil" (FC=05) request to serial port.
 
 *unit {number}:*
 The slave unit address.
@@ -400,9 +400,9 @@ that looks like: function (error, data) { ... }
 
 ----
 ##### .writeFC16 (unit, address, array, callback)
-Writes "Preset Multiple Registers" (FC=16) request to serial port.
+      Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
-#*unit {number}:*
+*unit {number}:*
 The slave unit address.
 
 *address {number}:*
@@ -462,7 +462,7 @@ client.connectTCP("192.168.1.42");
 ```
 ----
 ##### .connectRTU (path, options, callback)
-Connect using serial port.
+      Connect using serial port.
 
 *path {string}:*
 The port path (e.g. "/dev/ttyS0")
@@ -470,12 +470,12 @@ The port path (e.g. "/dev/ttyS0")
 *options {object}:* (optional)
 The options for this connection.
 
-*callback {function}* (optional)
+*callback {function}:* (optional)
 Called once the client is connected.
 
 ----
 ##### .connectTCP (ip, options, callback)
-Connect using tcp/ip.
+      Connect using tcp/ip.
 
 *ip {string}:*
 The port ip (e.g. "24.230.1.42")
@@ -483,12 +483,12 @@ The port ip (e.g. "24.230.1.42")
 *options {object}:* (optional)
 The options for this connection.
 
-*callback {function}* (optional)
+*callback {function}:* (optional)
 Called once the client is connected.
 
 ----
 ##### .connectTelnet (ip, options, callback)
-Connect using a telnet server
+      Connect using a telnet server
 
 *ip {string}:*
 The port ip (e.g. "24.230.1.42")
@@ -496,5 +496,5 @@ The port ip (e.g. "24.230.1.42")
 *options {object}:* (optional)
 The options for this connection.
 
-*callback {function}* (optional)
+*callback {function}:* (optional)
 Called once the client is connected.
