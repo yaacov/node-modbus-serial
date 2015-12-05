@@ -36,10 +36,13 @@ function crc16(buf) {
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
  */
-var TcpPort = function(ip, port) {
+var TcpPort = function(ip, options) {
     var _tcpport = this;
     this.ip = ip;
-    this.port = port || MODBUS_PORT; // modbus port
+    
+    // options
+    if (typeof(options) == 'undefined') options = {};
+    this.port = options.port || MODBUS_PORT; // modbus port
     
     // create a socket
     this._client = new net.Socket();

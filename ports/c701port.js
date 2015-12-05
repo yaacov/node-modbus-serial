@@ -54,10 +54,13 @@ function checkData(modbus, buf) {
 /**
  * Simulate a modbus-RTU port using C701 UDP-to-Serial bridge
  */
-var UdpPort = function(ip, port) {
+var UdpPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
-    this.port = port || C701_PORT; // C701 port
+    
+    // options
+    if (typeof(options) == 'undefined') options = {};
+    this.port = options.port || C701_PORT; // C701 port
     
     // create a socket
     this._client = dgram.createSocket("udp4");

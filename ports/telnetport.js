@@ -54,10 +54,13 @@ function checkData(modbus, buf) {
 /**
  * Simulate a modbus-RTU port using Telent connection
  */
-var TelnetPort = function(ip, port) {
+var TelnetPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
-    this.port = port || TELNET_PORT; // telnet server port
+    
+    // options
+    if (typeof(options) == 'undefined') options = {};
+    this.port = options.port || TELNET_PORT; // telnet server port
     
     // internal buffer
     this._buffer = new Buffer(0);

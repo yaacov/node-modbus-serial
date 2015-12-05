@@ -65,14 +65,9 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
         
-        // check for port
-        if (options && options.port) {
-            port = options.port;
-        }
-        
         // create the TcpPort
         var TcpPort = require('../ports/tcpport');
-        var tcpPort = new TcpPort(ip, port);
+        var tcpPort = new TcpPort(ip, options);
         
         // re-set the port to use
         this._port = tcpPort;
@@ -97,14 +92,9 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
         
-        // check for port
-        if (options && options.port) {
-            port = options.port;
-        }
-        
         // create the TcpPort
         var TelnetPort = require('../ports/telnetport');
-        var telnetPort = new TelnetPort(ip, port);
+        var telnetPort = new TelnetPort(ip, options);
         
         // re-set the port to use
         this._port = telnetPort;
@@ -129,14 +119,9 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
         
-        // check for port
-        if (options && options.port) {
-            port = options.port;
-        }
-        
         // create the TcpPort
         var C701Port = require('../ports/c701port');
-        var c701Port = new C701Port(ip, port);
+        var c701Port = new C701Port(ip, options);
         
         // re-set the port to use
         this._port = c701Port;
