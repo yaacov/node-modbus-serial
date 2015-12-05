@@ -40,4 +40,4 @@ setInterval(function() {
         lastAns = Date.now();
         start();
     }
-});
+}, 1000);
