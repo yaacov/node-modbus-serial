@@ -79,6 +79,9 @@ var TelnetPort = function(ip, port) {
         var length = modbus._length;
         var bufferLength = modbus._buffer.length ;
         
+        // check data length
+        if (data.length < 6 || length < 6) return;
+        
         // loop and check length-sized buffer chunks
         for (var i = 0; i < (bufferLength - length + 1); i++) {
             // cut a length of bytes from buffer

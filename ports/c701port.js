@@ -64,6 +64,9 @@ var UdpPort = function(ip, port) {
     
     // wait for answer
     this._client.on('message', function(data) {
+        // check expected length
+        if (modbus.length < 6) return;
+        
         // check message length
         if (data.length < (116 + modbus.length)) return;
         

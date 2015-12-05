@@ -47,6 +47,9 @@ var TcpPort = function(ip, port) {
         var buffer;
         var crc;
         
+        // check data length
+        if (data.length < 6) return;
+        
         // cut 6 bytes of mbap, copy pdu and add crc
         buffer = new Buffer(data.length - 6 + 2);
         data.copy(buffer, 0, 6);
