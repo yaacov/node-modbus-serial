@@ -15,16 +15,16 @@ function write() {
     // write the values 0, 0xffff to registers starting at address 5
     // on device number 1.
     client.writeRegisters(5, data)
-        .then( read );
+        .then(read);
 }
 
 function read() {
     // read the 2 registers starting at address 5
     // on device number 1.
     client.readHoldingRegisters(5, 2)
-        .then( function(d) {
+        .then(function(d) {
             console.log("Recive:", d); })
-        .then( exit );
+        .then(exit);
 }
 
 function exit() {

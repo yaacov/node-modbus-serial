@@ -80,7 +80,7 @@ var TelnetPort = function(ip, port) {
         var bufferLength = modbus._buffer.length ;
         
         // check data length
-        if (data.length < 6 || length < 6) return;
+        if (bufferLength.length < 6 || length < 6) return;
         
         // loop and check length-sized buffer chunks
         for (var i = 0; i < (bufferLength - length + 1); i++) {

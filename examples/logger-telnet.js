@@ -7,7 +7,7 @@ var client = new ModbusRTU();
 client.connectTelnet("127.0.0.1");
 
 client.setID(1);
-setInterval(run, 2000);
+setInterval(run, 1000);
 
 // read the values of 10 registers starting at address 0
 // on device number 1. and log the values to the console.
