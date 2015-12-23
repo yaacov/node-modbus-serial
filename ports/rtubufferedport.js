@@ -1,9 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
-var net = require('net');
-
-var TELNET_PORT = 2217;
+var SerialPort = require("serialport").SerialPort;
 
 /**
  * calculate crc16
@@ -52,15 +50,13 @@ function checkData(modbus, buf) {
 }
 
 /**
- * Simulate a modbus-RTU port using Telent connection
+ * Simulate a modbus-RTU port using buffered serial connection
  */
-var TelnetPort = function(ip, options) {
+var RTUBufferedPort = function(path, options) {
     var modbus = this;
-    this.ip = ip;
     
     // options
     if (typeof(options) == 'undefined') options = {};
-    this.port = options.port || TELNET_PORT; // telnet server port
     
     // internal buffer
     this._buffer = new Buffer(0);
@@ -68,8 +64,8 @@ var TelnetPort = function(ip, options) {
     this._cmd = 0;
     this._length = 0;
     
-    // create a socket
-    this._client = new net.Socket();
+    // create the SerialPort
+    this._client= new SerialPort(path, options);
     
     // register the port data event
     this._client.on('data', function(data) {
@@ -109,28 +105,25 @@ var TelnetPort = function(ip, options) {
 
     events.call(this);
 }
-util.inherits(TelnetPort, events);
+util.inherits(RTUBufferedPort, events);
 
 /**
  * Simulate successful port open
  */
-TelnetPort.prototype.open = function (callback) {
-    this._client.connect(this.port, this.ip, callback);
+RTUBufferedPort.prototype.open = function (callback) {
+    this._client.open(callback);
 }
 
 /**
  * Simulate successful close port
  */
-TelnetPort.prototype.close = function (callback) {
-    this._client.end();
-    if (callback)
-        callback(null);
+RTUBufferedPort.prototype.close = function (callback) {
+    this._client.close(callback);
 }
-
 /**
  * Send data to a modbus slave via telnet server
  */
-TelnetPort.prototype.write = function (data) {
+RTUBufferedPort.prototype.write = function (data) {
     // check data length
     if (data.length < 6) {
         // raise an error ?
@@ -167,4 +160,4 @@ TelnetPort.prototype.write = function (data) {
     this._client.write(data);
 }
 
-module.exports = TelnetPort;
+module.exports = RTUBufferedPort;

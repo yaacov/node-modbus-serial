@@ -129,6 +129,31 @@ var addConnctionAPI = function(Modbus) {
         // open and call next
         this.open(next);
     }
+    
+    /** 
+     * Connect to a communication port, using Bufferd Serial port.
+     *
+     * @param {string} path the path to the Serial Port - required.
+     * @param {object} options - the serial port options - optional.
+     * @param {function} next the function to call next.
+     */
+    cl.connectRTUBuffered = function (path, options, next) {
+        // check if we have options
+        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+            next = options;
+            options = {};
+        }
+        
+        // create the SerialPort
+        var SerialPort = require('../ports/rtubufferedport');
+        var serialPort = new SerialPort(path, options);
+        
+        // re-set the serial port to use
+        this._port = serialPort;
+        
+        // open and call next
+        this.open(next);
+    }
 }
 
 module.exports = addConnctionAPI;

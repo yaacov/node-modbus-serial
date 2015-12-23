@@ -4,7 +4,7 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // open connection to a tcp line
-client.connectTCP("192.168.1.42");
+client.connectTCP("192.168.1.115");
 
 /* read 10 registers every one second 
  * 1 - The Slave Address.
@@ -12,7 +12,7 @@ client.connectTCP("192.168.1.42");
  * 10 - Number of registers to read.
  */
 setInterval(function() {
-    client.writeFC4(1, 0, 10, function(err, data) {
+    client.readInputRegisters(0, 10, function(err, data) {
         console.log(data.data);
     });
 }, 1000);
