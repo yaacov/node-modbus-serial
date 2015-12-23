@@ -65,9 +65,11 @@ Node Modbus-WebSocket bridge:
 
 ###### Connects types:
 
-* Modbus-RTU: Over serial line [require node serialport].
-* modbus-TCP: Over TCP/IP line.
-* modbus-RTU: Over Telnet server, TCP/IP serial bridge.
+* Modbus-RTU (modbus-rtu): Over serial line [require node serialport].
+* modbus-TCP (modbus-tcp): Over TCP/IP line.
+* modbus-RTU (telnet): Over Telnet server, TCP/IP serial bridge.
+* modbus-RTU (buffered): Over buffered serial line [require node serialport].
+* modbus-RTU (C701): Over C701 server, commercial UDP to serial bridge.
 
 #### Examples
 ----
@@ -463,6 +465,20 @@ client.connectTCP("192.168.1.42");
 ----
 ##### .connectRTU (path, options, callback)
       Connect using serial port.
+
+*path {string}:*
+The port path (e.g. "/dev/ttyS0")
+
+*options {object}:* (optional)
+The options for this connection.
+
+*callback {function}:* (optional)
+Called once the client is connected.
+
+----
+##### .connectRTUBuffered (path, options, callback)
+      Connect using buffered serial port.
+      Use when serial port has long delays inside packets.
 
 *path {string}:*
 The port path (e.g. "/dev/ttyS0")
