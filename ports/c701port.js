@@ -15,7 +15,7 @@ function crc16(buf) {
     var length = buf.length - 2;
     var crc = 0xFFFF;
     var tmp;
-    
+
     // calculate crc16
     for (var i = 0; i < length; i++) {
         crc = crc ^ buf[i];
@@ -28,7 +28,7 @@ function crc16(buf) {
             }
         }
     }
-    
+
     return crc;
 }
 
@@ -44,7 +44,7 @@ function checkData(modbus, buf) {
     
     // calculate crc16
     var crcIn = buf.readUInt16LE(buf.length - 2);
-    
+
     // check buffer unit-id, command and crc
     return (buf[0] == modbus._id && 
         buf[1] == modbus._cmd &&
@@ -57,28 +57,28 @@ function checkData(modbus, buf) {
 var UdpPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
-    
+
     // options
     if (typeof(options) == 'undefined') options = {};
     this.port = options.port || C701_PORT; // C701 port
-    
+
     // create a socket
     this._client = dgram.createSocket("udp4");
-    
+
     // wait for answer
     this._client.on('message', function(data) {
         // check expected length
         if (modbus.length < 6) return;
-        
+
         // check message length
         if (data.length < (116 + modbus.length)) return;
-        
+
         // check the C701 packet magic
         if (data.readUInt16LE(2) != 602) return;
-        
+
         // get the serial data from the C701 packet
         var buffer = data.slice(data.length - modbus._length);
-        
+
         //check the serial data
         if (checkData(modbus, buffer)) {
             modbus.emit('data', buffer);
@@ -115,11 +115,11 @@ UdpPort.prototype.write = function (data) {
         // raise an error ?
         return;
     }
-    
+
     // remember current unit and command
     this._id = data[0];
     this._cmd = data[1];
-    
+
     // calculate expected answer length
     switch (this._cmd) {
         case 1:
@@ -133,6 +133,7 @@ UdpPort.prototype.write = function (data) {
             this._length = 3 + 2 * length + 2;
             break;
         case 5:
+        case 6:
         case 16:
             this._length = 6 + 2;
             break;
@@ -141,7 +142,7 @@ UdpPort.prototype.write = function (data) {
             this._length = 0;
             break;
     }
-    
+
     // build C701 header
     var buffer = new Buffer(data.length + 116);
     buffer.fill(0);
@@ -150,10 +151,10 @@ UdpPort.prototype.write = function (data) {
     buffer.writeUInt16LE(this._length, 38); // expected serial answer length
     buffer.writeUInt16LE(1, 102);           // C7011 RS481 hub (1..2)
     buffer.writeUInt16LE(data.length, 104); // serial data length
-    
+
     // add serial line data
     data.copy(buffer, 116);
-    
+
     // send buffer to C701 UDP to serial bridge
     this._client.send(buffer, 0, buffer.length, this.port, this.ip);
 }
