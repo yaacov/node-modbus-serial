@@ -6,7 +6,7 @@ A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS
 This class makes ModbusRTU (and TCP) calls fun and easy.
 
 Modbus is a serial communications protocol, first used in 1979.
-Modbus is simple and robust, openly published, royalty-free and 
+Modbus is simple and robust, openly published, royalty-free and
 easy to deploy and maintain.
 
 ----
@@ -40,18 +40,18 @@ devices such as irrigation controllers, protocol droids and robots.
 It talks with devices that use a serial line (e.g. RS485, RS232).
 Many industrial electronic devices implement modbus.
 Arduino can also talk modbus and you can control your projects and robots
-using modbus. 
+using modbus.
 
 Arduino libraries for modbus slave:
 * https://github.com/yaacov/arduino-modbus-slave
 * https://github.com/smarmengol/Modbus-Master-Slave-for-Arduino
-    
+
 Arduino sketch for irrigation timer with modbus support:
 * https://github.com/yaacov/arduino-irrigation-timer
-    
+
 Node Modbus-WebSocket bridge:
 * https://github.com/yaacov/node-modbus-ws
-    
+
 #### Compatibility
 
 ###### This class implements:
@@ -61,6 +61,7 @@ Node Modbus-WebSocket bridge:
 * FC3 "Read Holding Registers"
 * FC4 "Read Input Registers"
 * FC5 "Force Single Coil"
+* FC6 "Preset Single Register"
 * FC16 "Preset Multiple Registers"
 
 ###### Connects types:
@@ -86,7 +87,7 @@ client.connectTCP("192.168.1.42", run);
 // on device number 1. and log the values to the console.
 function run() {
     client.setID(1);
-    
+
     client.readInputRegisters(0, 10)
         .then(console.log)
         .then(run);
@@ -267,6 +268,18 @@ The Data Address of the first register.
 The array of values to set into the registers.
 
 ----
+
+----
+##### .writeRegisters (address, value)
+      Writes "Preset Single Register" (FC=6) request to serial port.
+
+*address {number}:*
+The Data Address of the first register.
+
+*value {number}:*
+The value to set into the register.
+
+----
 ###### API Callbacks
 ----
 
@@ -305,7 +318,7 @@ The Data Address of the first register.
 The total number of registers requested.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
@@ -328,7 +341,7 @@ The Data Address of the first register.
 The total number of registers requested.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
@@ -351,7 +364,7 @@ The Data Address of the first register.
 The total number of registers requested.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
@@ -374,7 +387,7 @@ The Data Address of the first register.
 The total number of registers requested.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 ```
 error - null on success, error string o/w
@@ -397,7 +410,24 @@ The Data Address of the first register.
 The coil state.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
+that looks like: function (error, data) { ... }
+
+----
+##### .writeFC6 (unit, address, array, callback)
+      Writes "Preset Single Register" (FC=6) request to serial port.
+
+*unit {number}:*
+The slave unit address.
+
+*address {number}:*
+The Data Address of the first register.
+
+*value {number}:*
+The value to sent to unit.
+
+*callback {function}:* (optional)
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 
 ----
@@ -414,7 +444,7 @@ The Data Address of the first register.
 The array of values to sent to unit.
 
 *callback {function}:* (optional)
-Called once the unit returns an answer. The callback should be a function 
+Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 
 ----
