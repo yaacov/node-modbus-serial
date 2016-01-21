@@ -2,16 +2,16 @@
 /**
  * Copyright (c) 2015, Yaacov Zamir <kobi.zamir@gmail.com>
  *
- * Permission to use, copy, modify, and/or distribute this software for any 
- * purpose with or without fee is hereby granted, provided that the above 
+ * Permission to use, copy, modify, and/or distribute this software for any
+ * purpose with or without fee is hereby granted, provided that the above
  * copyright notice and this permission notice appear in all copies.
  *
- * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES 
- * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF 
- * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR 
- * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES 
- * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN 
- * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF 
+ * THE SOFTWARE IS PROVIDED "AS IS" AND THE AUTHOR DISCLAIMS ALL WARRANTIES
+ * WITH REGARD TO THIS SOFTWARE INCLUDING ALL IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR
+ * ANY SPECIAL, DIRECT, INDIRECT, OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+ * WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN
+ * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
 
@@ -25,7 +25,7 @@ var convert = function(f) {
     var converted = function(address, arg, next) {
         var client = this;
         var id = this._unitID;
-        
+
         /* the function check for a callback
          * if we have a callback, use it
          * o/w build a promise.
@@ -43,14 +43,14 @@ var convert = function(f) {
                         resolve(data);
                     }
                 }
-                
+
                 f.bind(client)(id, address, arg, cb);
             });
-            
+
             return promise;
         }
     }
-    
+
     return converted;
 }
 
@@ -60,19 +60,20 @@ var convert = function(f) {
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
 var addPromiseAPI = function(Modbus) {
-    
+
     var cl = Modbus.prototype;
-    
+
     // set/get unitID
     cl.setID = function(id) {this._unitID = id;}
     cl.getID = function() {return this._unitID;}
-    
+
     // convert functions to return promises
     cl.readCoils = convert(cl.writeFC1);
     cl.readDiscreteInputs = convert(cl.writeFC2);
     cl.readHoldingRegisters = convert(cl.writeFC3);
     cl.readInputRegisters = convert(cl.writeFC4);
     cl.writeCoil = convert(cl.writeFC5);
+    cl.writeRegister  = convert(cl.writeFC6);
     cl.writeRegisters = convert(cl.writeFC16);
 }
 

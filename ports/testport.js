@@ -12,13 +12,13 @@ var events = require('events');
 var TestPort = function() {
     // simulate 14 input registers
     this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
-    
+
     // simulate 14 holding registers
     this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
-    
+
     // simulate 16 coils / digital inputs
     this._coils = 0x0000;
-    
+
     events.call(this);
 }
 util.inherits(TestPort, events);
@@ -34,11 +34,11 @@ function crc16(buf) {
     var length = buf.length - 2;
     var crc = 0xFFFF;
     var tmp;
-    
+
     // calculate crc16
     for (var i = 0; i < length; i++) {
         crc = crc ^ buf[i];
-        
+
         for (var j = 0; j < 8; j++) {
             tmp = crc & 0x0001;
             crc = crc >> 1;
@@ -47,7 +47,7 @@ function crc16(buf) {
             }
         }
     }
-    
+
     return crc;
 }
 
@@ -72,133 +72,152 @@ TestPort.prototype.close = function (callback) {
  */
 TestPort.prototype.write = function (buf) {
     var buffer = null;
-    
+
     // if length is too short, ignore message
     if (buf.length < 8) {
         return;
     }
-    
+
     var unitNumber = buf[0];
     var functionCode = buf[1];
     var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
-    
+
     // if crc is bad, ignore message
     if (crc != crc16(buf)) {
         return;
     }
-    
+
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
-        
+
         // if length is bad, ignore message
         if (buf.length != 8) {
             return;
         }
-        
+
         // build answer
         buffer = new Buffer(3 + parseInt((length - 1) / 8 + 1) + 2);
         buffer.writeUInt8(parseInt((length - 1) / 8 + 1), 2);
-        
+
         // read coils
         buffer.writeUInt16LE(this._coils >> address, 3);
     }
-    
+
     // function code 3
     if (functionCode == 3) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
-        
+
         // if length is bad, ignore message
         if (buf.length != 8) {
             return;
         }
-        
+
         // build answer
         buffer = new Buffer(3 + length * 2 + 2);
         buffer.writeUInt8(length * 2, 2);
-        
+
         // read registers
         for (var i = 0; i < length; i++) {
             buffer.writeUInt16BE(this._holding_registers[address + i], 3 + i * 2);
         }
     }
-    
+
     // function code 4
     if (functionCode == 4) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
-        
+
         // if length is bad, ignore message
         if (buf.length != 8) {
             return;
         }
-        
+
         // build answer
         buffer = new Buffer(3 + length * 2 + 2);
         buffer.writeUInt8(length * 2, 2);
-        
+
         // read registers
         for (var i = 0; i < length; i++) {
             buffer.writeUInt16BE(this._registers[address + i], 3 + i * 2);
         }
     }
-    
+
     // function code 5
     if (functionCode == 5) {
         var address = buf.readUInt16BE(2);
         var state = buf.readUInt16BE(4);
-        
+
         // if length is bad, ignore message
         if (buf.length != 8) {
             return;
         }
-        
+
         // build answer
         buffer = new Buffer(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(state, 4);
-        
+
         // write coil
         if (state == 0xff00) {
-            this._coils |= 1 << address; 
+            this._coils |= 1 << address;
         } else {
-            this._coils &= ~(1 << address); 
+            this._coils &= ~(1 << address);
         }
     }
-    
+
+    // function code 6
+    if (functionCode == 6) {
+        var address = buf.readUInt16BE(2);
+        var value = buf.readUInt16BE(4);
+        // if length is bad, ignore message
+        if (buf.length != (6 + 2)) {
+            return;
+        }
+
+        // build answer
+        buffer = new Buffer(8);
+        buffer.writeUInt16BE(address, 2);
+        buffer.writeUInt16BE(value, 4);
+
+        this._holding_registers[address] = value;
+    }
+
+
+
     // function code 16
     if (functionCode == 16) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
-        
+
         // if length is bad, ignore message
         if (buf.length != (7 + length * 2 + 2)) {
             return;
         }
-        
+
         // build answer
         buffer = new Buffer(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(length, 4);
-        
+
         // write registers
         for (var i = 0; i < length; i++) {
             this._holding_registers[address + i] = buf.readUInt16BE(7 + i * 2);
         }
     }
-    
+
     // send data back
     if (buffer) {
         // add unit number and function code
         buffer.writeUInt8(unitNumber, 0);
         buffer.writeUInt8(functionCode, 1);
-        
+
         // add crc
         crc = crc16(buffer);
         buffer.writeUInt16LE(crc, buffer.length - 2);
-        
+
         // corrupt the answer
         switch (unitNumber) {
             case 1:
@@ -217,7 +236,7 @@ TestPort.prototype.write = function (buf) {
                 buffer[0] = unitNumber + 2;
                 break;
         }
-        
+
         this.emit('data', buffer);
     }
 }
