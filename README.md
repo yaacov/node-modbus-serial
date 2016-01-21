@@ -1,7 +1,7 @@
 # modbus-serial
 A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS
 
-[![NPM Version](https://img.shields.io/npm/v/gm.svg?style=flat)](https://www.npmjs.com/package/modbus-serial)
+[![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/modbus-serial)
 
 This class makes ModbusRTU (and TCP) calls fun and easy.
 
