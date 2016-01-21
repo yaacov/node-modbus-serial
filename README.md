@@ -270,7 +270,7 @@ The array of values to set into the registers.
 ----
 
 ----
-##### .writeRegisters (address, value)
+##### .writeRegister (address, value)
       Writes "Preset Single Register" (FC=6) request to serial port.
 
 *address {number}:*
