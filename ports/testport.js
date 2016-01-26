@@ -185,7 +185,27 @@ TestPort.prototype.write = function (buf) {
         this._holding_registers[address] = value;
     }
 
+    // function code 15
+    if (functionCode == 15) {
+        var address = buf.readUInt16BE(2);
+        var length = buf.readUInt16BE(4);
 
+        // if length is bad, ignore message
+        if (buf.length != 7 + Math.ceil(length / 8) + 2) {
+            return;
+        }
+
+        // build answer
+        buffer = new Buffer(8);
+        buffer.writeUInt16BE(address, 2);
+        buffer.writeUInt16BE(length, 4);
+
+        // write coils
+        var byteCounts = Math.ceil(length / 8);
+        for (var i = 0; i < byteCounts; i++) {
+            this._coils &= buf.readUInt8(7 + i);
+        }
+    }
 
     // function code 16
     if (functionCode == 16) {
@@ -236,7 +256,6 @@ TestPort.prototype.write = function (buf) {
                 buffer[0] = unitNumber + 2;
                 break;
         }
-
         this.emit('data', buffer);
     }
 }

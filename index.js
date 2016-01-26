@@ -131,6 +131,16 @@ function _readFC6(data, next) {
         next(null, {"address": dataAddress, "value": value});
 }
 
+function _readFC15(data, next) {
+    var dataAddress = data.readUInt16BE(2);
+    var value = data.readUInt16BE(4);
+
+    if(next)
+        next(null, {"address": dataAddress, "value": value});
+}
+
+
+
 /**
  * Parse the data for a Modbus -
  * Preset Multiple Registers (FC=16)
@@ -272,6 +282,12 @@ ModbusRTU.prototype.open = function (callback) {
                  */
                 if (code == 6) {
                     _readFC6(data, next);
+                }
+
+                /* Force Multiple Coils
+                */
+                if (code == 15) {
+                    _readFC15(data, next);
                 }
 
                 // Preset Multiple Registers (FC=16)
@@ -443,6 +459,49 @@ ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
     this._port.write(buf);
 }
 
+/**
+ * Write a Modbus "Force Multiple Coils" (FC=15) to serial port.
+ *
+ * @param {number} address the slave unit address.
+ * @param {number} dataAddress the Data Address of the first register.
+ * @param {array} array the array of values to write to registers.
+ * @param {function} next the function to call next.
+ */
+ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
+    var code = 15;
+
+    // set state variables
+    this._nextAddress = address;
+    this._nextCode = code;
+    this._nextLength = 8;
+    this._next = next;
+
+    // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B dataCounts + 1B byteCounts
+    var codeLength = 7 + Math.ceil(array.length / 8);
+    var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
+
+    buf.writeUInt8(address, 0);
+    buf.writeUInt8(code, 1);
+    buf.writeUInt16BE(dataAddress, 2);
+    buf.writeUInt16BE(array.length, 4);
+    buf.writeUInt8(Math.ceil(array.length / 8), 6);
+
+    // accumulator: parse coil state to UInt8 conveniently
+    var len = array.length, accumulator = [1, 2, 4, 8, 16, 32, 64, 128];
+    for (var i = 0; i < len; i++) {
+        var temp = 0;
+        for (var j = i; j < i + 8 && j < len; j++) {
+            temp += array[j] ? accumulator[j-i] : 0;
+        }
+        i = j;
+        buf.writeUInt8(temp, 7 + parseInt((i - 1) / 8));
+    }
+    // add crc bytes to buffer
+    _CRC16(buf, codeLength);
+
+    // write buffer to serial port
+    this._port.write(buf);
+}
 
 
 /**
