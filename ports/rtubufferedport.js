@@ -148,6 +148,7 @@ RTUBufferedPort.prototype.write = function (data) {
             break;
         case 5:
         case 6:
+        case 15:
         case 16:
             this._length = 6 + 2;
             break;

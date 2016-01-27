@@ -133,10 +133,10 @@ function _readFC6(data, next) {
 
 function _readFC15(data, next) {
     var dataAddress = data.readUInt16BE(2);
-    var value = data.readUInt16BE(4);
+    var length = data.readUInt16BE(4);
 
     if(next)
-        next(null, {"address": dataAddress, "value": value});
+        next(null, {"address": dataAddress, "length": length});
 }
 
 
@@ -488,7 +488,7 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
 
     // accumulator: parse coil state to UInt8 conveniently
     var len = array.length, accumulator = [1, 2, 4, 8, 16, 32, 64, 128];
-    for (var i = 0; i < len; i++) {
+    for (var i = 0; i < len; ) {
         var temp = 0;
         for (var j = i; j < i + 8 && j < len; j++) {
             temp += array[j] ? accumulator[j-i] : 0;

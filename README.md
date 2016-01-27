@@ -258,6 +258,16 @@ The Data Address of the first register.
 The state to force into coil.
 
 ----
+##### .writeCoils(address, array)
+      Writes "Force Multiple Coils" (FC=15) request to serial port.
+
+*address {number}:*
+The Data Address of the first register.
+
+*array {array}:*
+The array of states to force into the coils.
+
+----
 ##### .writeRegisters (address, array)
       Writes "Preset Multiple Registers" (FC=16) request to serial port.
 
@@ -414,7 +424,24 @@ Called once the unit returns an answer. The callback should be a function
 that looks like: function (error, data) { ... }
 
 ----
-##### .writeFC6 (unit, address, array, callback)
+##### .writeFC15 (unit, address, array, callback)
+      Writes "Force Multiple Coils" (FC=15) request to serial port.
+
+*unit {number}:*
+The slave unit address.
+
+*address {number}:*
+The Data Address of the first register.
+
+*array {array}:*
+The array of states to send to unit.
+
+*callback {function}:* (optional)
+Called once the unit returns an answer. The callback should be a function
+that looks like: function (error, data) { ... }
+
+----
+##### .writeFC6 (unit, address, value, callback)
       Writes "Preset Single Register" (FC=6) request to serial port.
 
 *unit {number}:*

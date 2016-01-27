@@ -114,6 +114,7 @@ describe('ModbusRTU', function() {
     it('should write 3 coils [true, false, true] without errors', function (done) {
       modbusRTU.writeFC15(1, 8, [true, false, true], function(err, data) {
         expect(err).to.be.a('null');
+
         done()
       });
     });
