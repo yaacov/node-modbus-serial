@@ -16,6 +16,32 @@
  */
 
 /**
+ * Add Set one bit in a Buffer prototype.
+ *
+ * @param {value} Boolean, new state of bit.
+ * @param {bit} Number, The bit offset.
+ * @param {offset} Number, the byte offset.
+ */
+Buffer.prototype.writeBit = function (value, bit, offset) {
+  var byteOffset = bit / 8 + offset;
+  var bitOffset = bit % 8;
+  var bitMask = 0x1 << bitOffset;
+
+  // get byte from buffer
+  var byte = this.readUInt8(byteOffset);
+
+  // set bit on / off
+  if (value) {
+      byte |= bitMask;
+  } else {
+      byte &= ~bitMask;
+  }
+
+  // set byte to buffer
+  this.writeUInt8(byte, byteOffset)
+}
+
+/**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
  * this class makes ModbusRTU calls fun and easy.
  *
@@ -483,15 +509,9 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     buf.writeUInt16BE(array.length, 4);
     buf.writeUInt8(dataBytes, 6);
 
-    var bufferOffset = 7;
-    var bitString = array.map(function(item) {
-        return item ? '1' : '0';
-    });
-
-    while (bitString.length > 8) {
-        buf.writeUInt8(parseInt(bitString.splice(0, 8).join(''), 2), bufferOffset++);
+    for (var i = 0; i < array.length; i++) {
+        buf.writeBit(array[i], i, 7);
     }
-    buf.writeUInt8(parseInt(bitString.join(''), 2), bufferOffset);
 
     // add crc bytes to buffer
     _CRC16(buf, codeLength);

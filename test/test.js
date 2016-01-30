@@ -146,6 +146,20 @@ describe('ModbusRTU', function() {
     });
   });
 
+  describe('#writeFC1() - read coils after force multiple coils.', function () {
+    it('should read coil 8, 9 ,10 to be true, false, true', function (done) {
+        modbusRTU.writeFC1(1, 8, 4, function(err, data) {
+            expect(err).to.be.a('null');
+            expect(data).to.have.property('data');
+            expect(data.data[0]).to.equal(true);
+            expect(data.data[1]).to.equal(false);
+            expect(data.data[2]).to.equal(true);
+
+            done()
+        });
+    });
+  });
+  
   describe('#writeFC16() - write holding registers.', function () {
     it('should write 3 registers [42, 128, 5] without errors', function (done) {
         modbusRTU.writeFC16(1, 8, [42, 128, 5], function(err, data) {
