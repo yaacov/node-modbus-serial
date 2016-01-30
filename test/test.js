@@ -24,6 +24,7 @@ describe('ModbusRTU', function() {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
             expect(data.data.toString()).to.equal([0xa12b, 0xffff, 0xb21a].toString());
+
             done()
         });
     });
@@ -33,6 +34,7 @@ describe('ModbusRTU', function() {
             expect(err).to.be.a('null');
             expect(data).to.have.property('buffer');
             expect(data.buffer.toString('hex')).to.equal("a12bffffb21a");
+
             done()
         });
     });
@@ -44,6 +46,7 @@ describe('ModbusRTU', function() {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
             expect(data.data.toString()).to.equal([8, 9, 10].toString());
+
             done()
         });
     });
@@ -109,7 +112,6 @@ describe('ModbusRTU', function() {
     });
   });
 
-
   describe('#writeFC15() - force multiple coils.', function () {
     it('should write 3 coils [true, false, true] without errors', function (done) {
       modbusRTU.writeFC15(1, 8, [true, false, true], function(err, data) {
@@ -143,7 +145,6 @@ describe('ModbusRTU', function() {
       });
     });
   });
-
 
   describe('#writeFC16() - write holding registers.', function () {
     it('should write 3 registers [42, 128, 5] without errors', function (done) {
@@ -185,6 +186,7 @@ describe('ModbusRTU', function() {
             expect(err).to.be.a('null');
             expect(data).to.have.property('data').with.length(3);
             expect(data.data.toString()).to.equal([42, 128, 5].toString());
+
             done()
         });
     });

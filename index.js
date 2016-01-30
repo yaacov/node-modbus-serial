@@ -139,8 +139,6 @@ function _readFC15(data, next) {
         next(null, {"address": dataAddress, "length": length});
 }
 
-
-
 /**
  * Parse the data for a Modbus -
  * Preset Multiple Registers (FC=16)
@@ -426,7 +424,6 @@ ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
     this._port.write(buf);
 }
 
-
 /**
  * Write a Modbus "Preset Single Register " (FC=6) to serial port.
  *
@@ -476,33 +473,32 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     this._nextLength = 8;
     this._next = next;
 
-    // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B dataCounts + 1B byteCounts
-    var codeLength = 7 + Math.ceil(array.length / 8);
+    var dataBytes = Math.ceil(array.length / 8);
+    var codeLength = 7 + dataBytes;
     var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
     buf.writeUInt16BE(array.length, 4);
-    buf.writeUInt8(Math.ceil(array.length / 8), 6);
+    buf.writeUInt8(dataBytes, 6);
 
-    // accumulator: parse coil state to UInt8 conveniently
-    var len = array.length, accumulator = [1, 2, 4, 8, 16, 32, 64, 128];
-    for (var i = 0; i < len; ) {
-        var temp = 0;
-        for (var j = i; j < i + 8 && j < len; j++) {
-            temp += array[j] ? accumulator[j-i] : 0;
-        }
-        i = j;
-        buf.writeUInt8(temp, 7 + parseInt((i - 1) / 8));
+    var bufferOffset = 7;
+    var bitString = array.map(function(item) {
+        return item ? '1' : '0';
+    });
+
+    while (bitString.length > 8) {
+        buf.writeUInt8(parseInt(bitString.splice(0, 8).join(''), 2), bufferOffset++);
     }
+    buf.writeUInt8(parseInt(bitString.join(''), 2), bufferOffset);
+
     // add crc bytes to buffer
     _CRC16(buf, codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
 }
-
 
 /**
  * Write a Modbus "Preset Multiple Registers" (FC=16) to serial port.
