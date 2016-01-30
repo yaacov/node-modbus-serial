@@ -417,8 +417,8 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  * Write a Modbus "Force Single Coil" (FC=05) to serial port.
  *
  * @param {number} address the slave unit address.
- * @param {number} dataAddress the Data Address of the first register.
- * @param {number} state the state to write to the coil (true / false).
+ * @param {number} dataAddress the Data Address of the coil.
+ * @param {number} state the boolean state to write to the coil (true / false).
  * @param {function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
@@ -486,8 +486,8 @@ ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
  * Write a Modbus "Force Multiple Coils" (FC=15) to serial port.
  *
  * @param {number} address the slave unit address.
- * @param {number} dataAddress the Data Address of the first register.
- * @param {array} array the array of values to write to registers.
+ * @param {number} dataAddress the Data Address of the first coil.
+ * @param {array} array the array of boolean states to write to coils.
  * @param {function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
