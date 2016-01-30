@@ -19,7 +19,7 @@ function crc16(buf) {
     // calculate crc16
     for (var i = 0; i < length; i++) {
         crc = crc ^ buf[i];
-        
+
         for (var j = 0; j < 8; j++) {
             tmp = crc & 0x0001;
             crc = crc >> 1;
@@ -41,12 +41,12 @@ function crc16(buf) {
 function checkData(modbus, buf) {
     // check buffer size
     if (buf.length != modbus._length) return false;
-    
+
     // calculate crc16
     var crcIn = buf.readUInt16LE(buf.length - 2);
 
     // check buffer unit-id, command and crc
-    return (buf[0] == modbus._id && 
+    return (buf[0] == modbus._id &&
         buf[1] == modbus._cmd &&
         crcIn == crc16(buf));
 }
@@ -134,6 +134,7 @@ UdpPort.prototype.write = function (data) {
             break;
         case 5:
         case 6:
+        case 15:
         case 16:
             this._length = 6 + 2;
             break;

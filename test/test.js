@@ -110,6 +110,40 @@ describe('ModbusRTU', function() {
   });
 
 
+  describe('#writeFC15() - force multiple coils.', function () {
+    it('should write 3 coils [true, false, true] without errors', function (done) {
+      modbusRTU.writeFC15(1, 8, [true, false, true], function(err, data) {
+        expect(err).to.be.a('null');
+
+        done()
+      });
+    });
+
+    it('should fail on short data answer', function (done) {
+      modbusRTU.writeFC15(2, 8, [true, false, true], function(err, data) {
+        expect(err).to.have.string('Data length error');
+
+        done()
+      });
+    });
+
+    it('should fail on CRC error', function (done) {
+      modbusRTU.writeFC15(3, 8, [true, false, true], function(err, data) {
+        expect(err).to.have.string('CRC error');
+
+        done()
+      });
+    });
+
+    it('should fail on unexpected replay', function (done) {
+      modbusRTU.writeFC15(4, 8, [true, false, true], function(err, data) {
+        expect(err).to.have.string('Unexpected data error');
+
+        done()
+      });
+    });
+  });
+
 
   describe('#writeFC16() - write holding registers.', function () {
     it('should write 3 registers [42, 128, 5] without errors', function (done) {
