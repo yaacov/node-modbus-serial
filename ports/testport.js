@@ -259,10 +259,6 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt8(unitNumber, 0);
         buffer.writeUInt8(functionCode, 1);
 
-        // add crc
-        crc = crc16(buffer);
-        buffer.writeUInt16LE(crc, buffer.length - 2);
-
         // corrupt the answer
         switch (unitNumber) {
             case 1:
@@ -272,15 +268,21 @@ TestPort.prototype.write = function (buf) {
                 // unit 2: answers short data
                 buffer = buffer.slice(0, buffer.length - 5);
                 break;
-            case 3:
-                // unit 3: answers with bad crc
-                buffer.writeUInt16LE(crc + 1, buffer.length - 2);
-                break;
             case 4:
                 // unit 4: answers with bad unit number
                 buffer[0] = unitNumber + 2;
                 break;
         }
+
+        // add crc
+        crc = crc16(buffer);
+        buffer.writeUInt16LE(crc, buffer.length - 2);
+
+        // unit 3: answers with bad crc
+        if (unitNumber == 3) {
+            buffer.writeUInt16LE(crc + 1, buffer.length - 2);
+        }
+
         this.emit('data', buffer);
     }
 }

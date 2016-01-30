@@ -233,12 +233,9 @@ ModbusRTU.prototype.open = function (callback) {
                 /* check incoming data
                  */
 
-                /* check message length
-                 * if we do not expect this data
-                 * raise an error
+                /* check minimal length
                  */
-
-                if (data.length != length) {
+                if (data.length < 5) {
                     error = "Data length error, expected " +
                         length + " got " + data.length;
                     if (next)
@@ -246,8 +243,42 @@ ModbusRTU.prototype.open = function (callback) {
                     return;
                 }
 
+                /* check message CRC
+                 * if CRC is bad raise an error
+                 */
+                var crcIn = data.readUInt16LE(data.length - 2);
+                var crc = _CRC16(data, data.length - 2);
+
+                if (crcIn != crc) {
+                    error = "CRC error";
+                    if (next)
+                        next(error);
+                    return;
+                }
+
                 var address = data.readUInt8(0);
                 var code = data.readUInt8(1);
+
+                /* check for modbus exception
+                 */
+                if (data.length == 5 && code == (0x80 & modbus._nextCode)) {
+                    error = "Modbus exception " + data.readUInt8(3);
+                    if (next)
+                        next(error);
+                    return;
+                }
+                
+                /* check message length
+                 * if we do not expect this data
+                 * raise an error
+                 */
+                if (data.length != length) {
+                    error = "Data length error, expected " +
+                        length + " got " + data.length;
+                    if (next)
+                        next(error);
+                    return;
+                }
 
                 /* check message address and code
                  * if we do not expect this message
@@ -265,19 +296,6 @@ ModbusRTU.prototype.open = function (callback) {
                 modbus._nextAddress = null;
                 modbus._nextCode = null;
                 modbus._next = null;
-
-                /* check message CRC
-                 * if CRC is bad raise an error
-                 */
-                var crcIn = data.readUInt16LE(length - 2);
-                var crc = _CRC16(data, length - 2);
-
-                if (crcIn != crc) {
-                    error = "CRC error";
-                    if (next)
-                        next(error);
-                    return;
-                }
 
                 /* parse incoming data
                  */
