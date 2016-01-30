@@ -16,7 +16,7 @@
  */
 
 /**
- * Add Set one bit in a Buffer prototype.
+ * Add set one bit in a Buffer prototype.
  *
  * @param {value} Boolean, new state of bit.
  * @param {bit} Number, The bit offset.

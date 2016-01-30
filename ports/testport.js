@@ -3,6 +3,26 @@ var util = require('util');
 var events = require('events');
 
 /**
+ * Add get one bit in a Buffer prototype.
+ *
+ * @param {bit} Number, The bit offset.
+ * @param {offset} Number, the byte offset.
+ *
+ * @return {boolean} the state of the bit.
+ */
+Buffer.prototype.readBit = function (bit, offset) {
+  var byteOffset = bit / 8 + offset;
+  var bitOffset = bit % 8;
+  var bitMask = 0x1 << bitOffset;
+
+  // get byte from buffer
+  var byte = this.readUInt8(byteOffset);
+
+  // check bit state
+  return (byte & bitMask) == bitMask;
+}
+
+/**
  * Simulate a serial port with 4 modbus-rtu slaves connected
  * 1 - a modbus slave working correctly
  * 2 - a modbus slave that answer short replays
@@ -162,7 +182,7 @@ TestPort.prototype.write = function (buf) {
 
         // write coil
         if (state == 0xff00) {
-            this._coils |= 1 << address;
+            this._coils |= (1 << address);
         } else {
             this._coils &= ~(1 << address);
         }
@@ -189,6 +209,7 @@ TestPort.prototype.write = function (buf) {
     if (functionCode == 15) {
         var address = buf.readUInt16BE(2);
         var length = buf.readUInt16BE(4);
+
         // if length is bad, ignore message
         if (buf.length != 7 + Math.ceil(length / 8) + 2) {
             return;
@@ -199,15 +220,15 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(length, 4);
 
-        // write coils
-        for (var i = 0; i < length; ) {
-            var coils_state = buf.readUInt8(7 + Math.ceil(i / 8));
-            for (var j = i; j < i + 8 && j < length; j++) {
-                var coil_state = coils_state & (1 << (j - i));
-                if (coil_state) this._coils |= (coil_state << (address + i * 8));
-                else this.coils &= (coil_state << (address + i * 8));
+        // write registers
+        for (var i = 0; i < length; i++) {
+            var state = buf.readBit(i, 7);
+            
+            if (state) {
+                this._coils |= (1 << (address + i));
+            } else {
+                this._coils &= ~(1 << (address + i));
             }
-            i = j;
         }
     }
 
