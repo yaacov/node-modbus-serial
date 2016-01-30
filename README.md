@@ -62,6 +62,7 @@ Node Modbus-WebSocket bridge:
 * FC4 "Read Input Registers"
 * FC5 "Force Single Coil"
 * FC6 "Preset Single Register"
+* FC15 "Force Multiple Coil"
 * FC16 "Preset Multiple Registers"
 
 ###### Connects types:
