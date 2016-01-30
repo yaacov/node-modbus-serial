@@ -220,7 +220,7 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(length, 4);
 
-        // write registers
+        // write coils
         for (var i = 0; i < length; i++) {
             var state = buf.readBit(i, 7);
             
