@@ -77,12 +77,24 @@ var UdpPort = function(ip, options) {
         // check the C701 packet magic
         if (data.readUInt16LE(2) != 602) return;
 
+        // check for modbus valid answer
         // get the serial data from the C701 packet
         var buffer = data.slice(data.length - modbus._length);
 
         //check the serial data
         if (checkData(modbus, buffer)) {
             modbus.emit('data', buffer);
+            return;
+        }
+
+        // check for modbus exception
+        // get the serial data from the C701 packet
+        var buffer = data.slice(data.length - 5);
+
+        //check the serial data
+        if (checkData(modbus, buffer)) {
+            modbus.emit('data', buffer);
+            return;
         }
     });
 
