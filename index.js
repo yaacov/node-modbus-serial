@@ -15,31 +15,9 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
 
-/**
- * Add set one bit in a Buffer prototype.
- *
- * @param {value} Boolean, new state of bit.
- * @param {bit} Number, The bit offset.
- * @param {offset} Number, the byte offset.
+/* Add bit operation fnctions to Buffer
  */
-Buffer.prototype.writeBit = function (value, bit, offset) {
-  var byteOffset = bit / 8 + offset;
-  var bitOffset = bit % 8;
-  var bitMask = 0x1 << bitOffset;
-
-  // get byte from buffer
-  var byte = this.readUInt8(byteOffset);
-
-  // set bit on / off
-  if (value) {
-      byte |= bitMask;
-  } else {
-      byte &= ~bitMask;
-  }
-
-  // set byte to buffer
-  this.writeUInt8(byte, byteOffset)
-}
+require('./apis/buffer_bit')();
 
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.

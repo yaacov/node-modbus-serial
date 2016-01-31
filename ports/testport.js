@@ -2,25 +2,9 @@
 var util = require('util');
 var events = require('events');
 
-/**
- * Add get one bit in a Buffer prototype.
- *
- * @param {bit} Number, The bit offset.
- * @param {offset} Number, the byte offset.
- *
- * @return {boolean} the state of the bit.
+/* Add bit operation fnctions to Buffer
  */
-Buffer.prototype.readBit = function (bit, offset) {
-  var byteOffset = bit / 8 + offset;
-  var bitOffset = bit % 8;
-  var bitMask = 0x1 << bitOffset;
-
-  // get byte from buffer
-  var byte = this.readUInt8(byteOffset);
-
-  // check bit state
-  return (byte & bitMask) == bitMask;
-}
+require('../apis/buffer_bit')();
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected
