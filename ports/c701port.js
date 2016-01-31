@@ -72,7 +72,7 @@ var UdpPort = function(ip, options) {
         if (modbus.length < 6) return;
 
         // check message length
-        if (data.length < (116 + modbus.length)) return;
+        if (data.length < (116 + 5)) return;
 
         // check the C701 packet magic
         if (data.readUInt16LE(2) != 602) return;
