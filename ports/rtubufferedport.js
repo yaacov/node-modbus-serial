@@ -32,7 +32,7 @@ function crc16(buf) {
 
 /**
  * check if a buffer chunk can be a modbus answer
- * of modbus exception
+ * or modbus exception
  *
  * @param {buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
@@ -80,7 +80,7 @@ var RTUBufferedPort = function(path, options) {
         var bufferLength = modbus._buffer.length ;
 
         // check data length
-        if (bufferLength < 6 || length < 6) return;
+        if (bufferLength < 5 || length < 6) return;
 
         // loop and check length-sized buffer chunks
         for (var i = 0; i < (bufferLength - length + 1); i++) {
