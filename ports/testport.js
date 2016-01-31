@@ -2,7 +2,7 @@
 var util = require('util');
 var events = require('events');
 
-/* Add bit operation fnctions to Buffer
+/* Add bit operation functions to Buffer
  */
 require('../apis/buffer_bit')();
 
@@ -14,10 +14,10 @@ require('../apis/buffer_bit')();
  * 4 - a modbus slave that answer with bad unit number
  */
 var TestPort = function() {
-    // simulate 14 input registers
+    // simulate 11 input registers
     this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
-    // simulate 14 holding registers
+    // simulate 11 holding registers
     this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
 
     // simulate 16 coils / digital inputs

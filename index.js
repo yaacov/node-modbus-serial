@@ -15,7 +15,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
 
-/* Add bit operation fnctions to Buffer
+/* Add bit operation functions to Buffer
  */
 require('./apis/buffer_bit')();
 
@@ -135,17 +135,9 @@ function _readFC6(data, next) {
         next(null, {"address": dataAddress, "value": value});
 }
 
-function _readFC15(data, next) {
-    var dataAddress = data.readUInt16BE(2);
-    var length = data.readUInt16BE(4);
-
-    if(next)
-        next(null, {"address": dataAddress, "length": length});
-}
-
 /**
  * Parse the data for a Modbus -
- * Preset Multiple Registers (FC=16)
+ * Preset Multiple Registers (FC=15, 16)
  *
  * @param {buffer} data the data buffer to parse.
  * @param {function} next the function to call next.
@@ -234,6 +226,7 @@ ModbusRTU.prototype.open = function (callback) {
                     return;
                 }
 
+                // if crc is OK, read address and function code
                 var address = data.readUInt8(0);
                 var code = data.readUInt8(1);
 
@@ -280,41 +273,33 @@ ModbusRTU.prototype.open = function (callback) {
                 /* parse incoming data
                  */
 
-                /* Read Coil Status (FC=01)
-                 * Read Input Status (FC=02)
-                 */
-                if (code == 2 || code == 1) {
-                    _readFC2(data, next);
-                }
-
-                /* Read Input Registers (FC=04)
-                 * Read Holding Registers (FC=03)
-                 */
-                if (code == 4 || code == 3) {
-                    _readFC4(data, next);
-                }
-
-                /* Force Single Coil (FC=05)
-                 */
-                if (code == 5) {
-                    _readFC5(data, next);
-                }
-
-                /* Preset Single Register (FC=06)
-                 */
-                if (code == 6) {
-                    _readFC6(data, next);
-                }
-
-                /* Force Multiple Coils
-                */
-                if (code == 15) {
-                    _readFC15(data, next);
-                }
-
-                // Preset Multiple Registers (FC=16)
-                if (code == 16) {
-                    _readFC16(data, next);
+                switch (code) {
+                    case 1:
+                    case 2:
+                        // Read Coil Status (FC=01)
+                        // Read Input Status (FC=02)
+                        _readFC2(data, next);
+                        break;
+                    case 3:
+                    case 4:
+                        // Read Input Registers (FC=04)
+                        // Read Holding Registers (FC=03)
+                        _readFC4(data, next);
+                        break;
+                    case 5:
+                        // Force Single Coil
+                        _readFC5(data, next);
+                        break;
+                    case 6:
+                        // Preset Single Register
+                        _readFC6(data, next);
+                        break;
+                    case 15:
+                    case 16:
+                        // Force Multiple Coils
+                        // Preset Multiple Registers
+                        _readFC16(data, next);
+                        break;
                 }
             });
         }
