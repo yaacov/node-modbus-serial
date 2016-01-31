@@ -63,7 +63,7 @@ function _CRC16(buf, length) {
 
 /**
  * Parse the data for a Modbus -
- * Read Coils (FC=02,01)
+ * Read Coils (FC=02, 01)
  *
  * @param {buffer} data the data buffer to parse.
  * @param {function} next the function to call next.
@@ -87,7 +87,7 @@ function _readFC2(data, next) {
 
 /**
  * Parse the data for a Modbus -
- * Read Input Registers (FC=04,03)
+ * Read Input Registers (FC=04, 03)
  *
  * @param {buffer} data the data buffer to parse.
  * @param {function} next the function to call next.
