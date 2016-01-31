@@ -28,22 +28,22 @@ var addBufferBitOp = function() {
      * @param {number} offset, the byte offset.
      */
     Buffer.prototype.writeBit = function (value, bit, offset) {
-      var byteOffset = bit / 8 + offset;
-      var bitOffset = bit % 8;
-      var bitMask = 0x1 << bitOffset;
+        var byteOffset = bit / 8 + offset;
+        var bitOffset = bit % 8;
+        var bitMask = 0x1 << bitOffset;
 
-      // get byte from buffer
-      var byte = this.readUInt8(byteOffset);
+        // get byte from buffer
+        var byte = this.readUInt8(byteOffset);
 
-      // set bit on / off
-      if (value) {
-          byte |= bitMask;
-      } else {
-          byte &= ~bitMask;
-      }
+        // set bit on / off
+        if (value) {
+            byte |= bitMask;
+        } else {
+            byte &= ~bitMask;
+        }
 
-      // set byte to buffer
-      this.writeUInt8(byte, byteOffset)
+        // set byte to buffer
+        this.writeUInt8(byte, byteOffset)
     }
 
     /**
@@ -55,15 +55,15 @@ var addBufferBitOp = function() {
      * @return {boolean} the state of the bit.
      */
     Buffer.prototype.readBit = function (bit, offset) {
-      var byteOffset = bit / 8 + offset;
-      var bitOffset = bit % 8;
-      var bitMask = 0x1 << bitOffset;
+        var byteOffset = bit / 8 + offset;
+        var bitOffset = bit % 8;
+        var bitMask = 0x1 << bitOffset;
 
-      // get byte from buffer
-      var byte = this.readUInt8(byteOffset);
+        // get byte from buffer
+        var byte = this.readUInt8(byteOffset);
 
-      // check bit state
-      return (byte & bitMask) == bitMask;
+        // check bit state
+        return (byte & bitMask) == bitMask;
     }
 }
 
