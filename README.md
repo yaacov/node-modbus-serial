@@ -72,6 +72,7 @@ Node Modbus-WebSocket bridge:
 * modbus-RTU (telnet): Over Telnet server, TCP/IP serial bridge.
 * modbus-RTU (buffered): Over buffered serial line [require node serialport].
 * modbus-RTU (C701): Over C701 server, commercial UDP to serial bridge.
+* Modbus-ASCII (modbus-ascii): ASCII encoded over serial line [require node serialport].
 
 #### Examples
 ----
@@ -566,6 +567,19 @@ Called once the client is connected.
 
 *ip {string}:*
 The port ip (e.g. "24.230.1.42")
+
+*options {object}:* (optional)
+The options for this connection.
+
+*callback {function}:* (optional)
+Called once the client is connected.
+
+----
+##### .connectAsciiSerial (path, options, callback)
+      Connect using serial port with ASCII encoding.
+
+*path {string}:*
+The port path (e.g. "/dev/ttyS0")
 
 *options {object}:* (optional)
 The options for this connection.
