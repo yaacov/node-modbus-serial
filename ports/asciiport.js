@@ -1,0 +1,246 @@
+'use strict';
+var util = require('util');
+var events = require('events');
+var SerialPort = require("serialport").SerialPort;
+
+/**
+ * calculate crc16
+ *
+ * @param {buffer} buf the buffer to to crc on.
+ * @return {number} the calculated crc16
+ */
+function crc16(buf) {
+    var length = buf.length - 2;
+    var crc = 0xFFFF;
+    var tmp;
+
+    // calculate crc16
+    for (var i = 0; i < length; i++) {
+        crc = crc ^ buf[i];
+
+        for (var j = 0; j < 8; j++) {
+            tmp = crc & 0x0001;
+            crc = crc >> 1;
+            if (tmp) {
+              crc = crc ^ 0xA001;
+            }
+        }
+    }
+
+    return crc;
+}
+
+/**
+ * calculate lrc
+ *
+ * @param {buffer} buf the buffer to to lrc on.
+ * @return {number} the calculated lrc
+ */
+function calculateLrc (buf) {
+    var length = buf.length - 2;
+
+    var lrc = 0;
+    for (var i = 0; i < length; i++) {
+         lrc += buf[i] & 0xFF;
+     }
+
+     return ((lrc ^ 0xFF) + 1) & 0xFF;
+}
+
+/**
+ * Ascii encode a 'request' buffer and return it. This includes removing
+ * the CRC bytes and replacing them with an LRC.
+ *
+ * @param {buffer} buf the data buffer to encode.
+ * @return {buffer} the ascii encoded buffer
+ */
+function asciiEncodeRequestBuffer(buf) {
+
+    // replace the 2 byte crc16 with a single byte lrc
+    buf.writeUInt8(calculateLrc(buf), buf.length-2);
+
+    // create a new buffer of the correct size
+    var bufAscii = new Buffer(buf.length*2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
+
+    // create the ascii payload
+
+    // start with the single start delimiter
+    bufAscii.write(':', 0);
+    // encode the data, with the new single byte lrc
+    bufAscii.write(buf.toString('hex', 0, buf.length-1).toUpperCase(), 1);
+    // end with the two end delimiters
+    bufAscii.write('\r', bufAscii.length-2);
+    bufAscii.write('\n', bufAscii.length-1);
+
+    return bufAscii;
+}
+
+/**
+ * Ascii decode a 'response' buffer and return it.
+ *
+ * @param {buffer} bufAscii the ascii data buffer to decode.
+ * @return {buffer} the decoded buffer, or null if decode error
+ */
+function asciiDecodeResponseBuffer(bufAscii) {
+
+    // create a new buffer of the correct size (based on ascii encoded buffer length)
+    var bufDecoded = new Buffer( (bufAscii.length-1)/2 );
+
+    // decode into new buffer (removing delimiters at start and end)
+    for (var i = 0; i < (bufAscii.length-3)/2; i++) {
+        bufDecoded.write(String.fromCharCode(bufAscii.readUInt8(i*2+1), bufAscii.readUInt8(i*2+2)), i, 1, 'hex');
+    }
+
+    // check the lrc is true
+    var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
+    if( calculateLrc(bufDecoded) != lrcIn ) {
+        // retun null if lrc error
+        return null;
+    }
+
+    // replace the 1 byte lrc with a two byte crc16
+    bufDecoded.writeUInt16LE(crc16(bufDecoded), bufDecoded.length-2);
+
+    return bufDecoded;
+}
+
+/**
+ * check if a buffer chunk can be a modbus answer
+ * or modbus exception
+ *
+ * @param {buffer} buf the buffer to check.
+ * @return {boolean} if the buffer can be an answer
+ */
+function checkData(modbus, buf) {
+    // check buffer size
+    if (buf.length != modbus._length && buf.length != 5) return false;
+
+    // check buffer unit-id and command
+    return (buf[0] == modbus._id &&
+        (0x7f & buf[1]) == modbus._cmd);
+}
+
+/**
+ * Simulate a modbus-ascii port using serial connection
+ */
+var AsciiPort = function(path, options) {
+    var modbus = this;
+
+    // options
+    if (typeof(options) == 'undefined') options = {};
+
+    // internal buffer
+    this._buffer = new Buffer(0);
+    this._id = 0;
+    this._cmd = 0;
+    this._length = 0;
+
+    // create the SerialPort
+    this._client= new SerialPort(path, options);
+
+    // register the port data event
+    this._client.on('data', function(data) {
+
+        // add new data to buffer
+        modbus._buffer = Buffer.concat([modbus._buffer, data]);
+
+        // check buffer for start delimiter
+        var sdIndex = modbus._buffer.indexOf(0x3A); // ascii for ':'
+        if( sdIndex === -1) {
+            // if not there, reset the buffer and return
+            modbus._buffer = new Buffer(0);
+            return;
+        }
+        // if there is data before the start delimiter, remove it
+        if( sdIndex > 0 ) {
+            modbus._buffer = modbus._buffer.slice(sdIndex);
+        }
+        // do we have the complete message (i.e. are the end delimiters there)
+        if( modbus._buffer.includes('\r\n', 1, 'ascii') === true ) {
+            // check there is no excess data after end delimiters
+            var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
+            if(edIndex != modbus._buffer.length-1) {
+                // if there is, remove it
+                modbus._buffer = modbus._buffer.slice(0, edIndex+1);
+            }
+
+            // we have what looks like a complete ascii encoded response message, so decode
+            var _data = asciiDecodeResponseBuffer(modbus._buffer);
+            if( _data !== null ) {
+
+                // check if this is the data we are waiting for
+                if (checkData(modbus, _data)) {
+                    // emit a data signal
+                    modbus.emit('data', _data);
+                }
+            }
+            // reset the buffer now its been used
+            modbus._buffer = new Buffer(0);
+        } else {
+            // otherwise just wait for more data to arrive
+        }
+    });
+
+    events.call(this);
+}
+util.inherits(AsciiPort, events);
+
+/**
+ * Simulate successful port open
+ */
+AsciiPort.prototype.open = function (callback) {
+    this._client.open(callback);
+}
+
+/**
+ * Simulate successful close port
+ */
+AsciiPort.prototype.close = function (callback) {
+    this._client.close(callback);
+}
+/**
+ * Send data to a modbus slave via telnet server
+ */
+AsciiPort.prototype.write = function (data) {
+    // check data length
+    if (data.length < 6) {
+        // raise an error ?
+        return;
+    }
+
+    // remember current unit and command
+    this._id = data[0];
+    this._cmd = data[1];
+
+    // calculate expected answer length (this is checked after ascii decoding)
+    switch (this._cmd) {
+        case 1:
+        case 2:
+            var length = data.readUInt16BE(4);
+            this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
+            break;
+        case 3:
+        case 4:
+            var length = data.readUInt16BE(4);
+            this._length = 3 + 2 * length + 2;
+            break;
+        case 5:
+        case 6:
+        case 15:
+        case 16:
+            this._length = 6 + 2;
+            break;
+        default:
+            // raise and error ?
+            this._length = 0;
+            break;
+    }
+
+    // ascii encode buffer
+    var _encodedData = asciiEncodeRequestBuffer(data);
+
+    // send buffer to slave
+    this._client.write(_encodedData);
+}
+
+module.exports = AsciiPort;
