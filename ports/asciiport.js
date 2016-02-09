@@ -165,8 +165,8 @@ var AsciiPort = function(path, options) {
             }
 
             // we have what looks like a complete ascii encoded response message, so decode
-            var _data = asciiDecodeResponseBuffer();
-            if( _data() !== null ) {
+            var _data = asciiDecodeResponseBuffer(modbus._buffer);
+            if( _data !== null ) {
 
                 // check if this is the data we are waiting for
                 if (checkData(modbus, _data)) {
@@ -240,7 +240,7 @@ AsciiPort.prototype.write = function (data) {
     var _encodedData = asciiEncodeRequestBuffer(data);
 
     // send buffer to slave
-    this._client.write(data);
+    this._client.write(_encodedData);
 }
 
 module.exports = AsciiPort;
