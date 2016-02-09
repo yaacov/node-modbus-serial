@@ -232,15 +232,15 @@ ModbusRTU.prototype.open = function (callback) {
 
                 /* check for modbus exception
                  */
-                if (data.length == 5 && 
-                        address != modbus._nextAddress && 
+                if (data.length == 5 &&
                         code == (0x80 & modbus._nextCode)) {
-                    error = "Modbus exception " + data.readUInt8(3);
+//                    error = "Modbus exception " + data.readUInt8(3);
+                    error = "Modbus exception " + data.readUInt8(2);
                     if (next)
                         next(error);
                     return;
                 }
-                
+
                 /* check message length
                  * if we do not expect this data
                  * raise an error
