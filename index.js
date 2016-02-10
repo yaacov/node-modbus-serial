@@ -491,6 +491,10 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     buf.writeUInt16BE(array.length, 4);
     buf.writeUInt8(dataBytes, 6);
 
+    while (array.length % 8) {
+        array.push(false);
+    }
+
     for (var i = 0; i < array.length; i++) {
         buf.writeBit(array[i], i, 7);
     }
