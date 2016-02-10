@@ -40,7 +40,7 @@ var addConnctionAPI = function(Modbus) {
 
         // create the SerialPort
         var SerialPort = require("serialport").SerialPort;
-        var serialPort = new SerialPort(path, options);
+        var serialPort = new SerialPort(path, options, false);
 
         // re-set the serial port to use
         this._port = serialPort;
