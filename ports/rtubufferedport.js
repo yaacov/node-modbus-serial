@@ -66,7 +66,7 @@ var RTUBufferedPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client= new SerialPort(path, options);
+    this._client= new SerialPort(path, options, false);
 
     // register the port data event
     this._client.on('data', function(data) {
