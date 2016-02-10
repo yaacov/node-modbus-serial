@@ -67,12 +67,12 @@ Node Modbus-WebSocket bridge:
 
 ###### Connects types:
 
-* Modbus-RTU (modbus-rtu): Over serial line [require node serialport].
+* modbus-RTU (modbus-rtu): Over serial line [require node serialport].
+* modbus-ASCII (modbus-ascii): Over serial line [require node serialport].
 * modbus-TCP (modbus-tcp): Over TCP/IP line.
 * modbus-RTU (telnet): Over Telnet server, TCP/IP serial bridge.
 * modbus-RTU (buffered): Over buffered serial line [require node serialport].
 * modbus-RTU (C701): Over C701 server, commercial UDP to serial bridge.
-* Modbus-ASCII (modbus-ascii): ASCII encoded over serial line [require node serialport].
 
 #### Examples
 ----
