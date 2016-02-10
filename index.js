@@ -497,7 +497,11 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     }
 
     for (var i = 0; i < array.length; i++) {
-        buf.writeBit(array[i], i, 7);
+        // buffer bits are already all zero (0)
+        // only set the ones set to one (1)
+        if (array[i]) {
+            buf.writeBit(1, i, 7);
+        }
     }
 
     // add crc bytes to buffer
