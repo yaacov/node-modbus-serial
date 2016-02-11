@@ -99,7 +99,14 @@ RTUBufferedPort.prototype.close = function (callback) {
 };
 
 /**
- * Send data to a modbus slave via telnet server
+ * Check if port is open
+ */
+RTUBufferedPort.prototype.isOpen = function() {
+    return this._client.isOpen();
+};
+
+/**
+ * Send data to a modbus slave
  */
 RTUBufferedPort.prototype.write = function (data) {
     // check data length

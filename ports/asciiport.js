@@ -176,7 +176,14 @@ AsciiPort.prototype.close = function (callback) {
 };
 
 /**
- * Send data to a modbus slave via telnet server
+ * Check if port is open
+ */
+AsciiPort.prototype.isOpen = function() {
+    return this._client.isOpen();
+};
+
+/**
+ * Send data to a modbus slave
  */
 AsciiPort.prototype.write = function (data) {
     // check data length

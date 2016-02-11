@@ -34,6 +34,7 @@ function checkData(modbus, buf) {
 var UdpPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
+    this.openFlag = false;
 
     // options
     if (typeof(options) == 'undefined') options = {};
@@ -73,6 +74,14 @@ var UdpPort = function(ip, options) {
         }
     });
 
+    this._client.on('listening', function() {
+        this.openFlag = true;
+    });
+
+    this._client.on('close', function(had_error) {
+        this.openFlag = false;
+    });
+
     events.call(this);
 };
 util.inherits(UdpPort, events);
@@ -92,6 +101,13 @@ UdpPort.prototype.close = function (callback) {
     this._client.close();
     if (callback)
         callback(null);
+};
+
+/**
+ * Check if port is open
+ */
+UdpPort.prototype.isOpen = function() {
+    return this.openFlag;
 };
 
 /**
