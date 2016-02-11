@@ -18,7 +18,7 @@
 /**
  * Take a modbus serial function and convert it to use promises.
  *
- * @param {function} f the function to convert
+ * @param {Function} f the function to convert
  * @return a function that calls function "f" and return a promise.
  */
 var convert = function(f) {
@@ -49,10 +49,10 @@ var convert = function(f) {
 
             return promise;
         }
-    }
+    };
 
     return converted;
-}
+};
 
 /**
  * Adds promise API to a Modbus objext
@@ -64,8 +64,8 @@ var addPromiseAPI = function(Modbus) {
     var cl = Modbus.prototype;
 
     // set/get unitID
-    cl.setID = function(id) {this._unitID = id;}
-    cl.getID = function() {return this._unitID;}
+    cl.setID = function(id) {this._unitID = id;};
+    cl.getID = function() {return this._unitID;};
 
     // convert functions to return promises
     cl.readCoils = convert(cl.writeFC1);
@@ -75,6 +75,6 @@ var addPromiseAPI = function(Modbus) {
     cl.writeCoil = convert(cl.writeFC5);
     cl.writeRegister  = convert(cl.writeFC6);
     cl.writeRegisters = convert(cl.writeFC16);
-}
+};
 
 module.exports = addPromiseAPI;

@@ -3,35 +3,9 @@ var util = require('util');
 var events = require('events');
 var net = require('net');
 
-var MODBUS_PORT = 502; // modbus port
+var crc16 = require('./../utils/crc16');
 
-/**
- * calculate crc16
- *
- * @param {buffer} buf the buffer to to crc on.
- *
- * @return {number} the calculated crc16
- */
-function crc16(buf) {
-    var length = buf.length - 2;
-    var crc = 0xFFFF;
-    var tmp;
-    
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-        
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-    
-    return crc;
-}
+var MODBUS_PORT = 502; // modbus port
 
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
@@ -64,7 +38,7 @@ var TcpPort = function(ip, options) {
     });
 
     events.call(this);
-}
+};
 util.inherits(TcpPort, events);
 
 /**
@@ -72,7 +46,7 @@ util.inherits(TcpPort, events);
  */
 TcpPort.prototype.open = function (callback) {
     this._client.connect(this.port, this.ip, callback);
-}
+};
 
 /**
  * Simulate successful close port
@@ -81,7 +55,7 @@ TcpPort.prototype.close = function (callback) {
     this._client.end();
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Send data to a modbus-tcp slave
@@ -96,6 +70,6 @@ TcpPort.prototype.write = function (data) {
     
     // send buffer to slave
     this._client.write(buffer);
-}
+};
 
 module.exports = TcpPort;
