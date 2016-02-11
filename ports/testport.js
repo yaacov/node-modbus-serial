@@ -4,7 +4,7 @@ var events = require('events');
 
 /* Add bit operation functions to Buffer
  */
-require('../apis/buffer_bit')();
+require('../utils/buffer_bit')();
 var crc16 = require('./../utils/crc16');
 
 /**
