@@ -25,7 +25,7 @@ function checkData(modbus, buf) {
     // check buffer unit-id, command and crc
     return (buf[0] == modbus._id &&
         (0x7f & buf[1]) == modbus._cmd &&
-        crcIn == crc16(buf));
+        crcIn == crc16(buf.slice(0, -2)));
 }
 
 /**

@@ -31,7 +31,7 @@ var TcpPort = function(ip, options) {
         // cut 6 bytes of mbap, copy pdu and add crc
         buffer = new Buffer(data.length - 6 + 2);
         data.copy(buffer, 0, 6);
-        crc = crc16(buffer);
+        crc = crc16(buffer.slice(0, -2));
         buffer.writeUInt16LE(crc, buffer.length - 2);
 
         // emit a data signal
