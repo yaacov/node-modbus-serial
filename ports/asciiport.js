@@ -74,7 +74,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
     }
 
     // replace the 1 byte lrc with a two byte crc16
-    bufDecoded.writeUInt16LE(crc16(bufDecoded), bufDecoded.length-2);
+    bufDecoded.writeUInt16LE(crc16(bufDecoded.slice(0, -2)), bufDecoded.length-2);
 
     return bufDecoded;
 }
