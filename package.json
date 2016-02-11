@@ -4,7 +4,7 @@
   "description": "A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --recursive"
   },
   "repository": {
     "type": "git",
