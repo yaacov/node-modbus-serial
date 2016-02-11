@@ -5,6 +5,7 @@ var events = require('events');
 /* Add bit operation functions to Buffer
  */
 require('../apis/buffer_bit')();
+var crc16 = require('./../utils/crc16');
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected
@@ -24,36 +25,8 @@ var TestPort = function() {
     this._coils = 0x0000;
 
     events.call(this);
-}
+};
 util.inherits(TestPort, events);
-
-/**
- * calculate crc16
- *
- * @param {buffer} buf the buffer to to crc on.
- *
- * @return {number} the calculated crc16
- */
-function crc16(buf) {
-    var length = buf.length - 2;
-    var crc = 0xFFFF;
-    var tmp;
-
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-
-    return crc;
-}
 
 /**
  * Simulate successful port open
@@ -61,7 +34,7 @@ function crc16(buf) {
 TestPort.prototype.open = function (callback) {
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Simulate successful close port
@@ -69,7 +42,7 @@ TestPort.prototype.open = function (callback) {
 TestPort.prototype.close = function (callback) {
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Simulate successful/failure port requests and replays
@@ -87,7 +60,7 @@ TestPort.prototype.write = function (buf) {
     var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
 
     // if crc is bad, ignore message
-    if (crc != crc16(buf)) {
+    if (crc != crc16(buf.slice(0, -2))) {
         return;
     }
 
@@ -259,7 +232,7 @@ TestPort.prototype.write = function (buf) {
         }
 
         // add crc
-        crc = crc16(buffer);
+        crc = crc16(buffer.slice(0, -2));
         buffer.writeUInt16LE(crc, buffer.length - 2);
 
         // unit 3: answers with bad crc
@@ -269,6 +242,6 @@ TestPort.prototype.write = function (buf) {
 
         this.emit('data', buffer);
     }
-}
+};
 
 module.exports = TestPort;

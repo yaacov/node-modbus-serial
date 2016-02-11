@@ -3,40 +3,16 @@ var util = require('util');
 var events = require('events');
 var net = require('net');
 
+var crc16 = require('./../utils/crc16');
+
 var TELNET_PORT = 2217;
-
-/**
- * calculate crc16
- *
- * @param {buffer} buf the buffer to to crc on.
- * @return {number} the calculated crc16
- */
-function crc16(buf) {
-    var length = buf.length - 2;
-    var crc = 0xFFFF;
-    var tmp;
-
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-
-    return crc;
-}
 
 /**
  * check if a buffer chunk can be a modbus answer
  * or modbus exception
  *
- * @param {buffer} buf the buffer to check.
+ * @param {TelnetPort} modbus
+ * @param {Buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
  */
 function checkData(modbus, buf) {
@@ -109,7 +85,7 @@ var TelnetPort = function(ip, options) {
     });
 
     events.call(this);
-}
+};
 util.inherits(TelnetPort, events);
 
 /**
@@ -117,7 +93,7 @@ util.inherits(TelnetPort, events);
  */
 TelnetPort.prototype.open = function (callback) {
     this._client.connect(this.port, this.ip, callback);
-}
+};
 
 /**
  * Simulate successful close port
@@ -126,7 +102,7 @@ TelnetPort.prototype.close = function (callback) {
     this._client.end();
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Send data to a modbus slave via telnet server
@@ -168,6 +144,6 @@ TelnetPort.prototype.write = function (data) {
 
     // send buffer to slave
     this._client.write(data);
-}
+};
 
 module.exports = TelnetPort;

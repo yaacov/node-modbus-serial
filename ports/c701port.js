@@ -3,40 +3,16 @@ var util = require('util');
 var events = require('events');
 var dgram = require('dgram');
 
+var crc16 = require('./../utils/crc16');
+
 var C701_PORT = 0x7002;
-
-/**
- * calculate crc16
- *
- * @param {buffer} buf the buffer to to crc on.
- * @return {number} the calculated crc16
- */
-function crc16(buf) {
-    var length = buf.length - 2;
-    var crc = 0xFFFF;
-    var tmp;
-
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-
-    return crc;
-}
 
 /**
  * check if a buffer chunk can be a modbus answer
  * or modbus exception
  *
- * @param {buffer} buf the buffer to check.
+ * @param {UdpPort} modbus
+ * @param {Buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
  */
 function checkData(modbus, buf) {
@@ -94,12 +70,11 @@ var UdpPort = function(ip, options) {
         //check the serial data
         if (checkData(modbus, buffer)) {
             modbus.emit('data', buffer);
-            return;
         }
     });
 
     events.call(this);
-}
+};
 util.inherits(UdpPort, events);
 
 /**
@@ -108,7 +83,7 @@ util.inherits(UdpPort, events);
 UdpPort.prototype.open = function (callback) {
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Simulate successful close port
@@ -117,7 +92,7 @@ UdpPort.prototype.close = function (callback) {
     this._client.close();
     if (callback)
         callback(null);
-}
+};
 
 /**
  * Send data to a modbus-tcp slave
@@ -171,6 +146,6 @@ UdpPort.prototype.write = function (data) {
 
     // send buffer to C701 UDP to serial bridge
     this._client.send(buffer, 0, buffer.length, this.port, this.ip);
-}
+};
 
 module.exports = UdpPort;

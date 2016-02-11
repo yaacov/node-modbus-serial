@@ -28,8 +28,8 @@ var addConnctionAPI = function(Modbus) {
      * Connect to a communication port, using SerialPort.
      *
      * @param {string} path the path to the Serial Port - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectRTU = function (path, options, next) {
         // check if we have options
@@ -40,25 +40,20 @@ var addConnctionAPI = function(Modbus) {
 
         // create the SerialPort
         var SerialPort = require("serialport").SerialPort;
-        var serialPort = new SerialPort(path, options, false);
-
-        // re-set the serial port to use
-        this._port = serialPort;
+        this._port = new SerialPort(path, options, false);
 
         // open and call next
         this.open(next);
-    }
+    };
 
     /**
      * Connect to a communication port, using TcpPort.
      *
      * @param {string} ip the ip of the TCP Port - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectTCP = function (ip, options, next) {
-        var port;
-
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -67,25 +62,20 @@ var addConnctionAPI = function(Modbus) {
 
         // create the TcpPort
         var TcpPort = require('../ports/tcpport');
-        var tcpPort = new TcpPort(ip, options);
-
-        // re-set the port to use
-        this._port = tcpPort;
+        this._port = new TcpPort(ip, options);
 
         // open and call next
         this.open(next);
-    }
+    };
 
     /**
      * Connect to a communication port, using TelnetPort.
      *
      * @param {string} ip the ip of the TelnetPort - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectTelnet = function (ip, options, next) {
-        var port;
-
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -94,25 +84,20 @@ var addConnctionAPI = function(Modbus) {
 
         // create the TcpPort
         var TelnetPort = require('../ports/telnetport');
-        var telnetPort = new TelnetPort(ip, options);
-
-        // re-set the port to use
-        this._port = telnetPort;
+        this._port = new TelnetPort(ip, options);
 
         // open and call next
         this.open(next);
-    }
+    };
 
     /**
      * Connect to a communication port, using C701 UDP-to-Serial bridge.
      *
      * @param {string} ip the ip of the TelnetPort - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectC701 = function (ip, options, next) {
-        var port;
-
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -121,21 +106,18 @@ var addConnctionAPI = function(Modbus) {
 
         // create the TcpPort
         var C701Port = require('../ports/c701port');
-        var c701Port = new C701Port(ip, options);
-
-        // re-set the port to use
-        this._port = c701Port;
+        this._port = new C701Port(ip, options);
 
         // open and call next
         this.open(next);
-    }
+    };
 
     /**
      * Connect to a communication port, using Bufferd Serial port.
      *
      * @param {string} path the path to the Serial Port - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectRTUBuffered = function (path, options, next) {
         // check if we have options
@@ -146,21 +128,18 @@ var addConnctionAPI = function(Modbus) {
 
         // create the SerialPort
         var SerialPort = require('../ports/rtubufferedport');
-        var serialPort = new SerialPort(path, options);
-
-        // re-set the serial port to use
-        this._port = serialPort;
+        this._port = new SerialPort(path, options);
 
         // open and call next
         this.open(next);
-    }
+    };
 
     /**
      * Connect to a communication port, using ASCII Serial port.
      *
      * @param {string} path the path to the Serial Port - required.
-     * @param {object} options - the serial port options - optional.
-     * @param {function} next the function to call next.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
      */
     cl.connectAsciiSerial = function (path, options, next) {
         // check if we have options
@@ -171,14 +150,11 @@ var addConnctionAPI = function(Modbus) {
 
         // create the ASCII SerialPort
         var SerialPortAscii = require('../ports/asciiport');
-        var serialPortAscii = new SerialPortAscii(path, options);
-
-        // re-set the serial port to use
-        this._port = serialPortAscii;
+        this._port = new SerialPortAscii(path, options);
 
          // open and call next
          this.open(next);
      }
-}
+};
 
 module.exports = addConnctionAPI;

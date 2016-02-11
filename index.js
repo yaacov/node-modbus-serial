@@ -18,6 +18,7 @@
 /* Add bit operation functions to Buffer
  */
 require('./apis/buffer_bit')();
+var crc16 = require('./utils/crc16');
 
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
@@ -29,44 +30,11 @@ require('./apis/buffer_bit')();
  */
 
 /**
- * Calculate buffer CRC16 and add it to the
- * end of the buffer.
- *
- * @param {buffer} buf the data buffer.
- * @param {number} length the length of the buffer without CRC.
- *
- * @return {number} the calculated CRC16
- */
-function _CRC16(buf, length) {
-    var crc = 0xFFFF;
-    var tmp;
-
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-
-    // add to end of buffer
-    buf.writeUInt16LE(crc, length);
-
-    // return the crc
-    return crc;
-}
-
-/**
  * Parse the data for a Modbus -
  * Read Coils (FC=02, 01)
  *
- * @param {buffer} data the data buffer to parse.
- * @param {function} next the function to call next.
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
  */
 function _readFC2(data, next) {
     var length = data.readUInt8(2);
@@ -89,8 +57,8 @@ function _readFC2(data, next) {
  * Parse the data for a Modbus -
  * Read Input Registers (FC=04, 03)
  *
- * @param {buffer} data the data buffer to parse.
- * @param {function} next the function to call next.
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
  */
 function _readFC4(data, next) {
     var length = data.readUInt8(2);
@@ -109,8 +77,8 @@ function _readFC4(data, next) {
  * Parse the data for a Modbus -
  * Force Single Coil (FC=05)
  *
- * @param {buffer} data the data buffer to parse.
- * @param {function} next the function to call next.
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
  */
 function _readFC5(data, next) {
     var dataAddress = data.readUInt16BE(2);
@@ -124,8 +92,8 @@ function _readFC5(data, next) {
  * Parse the data for a Modbus -
  * Preset Single Registers (FC=06)
  *
- * @param {buffer} data the data buffer to parse.
- * @param {function} next the function to call next.
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
  */
 function _readFC6(data, next) {
     var dataAddress = data.readUInt16BE(2);
@@ -139,8 +107,8 @@ function _readFC6(data, next) {
  * Parse the data for a Modbus -
  * Preset Multiple Registers (FC=15, 16)
  *
- * @param {buffer} data the data buffer to parse.
- * @param {function} next the function to call next.
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
  */
 function _readFC16(data, next) {
     var dataAddress = data.readUInt16BE(2);
@@ -171,7 +139,7 @@ var ModbusRTU = function (port) {
 /**
  * Open the serial port and register Modbus parsers
  *
- * @param {function} callback the function to call next on open success
+ * @param {Function} callback the function to call next on open success
  *      of failure.
  */
 ModbusRTU.prototype.open = function (callback) {
@@ -217,9 +185,7 @@ ModbusRTU.prototype.open = function (callback) {
                  * if CRC is bad raise an error
                  */
                 var crcIn = data.readUInt16LE(data.length - 2);
-                var crc = _CRC16(data, data.length - 2);
-
-                if (crcIn != crc) {
+                if (crcIn != crc16(data.slice(0, -2))) {
                     error = "CRC error";
                     if (next)
                         next(error);
@@ -311,11 +277,11 @@ ModbusRTU.prototype.open = function (callback) {
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first coil.
  * @param {number} length the total number of coils requested.
- * @param {function} next the function to call next.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next) {
     this.writeFC2(address, dataAddress, length, next, 1);
-}
+};
 
 /**
  * Write a Modbus "Read Input Status" (FC=02) to serial port.
@@ -323,11 +289,11 @@ ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next) {
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first digital input.
  * @param {number} length the total number of digital inputs requested.
- * @param {function} next the function to call next.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, code) {
     // function code defaults to 2
-    if (!code) code = 2;
+    code = code || 2;
 
     // set state variables
     this._nextAddress = address;
@@ -344,11 +310,11 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     buf.writeUInt16BE(length, 4);
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 /**
  * Write a Modbus "Read Holding Registers" (FC=03) to serial port.
@@ -356,11 +322,11 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first register.
  * @param {number} length the total number of registers requested.
- * @param {function} next the function to call next.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next) {
     this.writeFC4(address, dataAddress, length, next, 3);
-}
+};
 
 /**
  * Write a Modbus "Read Input Registers" (FC=04) to serial port.
@@ -368,11 +334,11 @@ ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next) {
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first register.
  * @param {number} length the total number of registers requested.
- * @param {function} next the function to call next.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, code) {
     // function code defaults to 4
-    if (!code) code = 4;
+    code = code || 4;
 
     // set state variables
     this._nextAddress = address;
@@ -389,11 +355,11 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
     buf.writeUInt16BE(length, 4);
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 /**
  * Write a Modbus "Force Single Coil" (FC=05) to serial port.
@@ -401,7 +367,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the coil.
  * @param {number} state the boolean state to write to the coil (true / false).
- * @param {function} next the function to call next.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
     var code = 5;
@@ -426,18 +392,19 @@ ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
     }
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 /**
  * Write a Modbus "Preset Single Register " (FC=6) to serial port.
  *
  * @param {number} address the slave unit address.
- * @param {value} number the value to write to a specific register.
- * @param {function} next the function to call next.
+ * @param {number} dataAddress the Data Address of the register.
+ * @param {number} value the value to write to the register.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
     var code = 6;
@@ -458,19 +425,19 @@ ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
     buf.writeUInt16BE(value, 4);
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 /**
  * Write a Modbus "Force Multiple Coils" (FC=15) to serial port.
  *
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first coil.
- * @param {array} array the array of boolean states to write to coils.
- * @param {function} next the function to call next.
+ * @param {Array} array the array of boolean states to write to coils.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     var code = 15;
@@ -505,19 +472,19 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     }
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 /**
  * Write a Modbus "Preset Multiple Registers" (FC=16) to serial port.
  *
  * @param {number} address the slave unit address.
  * @param {number} dataAddress the Data Address of the first register.
- * @param {array} array the array of values to write to registers.
- * @param {function} next the function to call next.
+ * @param {Array} array the array of values to write to registers.
+ * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     var code = 16;
@@ -542,11 +509,11 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     }
 
     // add crc bytes to buffer
-    _CRC16(buf, codeLength);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
     this._port.write(buf);
-}
+};
 
 // add the connection shorthand API
 require('./apis/connection')(ModbusRTU);

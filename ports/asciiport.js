@@ -3,37 +3,12 @@ var util = require('util');
 var events = require('events');
 var SerialPort = require("serialport").SerialPort;
 
-/**
- * calculate crc16
- *
- * @param {buffer} buf the buffer to to crc on.
- * @return {number} the calculated crc16
- */
-function crc16(buf) {
-    var length = buf.length - 2;
-    var crc = 0xFFFF;
-    var tmp;
-
-    // calculate crc16
-    for (var i = 0; i < length; i++) {
-        crc = crc ^ buf[i];
-
-        for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
-            crc = crc >> 1;
-            if (tmp) {
-              crc = crc ^ 0xA001;
-            }
-        }
-    }
-
-    return crc;
-}
+var crc16 = require('./../utils/crc16');
 
 /**
  * calculate lrc
  *
- * @param {buffer} buf the buffer to to lrc on.
+ * @param {Buffer} buf the buffer to to lrc on.
  * @return {number} the calculated lrc
  */
 function calculateLrc (buf) {
@@ -51,8 +26,8 @@ function calculateLrc (buf) {
  * Ascii encode a 'request' buffer and return it. This includes removing
  * the CRC bytes and replacing them with an LRC.
  *
- * @param {buffer} buf the data buffer to encode.
- * @return {buffer} the ascii encoded buffer
+ * @param {Buffer} buf the data buffer to encode.
+ * @return {Buffer} the ascii encoded buffer
  */
 function asciiEncodeRequestBuffer(buf) {
 
@@ -78,8 +53,8 @@ function asciiEncodeRequestBuffer(buf) {
 /**
  * Ascii decode a 'response' buffer and return it.
  *
- * @param {buffer} bufAscii the ascii data buffer to decode.
- * @return {buffer} the decoded buffer, or null if decode error
+ * @param {Buffer} bufAscii the ascii data buffer to decode.
+ * @return {Buffer} the decoded buffer, or null if decode error
  */
 function asciiDecodeResponseBuffer(bufAscii) {
 
@@ -94,7 +69,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
     // check the lrc is true
     var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
     if( calculateLrc(bufDecoded) != lrcIn ) {
-        // retun null if lrc error
+        // return null if lrc error
         return null;
     }
 
@@ -108,7 +83,8 @@ function asciiDecodeResponseBuffer(bufAscii) {
  * check if a buffer chunk can be a modbus answer
  * or modbus exception
  *
- * @param {buffer} buf the buffer to check.
+ * @param {AsciiPort} modbus
+ * @param {Buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
  */
 function checkData(modbus, buf) {
@@ -127,7 +103,7 @@ var AsciiPort = function(path, options) {
     var modbus = this;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    options = options || {};
 
     // internal buffer
     this._buffer = new Buffer(0);
@@ -182,7 +158,7 @@ var AsciiPort = function(path, options) {
     });
 
     events.call(this);
-}
+};
 util.inherits(AsciiPort, events);
 
 /**
@@ -190,14 +166,15 @@ util.inherits(AsciiPort, events);
  */
 AsciiPort.prototype.open = function (callback) {
     this._client.open(callback);
-}
+};
 
 /**
  * Simulate successful close port
  */
 AsciiPort.prototype.close = function (callback) {
     this._client.close(callback);
-}
+};
+
 /**
  * Send data to a modbus slave via telnet server
  */
@@ -241,6 +218,6 @@ AsciiPort.prototype.write = function (data) {
 
     // send buffer to slave
     this._client.write(_encodedData);
-}
+};
 
 module.exports = AsciiPort;
