@@ -13,28 +13,37 @@ var MODBUS_PORT = 502; // modbus port
 var TcpPort = function(ip, options) {
     var _tcpport = this;
     this.ip = ip;
-    
+    this.openFlag = false;
+
     // options
     if (typeof(options) == 'undefined') options = {};
     this.port = options.port || MODBUS_PORT; // modbus port
-    
+
     // create a socket
     this._client = new net.Socket();
     this._client.on('data', function(data) {
         var buffer;
         var crc;
-        
+
         // check data length
         if (data.length < 6) return;
-        
+
         // cut 6 bytes of mbap, copy pdu and add crc
         buffer = new Buffer(data.length - 6 + 2);
         data.copy(buffer, 0, 6);
         crc = crc16(buffer);
         buffer.writeUInt16LE(crc, buffer.length - 2);
-        
+
         // emit a data signal
         _tcpport.emit('data', buffer);
+    });
+
+    this._client.on('connect', function() {
+        this.openFlag = true;
+    });
+
+    this._client.on('close', function(had_error) {
+        this.openFlag = false;
     });
 
     events.call(this);
@@ -58,6 +67,13 @@ TcpPort.prototype.close = function (callback) {
 };
 
 /**
+ * Check if port is open
+ */
+TcpPort.prototype.isOpen = function() {
+    return this.openFlag;
+};
+
+/**
  * Send data to a modbus-tcp slave
  */
 TcpPort.prototype.write = function (data) {
@@ -67,7 +83,7 @@ TcpPort.prototype.write = function (data) {
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - 2, 4);
     data.copy(buffer, 6);
-    
+
     // send buffer to slave
     this._client.write(buffer);
 };

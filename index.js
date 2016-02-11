@@ -295,6 +295,13 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     // function code defaults to 2
     code = code || 2;
 
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
+
     // set state variables
     this._nextAddress = address;
     this._nextCode = code;
@@ -340,6 +347,13 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
     // function code defaults to 4
     code = code || 4;
 
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
+
     // set state variables
     this._nextAddress = address;
     this._nextCode = code;
@@ -371,6 +385,13 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  */
 ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
     var code = 5;
+
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
 
     // set state variables
     this._nextAddress = address;
@@ -409,6 +430,13 @@ ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
 ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
     var code = 6;
 
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
+
     // set state variables
     this._nextAddress = address;
     this._nextCode = code;
@@ -441,6 +469,13 @@ ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
  */
 ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     var code = 15;
+
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
 
     // set state variables
     this._nextAddress = address;
@@ -488,6 +523,13 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
  */
 ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     var code = 16;
+
+    // check port is actually open before attempting write
+    if( this._port.isOpen() === false) {
+        var error = "Port Not Open";
+        if (next) next(error);
+        return;
+    }
 
     // set state variables
     this._nextAddress = address;

@@ -34,6 +34,7 @@ function checkData(modbus, buf) {
 var TelnetPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
+    this.openFlag = false;
 
     // options
     if (typeof(options) == 'undefined') options = {};
@@ -84,6 +85,14 @@ var TelnetPort = function(ip, options) {
         }
     });
 
+    this._client.on('connect', function() {
+        this.openFlag = true;
+    });
+
+    this._client.on('close', function(had_error) {
+        this.openFlag = false;
+    });
+
     events.call(this);
 };
 util.inherits(TelnetPort, events);
@@ -102,6 +111,13 @@ TelnetPort.prototype.close = function (callback) {
     this._client.end();
     if (callback)
         callback(null);
+};
+
+/**
+ * Check if port is open
+ */
+TelnetPort.prototype.isOpen = function() {
+    return this.openFlag;
 };
 
 /**

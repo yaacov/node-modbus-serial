@@ -45,6 +45,13 @@ TestPort.prototype.close = function (callback) {
 };
 
 /**
+ * Check if port is open
+ */
+TestPort.prototype.isOpen = function() {
+    return true;
+};
+
+/**
  * Simulate successful/failure port requests and replays
  */
 TestPort.prototype.write = function (buf) {
@@ -180,7 +187,7 @@ TestPort.prototype.write = function (buf) {
         // write coils
         for (var i = 0; i < length; i++) {
             var state = buf.readBit(i, 7);
-            
+
             if (state) {
                 this._coils |= (1 << (address + i));
             } else {
