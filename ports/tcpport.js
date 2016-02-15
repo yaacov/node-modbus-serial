@@ -11,7 +11,7 @@ var MODBUS_PORT = 502; // modbus port
  * Simulate a modbus-RTU port using modbus-TCP connection
  */
 var TcpPort = function(ip, options) {
-    var _tcpport = this;
+    var modbus = this;
     this.ip = ip;
     this.openFlag = false;
 
@@ -35,15 +35,15 @@ var TcpPort = function(ip, options) {
         buffer.writeUInt16LE(crc, buffer.length - 2);
 
         // emit a data signal
-        _tcpport.emit('data', buffer);
+        modbus.emit('data', buffer);
     });
 
     this._client.on('connect', function() {
-        _tcpport.openFlag = true;
+        modbus.openFlag = true;
     });
 
     this._client.on('close', function(had_error) {
-        _tcpport.openFlag = false;
+        modbus.openFlag = false;
     });
 
     events.call(this);
