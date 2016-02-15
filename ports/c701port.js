@@ -75,11 +75,11 @@ var UdpPort = function(ip, options) {
     });
 
     this._client.on('listening', function() {
-        this.openFlag = true;
+        modbus.openFlag = true;
     });
 
     this._client.on('close', function(had_error) {
-        this.openFlag = false;
+        modbus.openFlag = false;
     });
 
     events.call(this);

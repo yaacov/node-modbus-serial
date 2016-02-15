@@ -39,11 +39,11 @@ var TcpPort = function(ip, options) {
     });
 
     this._client.on('connect', function() {
-        this.openFlag = true;
+        _tcpport.openFlag = true;
     });
 
     this._client.on('close', function(had_error) {
-        this.openFlag = false;
+        _tcpport.openFlag = false;
     });
 
     events.call(this);
