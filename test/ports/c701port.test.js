@@ -76,6 +76,10 @@ describe('Modbus UDP port', function() {
             port.write(new Buffer('1103006B00037687', 'hex'));
             expect(port._client._data.length).to.equal(116 + 8);
             expect(port._client._data.slice(-8).toString('hex')).to.equal('1103006b00037687');
+            expect(port._client._offset).to.equal(0);
+            expect(port._client._length).to.equal(124);
+            expect(port._client._port).to.equal(9999);
+            expect(port._client._address).to.equal('127.0.0.1');
         });
     });
 
