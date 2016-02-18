@@ -11,7 +11,7 @@ describe('Modbus RTU buffered port', function() {
         mockery.enable({warnOnReplace:false, useCleanCache:true, warnOnUnregistered:false});
         mockery.registerMock('serialport', mock);
         var RTUBufferedPort = require('./../../ports/rtubufferedport');
-        port = new RTUBufferedPort('dummy', {});
+        port = new RTUBufferedPort('/dev/null', {});
     });
 
     after(function() {

@@ -34,7 +34,7 @@ describe('Modbus TCP port', function() {
             });
         });
 
-        it('should not be open after #close', function() {
+        it('should not be open after #close', function(done) {
             port.open(function() {
                 port.close(function() {
                     setTimeout(function() {
@@ -53,7 +53,6 @@ describe('Modbus TCP port', function() {
                 done();
             });
             port.open(function() {
-                // will write 0001000000061103006B0003
                 port.write(new Buffer('1103006B00037687', 'hex'));
 
                 if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
