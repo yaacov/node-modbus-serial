@@ -15,7 +15,7 @@ describe('Modbus RTU buffered port', function() {
     });
 
     after(function() {
-       mockery.disable;
+        mockery.disable();
     });
 
     afterEach(function() {
@@ -70,7 +70,7 @@ describe('Modbus RTU buffered port', function() {
     });
 
     describe('#write', function() {
-        it('should write a valid TCP message to the port', function() {
+        it('should write a valid RTU message to the port', function() {
             port.write(new Buffer('1103006B00037687', 'hex'));
             expect(port._client._data.toString('hex')).to.equal('1103006b00037687');
         });
