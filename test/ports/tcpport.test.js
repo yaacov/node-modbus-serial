@@ -1,31 +1,25 @@
 'use strict';
 var expect = require('chai').expect;
-var net = require('net');
-
-var DummyPort = require('./dummyport');
-var TcpPort = require('./../../ports/tcpport');
-
-var IP_ADDRESS = '127.0.0.1';
-var PORT = 2027;
+var mockery = require('mockery');
 
 describe('Modbus TCP port', function() {
-    var server = net.createServer(function(socket) {
-        socket.on('data', function(data) {
-            if (data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
-                socket.write(new Buffer('000100000006110366778899', 'hex'));
-            }
-        });
-    });
-    server.listen(PORT, IP_ADDRESS);
+    var port;
 
-    var port = new TcpPort(IP_ADDRESS, {port:PORT});
+    before(function() {
+        var mock = require('./../mocks/netMock');
+        mockery.resetCache();
+        mockery.enable({warnOnReplace:false, useCleanCache:true, warnOnUnregistered:false});
+        mockery.registerMock('net', mock);
+        var TcpPort = require('./../../ports/tcpport');
+        port = new TcpPort('127.0.0.1', {port:9999});
+    });
+
+    after(function() {
+        mockery.disable();
+    });
 
     afterEach(function() {
         port.close();
-    });
-
-    after(function(done) {
-       server.close(done);
     });
 
     describe('#isOpen', function() {
@@ -43,8 +37,10 @@ describe('Modbus TCP port', function() {
         it('should not be open after #close', function() {
             port.open(function() {
                 port.close(function() {
-                    expect(port.isOpen()).to.be.true;
-                    done();
+                    setTimeout(function() {
+                        expect(port.isOpen()).to.be.false;
+                        done();
+                    },100)
                 });
             });
         });
@@ -59,16 +55,18 @@ describe('Modbus TCP port', function() {
             port.open(function() {
                 // will write 0001000000061103006B0003
                 port.write(new Buffer('1103006B00037687', 'hex'));
+
+                if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
+                    port._client.receive(new Buffer('000100000006110366778899', 'hex'));
+                }
             });
         });
     });
 
     describe('#write', function() {
         it('should write a valid TCP message to the port', function() {
-            var dummyPort = new DummyPort();
-            port._client = dummyPort;
             port.write(new Buffer('1103006B00037687', 'hex'));
-            expect(dummyPort.data.toString('hex')).to.equal('0001000000061103006b0003');
+            expect(port._client._data.toString('hex')).to.equal('0001000000061103006b0003');
         });
     });
 
