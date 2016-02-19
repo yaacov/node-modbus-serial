@@ -13,6 +13,7 @@ var crc16 = require('./../utils/crc16');
  * 2 - a modbus slave that answer short replays
  * 3 - a modbus slave that answer with bad crc
  * 4 - a modbus slave that answer with bad unit number
+ * 5 - a modbus slave that answer with an exception
  */
 var TestPort = function() {
     // simulate 11 input registers
@@ -22,7 +23,7 @@ var TestPort = function() {
     this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
 
     // simulate 16 coils / digital inputs
-    this._coils = 0x0000;
+    this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
 
     events.call(this);
 };
@@ -235,6 +236,12 @@ TestPort.prototype.write = function (buf) {
             case 4:
                 // unit 4: answers with bad unit number
                 buffer[0] = unitNumber + 2;
+                break;
+            case 5:
+                // unit 5: answers with exception
+                buffer.writeUInt8(functionCode + 128, 1);
+                buffer.writeUInt8(4, 2);
+                buffer = buffer.slice(0, 5);
                 break;
         }
 
