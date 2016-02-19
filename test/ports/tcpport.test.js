@@ -40,7 +40,7 @@ describe('Modbus TCP port', function() {
                     setTimeout(function() {
                         expect(port.isOpen()).to.be.false;
                         done();
-                    },100)
+                    });
                 });
             });
         });
@@ -57,6 +57,20 @@ describe('Modbus TCP port', function() {
 
                 if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
                     port._client.receive(new Buffer('000100000006110366778899', 'hex'));
+                }
+            });
+        });
+
+        it('should return a valid Modbus RTU exception', function(done) {
+            port.once('data', function(data) {
+                expect(data.toString('hex')).to.equal('1183044136');
+                done();
+            });
+            port.open(function() {
+                port.write(new Buffer('1103006B00037687', 'hex'));
+
+                if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
+                    port._client.receive(new Buffer('000100000005118304', 'hex'));
                 }
             });
         });

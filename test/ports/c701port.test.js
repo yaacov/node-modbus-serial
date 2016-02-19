@@ -32,7 +32,7 @@ describe('Modbus UDP port', function() {
             setTimeout(function() {
                 expect(port.isOpen()).to.be.true;
                 done();
-            }, 100);
+            });
         });
 
         it('should not be open after #close', function(done) {
@@ -42,7 +42,7 @@ describe('Modbus UDP port', function() {
                     expect(port.isOpen()).to.be.false;
                     done();
                 });
-            }, 100);
+            });
         });
     });
 
@@ -65,6 +65,29 @@ describe('Modbus UDP port', function() {
 
                     // add serial line data
                     new Buffer('110306ae415652434049ad', 'hex').copy(buffer, 116);
+                    port._client.receive(buffer);
+                }
+            });
+        });
+
+        it('should return a valid Modbus RTU exception', function(done) {
+            port.once('data', function(data) {
+                expect(data.toString('hex')).to.equal('1183044136');
+                done();
+            });
+            port.open(function() {
+                port.write(new Buffer('1103006B00037687', 'hex'));
+
+                if (port._client._data.slice(-8).equals(new Buffer('1103006B00037687', 'hex'))) {
+                    var buffer = new Buffer(116 + 5).fill(0);
+                    buffer.writeUInt16LE(602, 2);           // C701 magic for serial bridge
+                    buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)
+                    buffer.writeUInt16LE(0, 38);            // expected serial answer length
+                    buffer.writeUInt16LE(1, 102);           // C7011 RS481 hub (1..2)
+                    buffer.writeUInt16LE(11, 104);          // serial data length
+
+                    // add serial line data
+                    new Buffer('1183044136', 'hex').copy(buffer, 116);
                     port._client.receive(buffer);
                 }
             });

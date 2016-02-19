@@ -64,7 +64,7 @@ describe('Modbus Telnet port', function() {
                     port._client.receive(new Buffer('40', 'hex'));
                     port._client.receive(new Buffer('49', 'hex'));
                     port._client.receive(new Buffer('ad', 'hex'));
-                }, 100);
+                });
             });
         });
     });
