@@ -4,23 +4,7 @@ var events = require('events');
 var SerialPort = require("serialport").SerialPort;
 
 var crc16 = require('./../utils/crc16');
-
-/**
- * calculate lrc
- *
- * @param {Buffer} buf the buffer to to lrc on.
- * @return {number} the calculated lrc
- */
-function calculateLrc (buf) {
-    var length = buf.length - 2;
-
-    var lrc = 0;
-    for (var i = 0; i < length; i++) {
-         lrc += buf[i] & 0xFF;
-     }
-
-     return ((lrc ^ 0xFF) + 1) & 0xFF;
-}
+var calculateLrc = require('./../utils/lrc');
 
 /**
  * Ascii encode a 'request' buffer and return it. This includes removing
@@ -32,7 +16,7 @@ function calculateLrc (buf) {
 function asciiEncodeRequestBuffer(buf) {
 
     // replace the 2 byte crc16 with a single byte lrc
-    buf.writeUInt8(calculateLrc(buf), buf.length-2);
+    buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length-2);
 
     // create a new buffer of the correct size
     var bufAscii = new Buffer(buf.length*2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
@@ -68,7 +52,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
 
     // check the lrc is true
     var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
-    if( calculateLrc(bufDecoded) != lrcIn ) {
+    if( calculateLrc(bufDecoded.slice(0, -2)) != lrcIn ) {
         // return null if lrc error
         return null;
     }

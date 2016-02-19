@@ -5,17 +5,17 @@
  * @param {Buffer} buffer the data buffer.
  * @return {number} the calculated CRC16.
  */
-module.exports = function (buffer) {
+module.exports = function crc16(buffer) {
     var crc = 0xFFFF;
-    var tmp;
+    var odd;
 
     for (var i = 0; i < buffer.length; i++) {
         crc = crc ^ buffer[i];
 
         for (var j = 0; j < 8; j++) {
-            tmp = crc & 0x0001;
+            odd = crc & 0x0001;
             crc = crc >> 1;
-            if (tmp) {
+            if (odd) {
                 crc = crc ^ 0xA001;
             }
         }

@@ -4,7 +4,7 @@
   "description": "A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha"
+    "test": "mocha --recursive"
   },
   "repository": {
     "type": "git",
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
   "devDependencies": {
     "chai": "^3.4.0",
-    "mocha": "^2.3.3"
+    "mocha": "^2.3.3",
+    "mockery": "^1.4.0"
   }
 }
