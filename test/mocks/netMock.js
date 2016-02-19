@@ -11,6 +11,7 @@ exports.Server = Server;
 var Socket = function(options) {
     EventEmitter.call(this);
 };
+util.inherits(Socket, EventEmitter);
 
 Socket.prototype.connect = function(port, host, connectListener) {
     this.emit('connect');
@@ -18,7 +19,6 @@ Socket.prototype.connect = function(port, host, connectListener) {
         connectListener(null);
     }
 };
-util.inherits(Socket, EventEmitter);
 
 Socket.prototype.end = function(data, encoding) {
     this.emit('close', false);
