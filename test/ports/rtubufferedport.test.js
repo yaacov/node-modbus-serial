@@ -67,6 +67,23 @@ describe('Modbus RTU buffered port', function() {
                 });
             });
         });
+
+        it('should return a valid Modbus RTU exception', function(done) {
+            port.once('data', function(data) {
+                expect(data.toString('hex')).to.equal('1183044136');
+                done();
+            });
+            port.open(function() {
+                port.write(new Buffer('1103006B00037687', 'hex'));
+                setTimeout(function() {
+                    port._client.receive(new Buffer('11', 'hex'));
+                    port._client.receive(new Buffer('83', 'hex'));
+                    port._client.receive(new Buffer('04', 'hex'));
+                    port._client.receive(new Buffer('41', 'hex'));
+                    port._client.receive(new Buffer('36', 'hex'));
+                });
+            });
+        });
     });
 
     describe('#write', function() {
