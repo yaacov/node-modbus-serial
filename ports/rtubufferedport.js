@@ -3,34 +3,13 @@ var util = require('util');
 var events = require('events');
 var SerialPort = require("serialport").SerialPort;
 
-var crc16 = require('./../utils/crc16');
-
-/**
- * check if a buffer chunk can be a modbus answer
- * or modbus exception
- *
- * @param {RTUBufferedPort} modbus
- * @param {Buffer} buf the buffer to check.
- * @return {boolean} if the buffer can be an answer
- */
-function checkData(modbus, buf) {
-    // check buffer size
-    if (buf.length != modbus._length && buf.length != 5) return false;
-
-    // calculate crc16
-    var crcIn = buf.readUInt16LE(buf.length - 2);
-
-    // check buffer unit-id, command and crc
-    return (buf[0] == modbus._id &&
-        (0x7f & buf[1]) == modbus._cmd &&
-        crcIn == crc16(buf.slice(0, -2)));
-}
+var EXCEPTION_LENGTH = 5;
 
 /**
  * Simulate a modbus-RTU port using buffered serial connection
  */
 var RTUBufferedPort = function(path, options) {
-    var modbus = this;
+    var self = this;
 
     // options
     if (typeof(options) == 'undefined') options = {};
@@ -45,44 +24,55 @@ var RTUBufferedPort = function(path, options) {
     this._client= new SerialPort(path, options, false);
 
     // register the port data event
-    this._client.on('data', function(data) {
-        /* add data to buffer
-         */
-        modbus._buffer = Buffer.concat([modbus._buffer, data]);
+    this._client.on('data', function onData(data) {
+        // add data to buffer
+        self._buffer = Buffer.concat([self._buffer, data]);
 
-        /* check if buffer include a complete modbus answer
-         */
-        var length = modbus._length;
-        var bufferLength = modbus._buffer.length ;
+        // check if buffer include a complete modbus answer
+        var expectedLength = self._length;
+        var bufferLength = self._buffer.length ;
 
         // check data length
-        if (bufferLength < 5 || length < 6) return;
+        if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
 
         // loop and check length-sized buffer chunks
-        for (var i = 0; i < (bufferLength - length + 1); i++) {
-            // cut a length of bytes from buffer
-            var _data = modbus._buffer.slice(i, i + length);
+        var maxOffset = bufferLength - EXCEPTION_LENGTH;
+        for (var i = 0; i <= maxOffset; i++) {
+            var unitId = self._buffer[i];
+            var functionCode = self._buffer[i+1];
 
-            // check if this is the data we are waiting for
-            if (checkData(modbus, _data)) {
-                // adjust i to end of data chunk
-                i = i + length;
+            if (unitId !== self._id) continue;
 
-                // emit a data signal
-                modbus.emit('data', _data);
+            if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
+                self._emitData(i, expectedLength);
+                return;
             }
-        }
-
-        /* cut checked data from buffer
-         */
-        if (i) {
-            modbus._buffer = modbus._buffer.slice(i);
+            if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
+                self._emitData(i, EXCEPTION_LENGTH);
+                return;
+            }
         }
     });
 
     events.call(this);
 };
 util.inherits(RTUBufferedPort, events);
+
+/**
+ * Emit the received response, cut the buffer and reset the internal vars.
+ * @param {number} start the start index of the response within the buffer
+ * @param {number} length the length of the response
+ * @private
+ */
+RTUBufferedPort.prototype._emitData = function(start, length) {
+    this.emit('data', this._buffer.slice(start, start + length));
+    this._buffer = this._buffer.slice(start + length);
+
+    // reset internal vars
+    this._id = 0;
+    this._cmd = 0;
+    this._length = 0;
+};
 
 /**
  * Simulate successful port open
