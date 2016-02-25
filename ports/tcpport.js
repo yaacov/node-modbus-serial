@@ -14,10 +14,20 @@ var TcpPort = function(ip, options) {
     var modbus = this;
     this.ip = ip;
     this.openFlag = false;
+    this.callback = null;
 
     // options
     if (typeof(options) == 'undefined') options = {};
     this.port = options.port || MODBUS_PORT; // modbus port
+
+    // handle callback - call a callback function only once, for the first event
+    // it will triger
+    var handleCallback = function(had_error) {
+        if (modbus.callback) {
+            modbus.callback(had_error);
+            modbus.callback = null;
+        }
+    }
 
     // create a socket
     this._client = new net.Socket();
@@ -38,12 +48,19 @@ var TcpPort = function(ip, options) {
         modbus.emit('data', buffer);
     });
 
-    this._client.on('connect', function() {
+    this._client.on('connect', function(had_error) {
         modbus.openFlag = true;
+        handleCallback(had_error);
     });
 
     this._client.on('close', function(had_error) {
         modbus.openFlag = false;
+        handleCallback(had_error);
+    });
+
+    this._client.on('error', function(had_error) {
+        modbus.openFlag = false;
+        handleCallback(had_error);
     });
 
     events.call(this);
@@ -54,16 +71,16 @@ util.inherits(TcpPort, events);
  * Simulate successful port open
  */
 TcpPort.prototype.open = function (callback) {
-    this._client.connect(this.port, this.ip, callback);
+    this.callback = callback;
+    this._client.connect(this.port, this.ip);
 };
 
 /**
  * Simulate successful close port
  */
 TcpPort.prototype.close = function (callback) {
+    this.callback = callback;
     this._client.end();
-    if (callback)
-        callback(null);
 };
 
 /**
