@@ -13,6 +13,7 @@ var TelnetPort = function(ip, options) {
     var self = this;
     this.ip = ip;
     this.openFlag = false;
+    this.callback = null;
 
     // options
     if (typeof(options) == 'undefined') options = {};
@@ -23,6 +24,15 @@ var TelnetPort = function(ip, options) {
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
+
+    // handle callback - call a callback function only once, for the first event
+    // it will triger
+    var handleCallback = function(had_error) {
+        if (self.callback) {
+            self.callback(had_error);
+            self.callback = null;
+        }
+    }
 
     // create a socket
     this._client = new net.Socket();
@@ -60,10 +70,17 @@ var TelnetPort = function(ip, options) {
 
     this._client.on('connect', function() {
         self.openFlag = true;
+        handleCallback();
     });
 
     this._client.on('close', function(had_error) {
         self.openFlag = false;
+        handleCallback(had_error);
+    });
+
+    this._client.on('error', function(had_error) {
+        self.openFlag = false;
+        handleCallback(had_error);
     });
 
     events.call(this);
@@ -90,16 +107,16 @@ TelnetPort.prototype._emitData = function(start, length) {
  * Simulate successful port open
  */
 TelnetPort.prototype.open = function (callback) {
-    this._client.connect(this.port, this.ip, callback);
+    this.callback = callback;
+    this._client.connect(this.port, this.ip);
 };
 
 /**
  * Simulate successful close port
  */
 TelnetPort.prototype.close = function (callback) {
+    this.callback = callback;
     this._client.end();
-    if (callback)
-        callback(null);
 };
 
 /**
