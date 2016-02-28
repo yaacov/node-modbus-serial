@@ -48,9 +48,9 @@ var TcpPort = function(ip, options) {
         modbus.emit('data', buffer);
     });
 
-    this._client.on('connect', function(had_error) {
+    this._client.on('connect', function() {
         modbus.openFlag = true;
-        handleCallback(had_error);
+        handleCallback();
     });
 
     this._client.on('close', function(had_error) {
