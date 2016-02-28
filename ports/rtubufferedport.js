@@ -67,11 +67,6 @@ util.inherits(RTUBufferedPort, events);
 RTUBufferedPort.prototype._emitData = function(start, length) {
     this.emit('data', this._buffer.slice(start, start + length));
     this._buffer = this._buffer.slice(start + length);
-
-    // reset internal vars
-    this._id = 0;
-    this._cmd = 0;
-    this._length = 0;
 };
 
 /**
