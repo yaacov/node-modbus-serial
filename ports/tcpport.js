@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 var net = require('net');
 
 var crc16 = require('./../utils/crc16');
@@ -63,9 +64,9 @@ var TcpPort = function(ip, options) {
         handleCallback(had_error);
     });
 
-    events.call(this);
+    EventEmitter.call(this);
 };
-util.inherits(TcpPort, events);
+util.inherits(TcpPort, EventEmitter);
 
 /**
  * Simulate successful port open

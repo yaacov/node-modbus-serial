@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 var dgram = require('dgram');
 
 var crc16 = require('./../utils/crc16');
@@ -82,9 +83,9 @@ var UdpPort = function(ip, options) {
         modbus.openFlag = false;
     });
 
-    events.call(this);
+    EventEmitter.call(this);
 };
-util.inherits(UdpPort, events);
+util.inherits(UdpPort, EventEmitter);
 
 /**
  * Simulate successful port open

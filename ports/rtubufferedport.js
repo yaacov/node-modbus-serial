@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport").SerialPort;
 
 var EXCEPTION_LENGTH = 5;
@@ -54,9 +55,9 @@ var RTUBufferedPort = function(path, options) {
         }
     });
 
-    events.call(this);
+    EventEmitter.call(this);
 };
-util.inherits(RTUBufferedPort, events);
+util.inherits(RTUBufferedPort, EventEmitter);
 
 /**
  * Emit the received response, cut the buffer and reset the internal vars.

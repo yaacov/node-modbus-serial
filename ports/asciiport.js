@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport").SerialPort;
 
 var crc16 = require('./../utils/crc16');
@@ -141,9 +142,9 @@ var AsciiPort = function(path, options) {
         }
     });
 
-    events.call(this);
+    EventEmitter.call(this);
 };
-util.inherits(AsciiPort, events);
+util.inherits(AsciiPort, EventEmitter);
 
 /**
  * Simulate successful port open
