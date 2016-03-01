@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
 var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 
 /* Add bit operation functions to Buffer
  */
@@ -25,9 +26,9 @@ var TestPort = function() {
     // simulate 16 coils / digital inputs
     this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
 
-    events.call(this);
+    EventEmitter.call(this);
 };
-util.inherits(TestPort, events);
+util.inherits(TestPort, EventEmitter);
 
 /**
  * Simulate successful port open

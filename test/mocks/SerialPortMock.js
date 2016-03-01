@@ -1,6 +1,7 @@
 'use strict';
 var util = require('util');
-var EventEmitter = require('events');
+var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 
 
 /**

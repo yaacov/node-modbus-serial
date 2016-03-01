@@ -1,5 +1,6 @@
 'use strict';
-var EventEmitter = require('events');
+var events = require('events');
+var EventEmitter = events.EventEmitter || events;
 var util = require('util');
 
 var Socket = function(type, listener) {
