@@ -272,6 +272,17 @@ ModbusRTU.prototype.open = function (callback) {
 };
 
 /**
+ * Close the serial port
+ *
+ * @param {Function} callback the function to call next on close success
+ *      or failure.
+ */
+ModbusRTU.prototype.close = function (callback) {
+    // close the serial port
+    this._port.close(callback);
+};
+
+/**
  * Write a Modbus "Read Coil Status" (FC=01) to serial port.
  *
  * @param {number} address the slave unit address.

@@ -18,6 +18,16 @@ describe('ModbusRTU', function() {
         });
     });
 
+    describe('#close() - close serial port.', function () {
+        it('should close the port without errors', function (done) {
+            modbusRTU.close(function(err) {
+                expect(err).to.be.a('null');
+
+                done();
+            });
+        });
+    });
+
     describe('#writeFC3() - read holding registers.', function () {
         it('should read 3 registers [0xa12b, 0xffff, 0xb21a] without errors', function (done) {
             modbusRTU.writeFC3(1, 8, 3, function(err, data) {
