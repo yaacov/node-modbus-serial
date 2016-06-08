@@ -119,6 +119,44 @@ function _readFC16(data, next) {
 }
 
 /**
+ * Wrapper method for writing to a port with timeout. <code><b>[this]</b></code> has the context of ModbusRTU
+ * @param {Buffer} buffer The data to send
+ * @private
+ */
+function _writeBufferToPort(buffer) {
+    this._port.write(buffer);
+    this._timeoutHandle = _startTimeout(this._timeout, this._next);
+}
+
+/**
+ * Starts the timeout timer with the given duration.
+ * If the timeout ends before it was cancelled, it will call the callback with an error.
+ * @param {number} duration the timeout duration in milliseconds.
+ * @param {Function} next the function to call next.
+ * @return {number} The handle of the timeout
+ * @private
+ */
+function _startTimeout(duration, next) {
+    if (!duration) {
+        return undefined;
+    }
+    return setTimeout(function () {
+        if (next) {
+            next('Timed out');
+        }
+    }, duration);
+}
+
+/**
+ * Cancel the given timeout
+ * @param {number} timeoutHandle The handle of the timeout
+ * @private
+ */
+function _cancelTimeout(timeoutHandle) {
+   clearTimeout(timeoutHandle);
+}
+
+/**
  * Class making ModbusRTU calls fun and easy.
  *
  * @param {SerialPort} port the serial port to use.
@@ -132,6 +170,9 @@ var ModbusRTU = function (port) {
     this._nextCode = null; // function code of current function call.
     this._nextLength = 0; // number of bytes in current answer.
     this._next = null; // the function to call on success or failure
+
+    this._timeout = null; // timeout in msec before unanswered request throws timeout error
+    this._timeoutHandle = null; // timeoutHandle to cancel active timeouts
 
     this._unitID = 1;
 };
@@ -149,8 +190,8 @@ ModbusRTU.prototype.open = function (callback) {
     modbus._port.open(function (error) {
         if (error) {
             /* On serial port open error
-            * call next function
-            */
+             * call next function
+             */
             if (callback)
                 callback(error);
         } else {
@@ -163,10 +204,14 @@ ModbusRTU.prototype.open = function (callback) {
             /* On serial port success
              * register the modbus parser functions
              */
-            modbus._port.on('data', function(data) {
+            modbus._port.on('data', function (data) {
                 // set locale helpers variables
                 var length = modbus._nextLength;
-                var next =  modbus._next;
+                var next = modbus._next;
+
+                /* cancel the timeout */
+                _cancelTimeout(modbus._timeoutHandle);
+                modbus._timeoutHandle = undefined;
 
                 /* check incoming data
                  */
@@ -199,7 +244,7 @@ ModbusRTU.prototype.open = function (callback) {
                 /* check for modbus exception
                  */
                 if (data.length == 5 &&
-                        code == (0x80 | modbus._nextCode)) {
+                    code == (0x80 | modbus._nextCode)) {
                     error = "Modbus exception " + data.readUInt8(2);
                     if (next)
                         next(error);
@@ -280,6 +325,7 @@ ModbusRTU.prototype.open = function (callback) {
 ModbusRTU.prototype.close = function (callback) {
     // close the serial port
     this._port.close(callback);
+    this._port.removeAllListeners('data');
 };
 
 /**
@@ -307,7 +353,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     code = code || 2;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -331,7 +377,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 /**
@@ -359,7 +405,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
     code = code || 4;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -383,7 +429,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 /**
@@ -394,11 +440,11 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  * @param {number} state the boolean state to write to the coil (true / false).
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
+ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
     var code = 5;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -427,7 +473,7 @@ ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 /**
@@ -438,11 +484,11 @@ ModbusRTU.prototype.writeFC5 =  function (address, dataAddress, state, next) {
  * @param {number} value the value to write to the register.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
+ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
     var code = 6;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -467,7 +513,7 @@ ModbusRTU.prototype.writeFC6 =  function (address, dataAddress, value, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 /**
@@ -482,7 +528,7 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     var code = 15;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -521,7 +567,7 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 /**
@@ -532,11 +578,11 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
  * @param {Array} array the array of values to write to registers.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
+ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
     var code = 16;
 
     // check port is actually open before attempting write
-    if( this._port.isOpen() === false) {
+    if (this._port.isOpen() === false) {
         var error = "Port Not Open";
         if (next) next(error);
         return;
@@ -565,7 +611,7 @@ ModbusRTU.prototype.writeFC16 =  function (address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    this._port.write(buf);
+    _writeBufferToPort.call(this, buf)
 };
 
 // add the connection shorthand API
