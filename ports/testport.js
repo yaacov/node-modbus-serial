@@ -15,6 +15,7 @@ var crc16 = require('./../utils/crc16');
  * 3 - a modbus slave that answer with bad crc
  * 4 - a modbus slave that answer with bad unit number
  * 5 - a modbus slave that answer with an exception
+ * 6 - a modbus slave that times out (does not answer)
  */
 var TestPort = function() {
     // simulate 11 input registers
@@ -244,6 +245,9 @@ TestPort.prototype.write = function (buf) {
                 buffer.writeUInt8(4, 2);
                 buffer = buffer.slice(0, 5);
                 break;
+            case 6:
+                // unit 6: does not answer
+                return;
         }
 
         // add crc

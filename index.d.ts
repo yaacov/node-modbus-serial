@@ -26,6 +26,7 @@ declare namespace ModbusRTU {
     // Promise API
     setID(id: number): void;
     getID(): number;
+    setTimeout(duration: number): void;
 
     readCoils(dataAddress: number, length: number): Promise<ReadCoilResult>;
     readDiscreteInputs(dataAddress: number, length: number): Promise<ReadCoilResult>;

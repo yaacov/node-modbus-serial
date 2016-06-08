@@ -67,6 +67,9 @@ var addPromiseAPI = function(Modbus) {
     cl.setID = function(id) {this._unitID = id;};
     cl.getID = function() {return this._unitID;};
 
+    // set unitID
+    cl.setTimeout = function(timeout) {this._timeout = timeout;};
+
     // convert functions to return promises
     cl.readCoils = convert(cl.writeFC1);
     cl.readDiscreteInputs = convert(cl.writeFC2);
