@@ -32,6 +32,7 @@ var convert = function(f) {
          */
         if (next) {
             // if we have a callback, use the callback
+            console.log(id, address, arg, next);
             f.bind(client)(id, address, arg, next);
         } else {
             // o/w use  a promise
@@ -66,6 +67,9 @@ var addPromiseAPI = function(Modbus) {
     // set/get unitID
     cl.setID = function(id) {this._unitID = id;};
     cl.getID = function() {return this._unitID;};
+
+    // set unitID
+    cl.setTimeout = function(timeout) {this._timeout = timeout;};
 
     // convert functions to return promises
     cl.readCoils = convert(cl.writeFC1);

@@ -334,6 +334,7 @@ describe('ModbusRTU', function () {
         });
 
         describe('Timeout', function() {
+            var timeout = 1000;
             var clock;
             beforeEach(function(){
                 clock = sinon.useFakeTimers();
@@ -344,8 +345,6 @@ describe('ModbusRTU', function () {
             });
 
             it('should time out', function (done) {
-                var timeout = 1000;
-
                 modbusRTU._timeout = timeout;
                 modbusRTU.writeFC3(6, 8, 3, function (err, data) {
                     expect(err).to.have.string('Timed out');
@@ -353,6 +352,24 @@ describe('ModbusRTU', function () {
                 });
 
                 clock.tick(timeout);
+            });
+
+
+            describe('Promise', function() {
+                it('should reject with error if timeout is hit', function (done) {
+                    modbusRTU.setID(6);
+                    modbusRTU.setTimeout(timeout);
+                    modbusRTU.readCoils(1, 1)
+                        .then(function () {
+                            done(new Error('Failed should timeout'));
+                        })
+                        .catch(function (err) {
+                            expect(err).to.have.string('Timed out');
+                            done();
+                        });
+
+                    clock.tick(timeout);
+                });
             });
         });
     });
