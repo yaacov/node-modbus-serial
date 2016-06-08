@@ -32,7 +32,6 @@ var convert = function(f) {
          */
         if (next) {
             // if we have a callback, use the callback
-            console.log(id, address, arg, next);
             f.bind(client)(id, address, arg, next);
         } else {
             // o/w use  a promise
