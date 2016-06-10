@@ -194,6 +194,9 @@ Using callbacks is optional.
 // set the client's unit id
 client.setID(1);
 
+// set a timout for requests default is null (no timeout)
+client.setTimeout(1000);
+
 // read 8 discrete inputs starting at input 10
 // (function use the unit id 1, we set earlier)
 client.readDiscreteInputs(10, 8)
@@ -208,6 +211,19 @@ client.readDiscreteInputs(10, 8)
 
 *id {number}:*
 The new client id
+
+----
+##### .getID()
+      Returns the unit id
+
+
+----
+##### .setTimeout(duration)
+      Sets a timeout for the request
+
+*duration {number}:*
+Duration of the timeout
+
 
 ----
 ##### .readCoils (address, length)
@@ -315,6 +331,13 @@ client.writeFC3(1, 10, 8, function(err, data) {
 
 *callback {function}:* (optional)
 Called when a connection has been opened.
+
+----
+##### .close(callback)
+      Closes a modbus connection using the given serial port.
+
+*callback {function}:* (optional)
+Called when a connection has been closed.
 
 ----
 ##### .writeFC1 (unit, address, length, callback)
