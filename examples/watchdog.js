@@ -4,39 +4,24 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // open connection to a tcp line
-client.connectTCP("192.168.1.115");
+client.connectTCP("192.168.1.115", run);
 
-// the global last_connection time for the watchdog
-var last_connection = new Date();
+// read 8 read holding registers starting at register 10
+// (function use the unit id 1, we set earlier)
+function run() {
+  // set unit id
+  client.setID(1);
 
-/* check time of last_connection and restart-reading if needed
- */
-var watchdog = function() {
-    var time_diff = new Date() - last_connection;
-    if (time_diff > 1000) {
-        console.log('Oyyy ... we did not get data for 1 sec, will try again.');
-        run();
-    }
-}
+  // set a timout for requests default is null (no timeout)
+  client.setTimeout(1000);
 
-/* if last request was good - send a read request evry 0.5 sec
- * and update last_connection
- */
-var run = function() {
-    console.log('Send a request for input registers.');
-    client.readInputRegisters(0, 10, function(err, data) {
-        if (!err) {
-          console.log(data.data);
-          last_connection = new Date();
-
-          setTimeout(run, 500);
-        }
+  client.readHoldingRegisters(10, 8)
+    .then(function(data) {
+      // we got an answer before watchdog timeout
+      console.log(data);
+    })
+    .catch(function (err) {
+      // watchdog was trigered
+      console.log(err);
     });
 }
-
-/* run the watchdog
- */
-setInterval(function() {
-    watchdog();
-}, 500);
-

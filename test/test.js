@@ -354,14 +354,13 @@ describe('ModbusRTU', function () {
                 clock.tick(timeout);
             });
 
-
             describe('Promise', function() {
                 it('should reject with error if timeout is hit', function (done) {
                     modbusRTU.setID(6);
                     modbusRTU.setTimeout(timeout);
                     modbusRTU.readCoils(1, 1)
                         .then(function () {
-                            done(new Error('Failed should timeout'));
+                            done(new Error('Call should timeout'));
                         })
                         .catch(function (err) {
                             expect(err).to.have.string('Timed out');
