@@ -226,6 +226,11 @@ Duration of the timeout
 
 
 ----
+##### .getTimeout()
+      Returns the timeout for the request
+
+
+----
 ##### .readCoils (address, length)
       Writes "Read Coils" (FC=1) request to serial port.
 
