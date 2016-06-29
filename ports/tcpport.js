@@ -7,6 +7,7 @@ var net = require('net');
 var crc16 = require('./../utils/crc16');
 
 var MODBUS_PORT = 502; // modbus port
+var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
 
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
@@ -44,6 +45,9 @@ var TcpPort = function(ip, options) {
         data.copy(buffer, 0, 6);
         crc = crc16(buffer.slice(0, -2));
         buffer.writeUInt16LE(crc, buffer.length - 2);
+
+        // update transaction id
+        modbus._transactionId = data.readUInt16BE(0)
 
         // emit a data signal
         modbus.emit('data', buffer);
@@ -95,9 +99,12 @@ TcpPort.prototype.isOpen = function() {
  * Send data to a modbus-tcp slave
  */
 TcpPort.prototype.write = function (data) {
+    // get next transaction id
+    var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
+
     // remove crc and add mbap
     var buffer = new Buffer(data.length + 6 - 2);
-    buffer.writeUInt16BE(1, 0);
+    buffer.writeUInt16BE(transactionsId, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - 2, 4);
     data.copy(buffer, 6);
