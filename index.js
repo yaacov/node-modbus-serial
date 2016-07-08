@@ -124,8 +124,10 @@ function _readFC16(data, next) {
  * @private
  */
 function _writeBufferToPort(buffer) {
+    var transaction = this._transactions[this._transactionId]
+
     this._port.write(buffer);
-    this._timeoutHandle = _startTimeout(this._timeout, this._next);
+    transaction._timeoutHandle = _startTimeout(this._timeout, transaction.next);
 }
 
 /**
@@ -166,13 +168,10 @@ var ModbusRTU = function (port) {
     this._port = port;
 
     // state variables
-    this._nextAddress = null; // unit address of current function call.
-    this._nextCode = null; // function code of current function call.
-    this._nextLength = 0; // number of bytes in current answer.
-    this._next = null; // the function to call on success or failure
+    this._transactions = {};
+    this._transactionId = 1;
 
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
-    this._timeoutHandle = null; // timeoutHandle to cancel active timeouts
 
     this._unitID = 1;
 };
@@ -206,12 +205,11 @@ ModbusRTU.prototype.open = function (callback) {
              */
             modbus._port.on('data', function (data) {
                 // set locale helpers variables
-                var length = modbus._nextLength;
-                var next = modbus._next;
+                var transaction = modbus._transactions[modbus._transactionId];
 
                 /* cancel the timeout */
-                _cancelTimeout(modbus._timeoutHandle);
-                modbus._timeoutHandle = undefined;
+                _cancelTimeout(transaction._timeoutHandle);
+                transaction._timeoutHandle = undefined;
 
                 /* check incoming data
                  */
@@ -220,9 +218,9 @@ ModbusRTU.prototype.open = function (callback) {
                  */
                 if (data.length < 5) {
                     error = "Data length error, expected " +
-                        length + " got " + data.length;
-                    if (next)
-                        next(error);
+                        transaction.nextLength + " got " + data.length;
+                    if (transaction.next)
+                        transaction.next(error);
                     return;
                 }
 
@@ -232,8 +230,8 @@ ModbusRTU.prototype.open = function (callback) {
                 var crcIn = data.readUInt16LE(data.length - 2);
                 if (crcIn != crc16(data.slice(0, -2))) {
                     error = "CRC error";
-                    if (next)
-                        next(error);
+                    if (transaction.next)
+                        transaction.next(error);
                     return;
                 }
 
@@ -244,10 +242,10 @@ ModbusRTU.prototype.open = function (callback) {
                 /* check for modbus exception
                  */
                 if (data.length == 5 &&
-                    code == (0x80 | modbus._nextCode)) {
+                    code == (0x80 | transaction.nextCode)) {
                     error = "Modbus exception " + data.readUInt8(2);
-                    if (next)
-                        next(error);
+                    if (transaction.next)
+                        transaction.next(error);
                     return;
                 }
 
@@ -255,11 +253,11 @@ ModbusRTU.prototype.open = function (callback) {
                  * if we do not expect this data
                  * raise an error
                  */
-                if (data.length != length) {
+                if (data.length != transaction.nextLength) {
                     error = "Data length error, expected " +
-                        length + " got " + data.length;
-                    if (next)
-                        next(error);
+                        transaction.nextLength + " got " + data.length;
+                    if (transaction.next)
+                        transaction.next(error);
                     return;
                 }
 
@@ -267,18 +265,13 @@ ModbusRTU.prototype.open = function (callback) {
                  * if we do not expect this message
                  * raise an error
                  */
-                if (address != modbus._nextAddress || code != modbus._nextCode) {
+                if (address != transaction.nextAddress || code != transaction.nextCode) {
                     error = "Unexpected data error, expected " +
-                        modbus._nextAddress + " got " + address;
-                    if (next)
-                        next(error);
+                        transaction.nextAddress + " got " + address;
+                    if (transaction.next)
+                        transaction.next(error);
                     return;
                 }
-
-                // data is OK - clear state variables
-                modbus._nextAddress = null;
-                modbus._nextCode = null;
-                modbus._next = null;
 
                 /* parse incoming data
                  */
@@ -288,27 +281,27 @@ ModbusRTU.prototype.open = function (callback) {
                     case 2:
                         // Read Coil Status (FC=01)
                         // Read Input Status (FC=02)
-                        _readFC2(data, next);
+                        _readFC2(data, transaction.next);
                         break;
                     case 3:
                     case 4:
                         // Read Input Registers (FC=04)
                         // Read Holding Registers (FC=03)
-                        _readFC4(data, next);
+                        _readFC4(data, transaction.next);
                         break;
                     case 5:
                         // Force Single Coil
-                        _readFC5(data, next);
+                        _readFC5(data, transaction.next);
                         break;
                     case 6:
                         // Preset Single Register
-                        _readFC6(data, next);
+                        _readFC6(data, transaction.next);
                         break;
                     case 15:
                     case 16:
                         // Force Multiple Coils
                         // Preset Multiple Registers
-                        _readFC16(data, next);
+                        _readFC16(data, transaction.next);
                         break;
                 }
             });
@@ -360,10 +353,12 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 3 + parseInt((length - 1) / 8 + 1) + 2;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 3 + parseInt((length - 1) / 8 + 1) + 2,
+      next: next
+    };
 
     var codeLength = 6;
     var buf = new Buffer(codeLength + 2); // add 2 crc bytes
@@ -412,10 +407,12 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 3 + 2 * length + 2;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 3 + 2 * length + 2,
+      next: next
+    };
 
     var codeLength = 6;
     var buf = new Buffer(codeLength + 2); // add 2 crc bytes
@@ -451,10 +448,12 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 8;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 8,
+      next: next
+    };
 
     var codeLength = 6;
     var buf = new Buffer(codeLength + 2); // add 2 crc bytes
@@ -495,10 +494,12 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 8;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 8,
+      next: next
+    };
 
     var codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
     var buf = new Buffer(codeLength + 2); // add 2 crc bytes
@@ -535,10 +536,12 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 8;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 8,
+      next: next
+    };
 
     var dataBytes = Math.ceil(array.length / 8);
     var codeLength = 7 + dataBytes;
@@ -589,10 +592,12 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
     }
 
     // set state variables
-    this._nextAddress = address;
-    this._nextCode = code;
-    this._nextLength = 8;
-    this._next = next;
+    this._transactions[this._transactionId] = {
+      nextAddress: address,
+      nextCode: code,
+      nextLength: 8,
+      next: next
+    };
 
     var codeLength = 7 + 2 * array.length;
     var buf = new Buffer(codeLength + 2); // add 2 crc bytes
