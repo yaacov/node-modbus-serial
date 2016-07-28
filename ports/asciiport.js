@@ -2,7 +2,7 @@
 var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
-var SerialPort = require("serialport").SerialPort;
+var SerialPort = require("serialport");
 
 var crc16 = require('./../utils/crc16');
 var calculateLrc = require('./../utils/lrc');
