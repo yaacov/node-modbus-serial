@@ -37,10 +37,12 @@ var addConnctionAPI = function(Modbus) {
             next = options;
             options = {};
         }
+        // disable auto open, as we handle the open
+        options.autoOpen = false;
 
         // create the SerialPort
         var SerialPort = require("serialport").SerialPort;
-        this._port = new SerialPort(path, options, false);
+        this._port = new SerialPort(path, options);
 
         // open and call next
         this.open(next);

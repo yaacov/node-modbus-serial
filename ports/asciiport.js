@@ -90,6 +90,9 @@ var AsciiPort = function(path, options) {
     // options
     options = options || {};
 
+    // disable auto open, as we handle the open
+    options.autoOpen = false;
+
     // internal buffer
     this._buffer = new Buffer(0);
     this._id = 0;
@@ -97,7 +100,7 @@ var AsciiPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client= new SerialPort(path, options, false);
+    this._client= new SerialPort(path, options);
 
     // register the port data event
     this._client.on('data', function(data) {
