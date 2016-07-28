@@ -513,8 +513,8 @@ The shorthand connection functions creates a port and open it.
 Long way, without shorthand:
 ``` javascript
 // open a serial port
-var SerialPort = require("serialport").SerialPort;
-var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600});
+var SerialPort = require("serialport");
+var serialPort = new SerialPort("/dev/ttyUSB0", {baudrate: 9600, autoOpen: false});
 
 // create a modbus client using the serial port
 var ModbusRTU = require("modbus-serial");
