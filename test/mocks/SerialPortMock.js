@@ -7,9 +7,9 @@ var EventEmitter = events.EventEmitter || events;
 /**
  * Mock for SerialPort
  */
-var SerialPortMock = function(path, options, openImmediately, callback) {
+var SerialPortMock = function(path, options, callback) {
     EventEmitter.call(this);
-    this._openFlag = openImmediately;
+    this._openFlag = false;
     if (callback) {
         callback(null);
     }
@@ -47,4 +47,4 @@ SerialPortMock.prototype.receive = function (buffer) {
     this.emit('data', buffer);
 };
 
-module.exports.SerialPort = SerialPortMock;
+module.exports = SerialPortMock;
