@@ -157,6 +157,21 @@ var addConnctionAPI = function(Modbus) {
          // open and call next
          this.open(next);
      }
+    cl.connectComOverTCP= function (ip, options, next) {
+        // check if we have options
+        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+            next = options;
+            options = {};
+        }
+
+        // create the TcpPort
+        var ComOverTcpPort = require('../ports/comovertcp');
+
+        this._port = new ComOverTcpPort(ip, options);
+
+        // open and call next
+        this.open(next);
+    };
 };
 
 module.exports = addConnctionAPI;

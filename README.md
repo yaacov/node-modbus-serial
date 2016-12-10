@@ -1,5 +1,11 @@
 # modbus-serial master
 A pure JavaScript implemetation of MODBUS-RTU (and TCP) master for NodeJS
+!!! this is a forked version !!!
+in the original version, the parser only check and parse one piece of data, which means an error will occur if the data is emitted more than once.
+
+in this version, a frame will be parsed only when the received data bytes is more than expected.
+timeout is used to avoid data loss;
+
 
 [![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/modbus-serial)
 [![Build Status](https://travis-ci.org/yaacov/node-modbus-serial.svg?branch=master)](https://travis-ci.org/yaacov/node-modbus-serial)
@@ -26,7 +32,7 @@ easy to deploy and maintain.
 #### Install
 
 ```
-npm install modbus-serial
+npm install qz-modbus-serial
 ```
 
 For use over serial port (ModbusRTU), also install node-serialport:
