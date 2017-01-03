@@ -24,6 +24,32 @@ var addConnctionAPI = function(Modbus) {
 
     var cl = Modbus.prototype;
 
+    var open = function(obj, next) {
+      /* the function check for a callback
+       * if we have a callback, use it
+       * o/w build a promise.
+       */
+      if (next) {
+          // if we have a callback, use the callback
+          obj.open(next);
+      } else {
+          // o/w use  a promise
+          var promise = new Promise( function (resolve, reject) {
+              function cb(err) {
+                  if (err) {
+                      reject(err);
+                  } else {
+                      resolve();
+                  }
+              }
+
+              obj.open(cb);
+          });
+
+          return promise;
+      }
+    }
+
     /**
      * Connect to a communication port, using SerialPort.
      *
@@ -45,7 +71,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new SerialPort(path, options);
 
         // open and call next
-        this.open(next);
+        return open(this, next);
     };
 
     /**
@@ -67,7 +93,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new TcpPort(ip, options);
 
         // open and call next
-        this.open(next);
+        return open(this, next);
     };
 
     /**
@@ -89,7 +115,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new TelnetPort(ip, options);
 
         // open and call next
-        this.open(next);
+        return open(this, next);
     };
 
     /**
@@ -111,7 +137,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new C701Port(ip, options);
 
         // open and call next
-        this.open(next);
+        return open(this, next);
     };
 
     /**
@@ -133,7 +159,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new SerialPort(path, options);
 
         // open and call next
-        this.open(next);
+        return open(this, next);
     };
 
     /**
@@ -155,7 +181,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new SerialPortAscii(path, options);
 
          // open and call next
-         this.open(next);
+         open(this, next);
      }
 };
 

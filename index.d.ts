@@ -16,12 +16,12 @@ declare namespace ModbusRTU {
     writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
 
     // Connection shorthand API
-    connectRTU(path: string, options: SerialPortOptions, next: Function): void;
-    connectTCP(ip: string, options: TcpPortOptions, next: Function): void;
-    connectTelnet(ip: string, options: TelnetPortOptions, next: Function): void;
-    connectC701(ip: string, options: C701PortOptions, next: Function): void;
-    connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): void;
-    connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
+    connectRTU(path: string, options: SerialPortOptions, next: Function): Promise<void>;
+    connectTCP(ip: string, options: TcpPortOptions, next: Function): Promise<void>;
+    connectTelnet(ip: string, options: TelnetPortOptions, next: Function): Promise<void>;
+    connectC701(ip: string, options: C701PortOptions, next: Function): Promise<void>;
+    connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): Promise<void>;
+    connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): Promise<void>;
 
     // Promise API
     setID(id: number): void;

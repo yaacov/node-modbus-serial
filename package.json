@@ -1,6 +1,6 @@
 {
   "name": "modbus-serial",
-  "version": "4.5.2",
+  "version": "4.6.0",
   "description": "A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
@@ -9,6 +9,9 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/yaacov/node-modbus-serial.git"
+  },
+  "bin": {
+    "modbus-cli": "examples/modbus-cli.js"
   },
   "keywords": [
     "modbus",
