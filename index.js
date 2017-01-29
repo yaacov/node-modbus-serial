@@ -1,6 +1,6 @@
 'use strict';
 /**
- * Copyright (c) 2015, Yaacov Zamir <kobi.zamir@gmail.com>
+ * Copyright (c) 2015-2017, Yaacov Zamir <kobi.zamir@gmail.com>
  *
  * Permission to use, copy, modify, and/or distribute this software for any
  * purpose with or without fee is hereby granted, provided that the above
