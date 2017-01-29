@@ -2,7 +2,7 @@
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var vector = {
-  getInputRegister: function(addr) { return addr;},
+  getInputRegister: function(addr) { return addr; },
   getHoldingRegister: function(addr) { return addr + 8000; },
   getCoil: function(addr) { return (addr % 2) === 0; },
   setRegister: function(addr, value) { console.log('set register', addr, value); return; },

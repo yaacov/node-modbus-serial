@@ -206,6 +206,7 @@ function parseModbusBuffer(buf, vector) {
 
     return ansBuf;
 }
+
 /**
  * Class making ModbusTCP server
  *
