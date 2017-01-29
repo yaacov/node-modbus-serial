@@ -232,6 +232,11 @@ Duration of the timeout
 
 
 ----
+##### .isOpen()
+      Returns true if port is open, false o/w.
+
+
+----
 ##### .readCoils (address, length)
       Writes "Read Coils" (FC=1) request to serial port.
 
