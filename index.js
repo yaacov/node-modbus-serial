@@ -144,7 +144,7 @@ function _startTimeout(duration, next) {
     }
     return setTimeout(function () {
         if (next) {
-            next('Timed out');
+            next(new Error('Timed out'));
         }
     }, duration);
 }
@@ -220,7 +220,7 @@ ModbusRTU.prototype.open = function (callback) {
                     error = "Data length error, expected " +
                         transaction.nextLength + " got " + data.length;
                     if (transaction.next)
-                        transaction.next(error);
+                        transaction.next(new Error(error));
                     return;
                 }
 
@@ -231,7 +231,7 @@ ModbusRTU.prototype.open = function (callback) {
                 if (crcIn != crc16(data.slice(0, -2))) {
                     error = "CRC error";
                     if (transaction.next)
-                        transaction.next(error);
+                        transaction.next(new Error(error));
                     return;
                 }
 
@@ -245,7 +245,7 @@ ModbusRTU.prototype.open = function (callback) {
                     code == (0x80 | transaction.nextCode)) {
                     error = "Modbus exception " + data.readUInt8(2);
                     if (transaction.next)
-                        transaction.next(error);
+                        transaction.next(new Error(error));
                     return;
                 }
 
@@ -257,7 +257,7 @@ ModbusRTU.prototype.open = function (callback) {
                     error = "Data length error, expected " +
                         transaction.nextLength + " got " + data.length;
                     if (transaction.next)
-                        transaction.next(error);
+                        transaction.next(new Error(error));
                     return;
                 }
 
@@ -269,7 +269,7 @@ ModbusRTU.prototype.open = function (callback) {
                     error = "Unexpected data error, expected " +
                         transaction.nextAddress + " got " + address;
                     if (transaction.next)
-                        transaction.next(error);
+                        transaction.next(new Error(error));
                     return;
                 }
 
@@ -348,7 +348,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
         var error = "Port Not Open";
-        if (next) next(error);
+        if (next) next(new Error(error));
         return;
     }
 
@@ -401,8 +401,10 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(error);
+        if (next) {
+            var message = "Port Not Open";
+            next(new Error(message));
+        }
         return;
     }
 
@@ -442,8 +444,10 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(error);
+        if (next) {
+            var message = "Port Not Open";
+            next(new Error(message));
+        }
         return;
     }
 
@@ -488,8 +492,10 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(error);
+        if (next) {
+            var message = "Port Not Open";
+            next(new Error(message));
+        }
         return;
     }
 
@@ -586,8 +592,10 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(error);
+        if (next) {
+            var message = "Port Not Open";
+            next(new Error(message));
+        }
         return;
     }
 
