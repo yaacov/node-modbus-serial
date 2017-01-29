@@ -23,15 +23,25 @@ function setClient() {
 }
 
 function run() {
-  // read the 4 registers starting at address 5
-  client.readHoldingRegisters(5, 4)
-    .then(function(d) {
-      console.log("Recive:", d.data); })
-    .catch(function(e) {
-      console.log(e.message); })
-    .then(close);
+    // write to coil
+    client.writeCoil(5, true)
+      .then(function(d) {
+          console.log("Write true to coil 5", d); })
+      .catch(function(e) {
+          console.log(e.message); })
+      .then(writeRegisters);
+}
+
+function writeRegisters() {
+    // write 3 registers statrting at register 101
+    client.writeRegisters(101, [10, 9, 8])
+      .then(function(d) {
+          console.log("Write 10, 9, 8 to registers 101, 102 and 103", d); })
+      .catch(function(e) {
+          console.log(e.message); })
+      .then(close);
 }
 
 function close() {
-  client.close();
+    client.close();
 }
