@@ -23,15 +23,18 @@ function setClient() {
 }
 
 function run() {
-  // read the 4 registers starting at address 5
-  client.readHoldingRegisters(5, 4)
-    .then(function(d) {
-      console.log("Recive:", d.data); })
-    .catch(function(e) {
-      console.log(e.message); })
-    .then(close);
+    // read the 4 registers starting at address 5
+    client.readInputRegisters(4, 12)
+      .then(function(d) {
+          floatA = d.buffer.readFloatBE(0);
+          floatB = d.buffer.readFloatBE(4);
+          floatC = d.buffer.readFloatBE(8);
+          console.log("Recive:", floatA, floatB, floatC); })
+      .catch(function(e) {
+          console.log(e.message); })
+      .then(close);
 }
 
 function close() {
-  client.close();
+    client.close();
 }
