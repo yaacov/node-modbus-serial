@@ -214,6 +214,7 @@ function parseModbusBuffer(buf, vector) {
  */
 var ServerTCP = function (vector, options) {
     var modbus = this;
+    options = options || {};
     modbus._unitID = options.unitID || 1;
     modbus.debug = options.debug || false;
 
