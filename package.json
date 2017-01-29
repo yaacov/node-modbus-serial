@@ -10,9 +10,6 @@
     "type": "git",
     "url": "git+https://github.com/yaacov/node-modbus-serial.git"
   },
-  "bin": {
-    "modbus-cli": "examples/modbus-cli.js"
-  },
   "keywords": [
     "modbus",
     "rtu",
