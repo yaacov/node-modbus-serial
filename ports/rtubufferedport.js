@@ -23,6 +23,7 @@ var RTUBufferedPort = function(path, options) {
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
+    this.debug = false;
 
     // create the SerialPort
     this._client= new SerialPort(path, options);
@@ -69,7 +70,13 @@ util.inherits(RTUBufferedPort, EventEmitter);
  * @private
  */
 RTUBufferedPort.prototype._emitData = function(start, length) {
-    this.emit('data', this._buffer.slice(start, start + length));
+    var buffer = this._buffer.slice(start, start + length);
+
+    // emit debug message
+    if (this.debug) { this.emit('debug', {action: 'recive', data: buffer}); }
+
+    // emit data
+    this.emit('data', buffer);
     this._buffer = this._buffer.slice(start + length);
 };
 
@@ -134,6 +141,9 @@ RTUBufferedPort.prototype.write = function (data) {
 
     // send buffer to slave
     this._client.write(data);
+
+    // emit debug message
+    if (this.debug) { this.emit('debug', {action: 'send', data: data}); }
 };
 
 module.exports = RTUBufferedPort;
