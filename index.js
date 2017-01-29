@@ -322,6 +322,13 @@ ModbusRTU.prototype.close = function (callback) {
 };
 
 /**
+ * Check if port is open
+ */
+ModbusRTU.prototype.isOpen = function () {
+    return this._port && this._port.isOpen();
+};
+
+/**
  * Write a Modbus "Read Coil Status" (FC=01) to serial port.
  *
  * @param {number} address the slave unit address.
