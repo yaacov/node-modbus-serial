@@ -29,7 +29,7 @@ function run() {
           floatA = d.buffer.readFloatBE(0);
           floatB = d.buffer.readFloatBE(4);
           floatC = d.buffer.readFloatBE(8);
-          console.log("Recive:", floatA, floatB, floatC); })
+          console.log("Receive:", floatA, floatB, floatC); })
       .catch(function(e) {
           console.log(e.message); })
       .then(close);
