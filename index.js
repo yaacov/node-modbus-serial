@@ -366,8 +366,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(new Error(error));
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
@@ -420,10 +419,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) {
-            var message = "Port Not Open";
-            next(new Error(message));
-        }
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
@@ -463,10 +459,7 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) {
-            var message = "Port Not Open";
-            next(new Error(message));
-        }
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
@@ -511,10 +504,7 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) {
-            var message = "Port Not Open";
-            next(new Error(message));
-        }
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
@@ -555,8 +545,7 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        var error = "Port Not Open";
-        if (next) next(error);
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
@@ -611,10 +600,7 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) {
-            var message = "Port Not Open";
-            next(new Error(message));
-        }
+        if (next) next(new Error("Port Not Open"));
         return;
     }
 
