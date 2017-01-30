@@ -26,7 +26,7 @@ function run() {
   // read the 4 registers starting at address 5
   client.readHoldingRegisters(5, 4)
     .then(function(d) {
-      console.log("Recive:", d.data); })
+      console.log("Receive:", d.data); })
     .catch(function(e) {
       console.log(e.message); })
     .then(close);
