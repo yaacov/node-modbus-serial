@@ -6,7 +6,7 @@ var EventEmitter = events.EventEmitter || events;
 /* Add bit operation functions to Buffer
  */
 require('../utils/buffer_bit')();
-var crc16 = require('./../utils/crc16');
+var crc16 = require('../utils/crc16');
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected

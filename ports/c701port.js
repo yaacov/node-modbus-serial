@@ -4,7 +4,7 @@ var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var dgram = require('dgram');
 
-var crc16 = require('./../utils/crc16');
+var crc16 = require('../utils/crc16');
 
 var C701_PORT = 0x7002;
 

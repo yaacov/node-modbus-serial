@@ -1,7 +1,7 @@
 'use strict';
 var expect = require('chai').expect;
 
-var crc16 = require('./../../utils/crc16');
+var crc16 = require('../../utils/crc16');
 
 describe('Modbus CRC16', function() {
 
@@ -22,4 +22,3 @@ describe('Modbus CRC16', function() {
     });
 
 });
-

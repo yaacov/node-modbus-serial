@@ -4,7 +4,7 @@ var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var net = require('net');
 
-var crc16 = require('./../utils/crc16');
+var crc16 = require('../utils/crc16');
 
 var MODBUS_PORT = 502; // modbus port
 var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
