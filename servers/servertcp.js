@@ -25,102 +25,103 @@
 /* Add bit operation functions to Buffer
  */
 require('../utils/buffer_bit')();
-var crc16 = require('./../utils/crc16');
+var crc16 = require('../utils/crc16');
 
 /**
  * Parse a modbusRTU buffer and return an answer buffer
  */
-function parseModbusBuffer(buf, vector) {
-    var ansBuf = null;
-    var unitNumber = buf[0];
-    var functionCode = buf[1];
-    var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
+function parseModbusBuffer(requestBuffer, vector) {
+    var responseBuffer = null;
+    var unitID = requestBuffer[0];
+    var functionCode = requestBuffer[1];
+    var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
 
     // if crc is bad, ignore message
-    if (crc != crc16(buf.slice(0, -2))) {
+    if (crc != crc16(requestBuffer.slice(0, -2))) {
         return;
     }
 
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (requestBuffer.length != 8) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(3 + parseInt((length - 1) / 8 + 1) + 2);
-        ansBuf.writeUInt8(parseInt((length - 1) / 8 + 1), 2);
+        var dataBytes = parseInt((length - 1) / 8 + 1);
+        responseBuffer = new Buffer(3 + dataBytes + 2);
+        responseBuffer.writeUInt8(dataBytes, 2);
 
         // read coils
         if (vector.getCoil) {
             for (var i = 0; i < length; i++) {
-              ansBuf.writeBit(vector.getCoil(address + i), i, 3);
+              responseBuffer.writeBit(vector.getCoil(address + i), i % 8, 3 + parseInt(i / 8));
             }
         }
     }
 
     // function code 3
     if (functionCode == 3) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (requestBuffer.length != 8) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(3 + length * 2 + 2);
-        ansBuf.writeUInt8(length * 2, 2);
+        responseBuffer = new Buffer(3 + length * 2 + 2);
+        responseBuffer.writeUInt8(length * 2, 2);
 
         // read registers
         if (vector.getHoldingRegister) {
           for (var i = 0; i < length; i++) {
-              ansBuf.writeUInt16BE(vector.getHoldingRegister(address + i), 3 + i * 2);
+              responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i), 3 + i * 2);
           }
         }
     }
 
     // function code 4
     if (functionCode == 4) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (requestBuffer.length != 8) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(3 + length * 2 + 2);
-        ansBuf.writeUInt8(length * 2, 2);
+        responseBuffer = new Buffer(3 + length * 2 + 2);
+        responseBuffer.writeUInt8(length * 2, 2);
 
         // read registers
         if (vector.getInputRegister) {
           for (var i = 0; i < length; i++) {
-              ansBuf.writeUInt16BE(vector.getInputRegister(address + i), 3 + i * 2);
+              responseBuffer.writeUInt16BE(vector.getInputRegister(address + i), 3 + i * 2);
           }
         }
     }
 
     // function code 5
     if (functionCode == 5) {
-        var address = buf.readUInt16BE(2);
-        var state = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var state = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (requestBuffer.length != 8) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(8);
-        ansBuf.writeUInt16BE(address, 2);
-        ansBuf.writeUInt16BE(state, 4);
+        responseBuffer = new Buffer(8);
+        responseBuffer.writeUInt16BE(address, 2);
+        responseBuffer.writeUInt16BE(state, 4);
 
         // write coil
         if (vector.setCoil) {
@@ -130,40 +131,40 @@ function parseModbusBuffer(buf, vector) {
 
     // function code 6
     if (functionCode == 6) {
-        var address = buf.readUInt16BE(2);
-        var value = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var value = requestBuffer.readUInt16BE(4);
         // if length is bad, ignore message
-        if (buf.length != (6 + 2)) {
+        if (requestBuffer.length != (6 + 2)) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(8);
-        ansBuf.writeUInt16BE(address, 2);
-        ansBuf.writeUInt16BE(value, 4);
+        responseBuffer = new Buffer(8);
+        responseBuffer.writeUInt16BE(address, 2);
+        responseBuffer.writeUInt16BE(value, 4);
 
         if (vector.setRegister) vector.setRegister(address, value);
     }
 
     // function code 15
     if (functionCode == 15) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 7 + Math.ceil(length / 8) + 2) {
+        if (requestBuffer.length != 7 + Math.ceil(length / 8) + 2) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(8);
-        ansBuf.writeUInt16BE(address, 2);
-        ansBuf.writeUInt16BE(length, 4);
+        responseBuffer = new Buffer(8);
+        responseBuffer.writeUInt16BE(address, 2);
+        responseBuffer.writeUInt16BE(length, 4);
 
         // write coils
         if (vector.setCoil) {
             for (var i = 0; i < length; i++) {
-                var state = buf.readBit(i, 7);
+                var state = requestBuffer.readBit(i, 7);
                 vector.setCoil(address + i, state !== 0);
             }
         }
@@ -171,40 +172,40 @@ function parseModbusBuffer(buf, vector) {
 
     // function code 16
     if (functionCode == 16) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = requestBuffer.readUInt16BE(2);
+        var length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != (7 + length * 2 + 2)) {
+        if (requestBuffer.length != (7 + length * 2 + 2)) {
             return;
         }
 
         // build answer
-        ansBuf = new Buffer(8);
-        ansBuf.writeUInt16BE(address, 2);
-        ansBuf.writeUInt16BE(length, 4);
+        responseBuffer = new Buffer(8);
+        responseBuffer.writeUInt16BE(address, 2);
+        responseBuffer.writeUInt16BE(length, 4);
 
         // write registers
         if (vector.setRegister) {
             for (var i = 0; i < length; i++) {
-                var value = buf.readUInt16BE(7 + i * 2);
+                var value = requestBuffer.readUInt16BE(7 + i * 2);
                 vector.setRegister(address + i, value);
             }
         }
     }
 
     // add unit-id, function code and crc
-    if (ansBuf) {
+    if (responseBuffer) {
         // add unit number and function code
-        ansBuf.writeUInt8(unitNumber, 0);
-        ansBuf.writeUInt8(functionCode, 1);
+        responseBuffer.writeUInt8(unitID, 0);
+        responseBuffer.writeUInt8(functionCode, 1);
 
         // add crc
-        crc = crc16(ansBuf.slice(0, -2));
-        ansBuf.writeUInt16LE(crc, ansBuf.length - 2);
+        crc = crc16(responseBuffer.slice(0, -2));
+        responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
     }
 
-    return ansBuf;
+    return responseBuffer;
 }
 
 /**
@@ -228,36 +229,36 @@ var ServerTCP = function (vector, options) {
 
         sock.on('data', function (data) {
             // remove mbap and add crc16
-            var buf = new Buffer(data.length - 6 + 2);
-            data.copy(buf, 0, 6);
-            var crc = crc16(buf.slice(0, -2));
-            buf.writeUInt16LE(crc, buf.length - 2);
+            var requestBuffer = new Buffer(data.length - 6 + 2);
+            data.copy(requestBuffer, 0, 6);
+            var crc = crc16(requestBuffer.slice(0, -2));
+            requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
             // emit debug data
-            if (modbus.debug) modbus.emit('debug', {action: 'recive', data: buf});
+            if (modbus.debug) modbus.emit('debug', {action: 'recive', data: requestBuffer});
 
             // if length is too short, ignore message
-            if (buf.length < 8) {
+            if (requestBuffer.length < 8) {
                 return;
             }
 
             // parse the modbusRTU buffer
-            var ansBuf = parseModbusBuffer(buf, vector);
+            var responseBuffer = parseModbusBuffer(requestBuffer, vector);
 
             // send data back
-            if (ansBuf) {
+            if (responseBuffer) {
                 // get transaction id
                 var transactionsId = data.readUInt16BE(0);
 
                 // remove crc and add mbap
-                var outTcp = new Buffer(ansBuf.length + 6 - 2);
+                var outTcp = new Buffer(responseBuffer.length + 6 - 2);
                 outTcp.writeUInt16BE(transactionsId, 0);
                 outTcp.writeUInt16BE(0, 2);
-                outTcp.writeUInt16BE(ansBuf.length - 2, 4);
-                ansBuf.copy(outTcp, 6);
+                outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
+                responseBuffer.copy(outTcp, 6);
 
                 // emit debug data
-                if (modbus.debug) modbus.emit('debug', {action: 'send', data: ansBuf});
+                if (modbus.debug) modbus.emit('debug', {action: 'send', data: responseBuffer});
 
                 // write to port
                 sock.write(outTcp);
