@@ -5,6 +5,7 @@ var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport");
 
 var EXCEPTION_LENGTH = 5;
+var MAX_BUFFER_LENGTH = 256;
 
 /**
  * Simulate a modbus-RTU port using buffered serial connection
@@ -35,10 +36,15 @@ var RTUBufferedPort = function(path, options) {
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
-        var bufferLength = self._buffer.length ;
+        var bufferLength = self._buffer.length;
 
         // check data length
         if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
+
+        // check buffer size for MAX_BUFFER_SIZE
+        if (bufferLength > MAX_BUFFER_LENGTH) {
+            self._buffer = self._buffer.slice(-MAX_BUFFER_LENGTH);
+        }
 
         // loop and check length-sized buffer chunks
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
@@ -46,31 +52,20 @@ var RTUBufferedPort = function(path, options) {
             var unitId = self._buffer[i];
             var functionCode = self._buffer[i+1];
 
-            if ( unitId === self._id) {
-                if( functionCode === self._cmd || functionCode === (0x80 | self._cmd)) {
-                
-                    // a valid modbus frame header has been identified, check for expected buffer length
-                    if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
-                        self._emitData(i, expectedLength);
-                        return;
-                        
-                    } else {
-                        if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
-                            self._emitData(i, EXCEPTION_LENGTH);
-                            return;
-                        }
-                    }
-                    // frame header matches, but still missing bytes pending ... wait for further bytes
-                    break;
-                }
+            if (unitId !== self._id) continue;
+
+            if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
+                self._emitData(i, expectedLength);
+                return;
             }
+            if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
+                self._emitData(i, EXCEPTION_LENGTH);
+                return;
+            }
+
+            // frame header matches, but still missing bytes pending
+            if (functionCode === (0x7f & self._cmd)) break;
         }
-        
-        // cut off illegal RX chars, else buffer will grow and grow ...
-        if( i >= 1 ) {
-          self._buffer = self._buffer.slice(i,self._buffer.length);
-        }
-        
     });
 
     EventEmitter.call(this);
