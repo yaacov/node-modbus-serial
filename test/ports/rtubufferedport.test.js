@@ -2,6 +2,11 @@
 var expect = require('chai').expect;
 var mockery = require('mockery');
 
+var LONG_MSG = '010380018301830183018301830183018301830183018301830183018301830\
+1830183018301830183018301830183018301830183018301830183018301830183018301830183\
+0183018301830183018301830183018301830183018301830183018301830183018301830183018\
+3018301830183018301830183018301830183018346e0';
+
 describe('Modbus RTU buffered port', function() {
     var port;
 
@@ -84,153 +89,22 @@ describe('Modbus RTU buffered port', function() {
                 });
             });
         });
-        
-                it('Special data package, should return a valid Modbus RTU message', function(done) {
+
+        it('Special data package, should return a valid Modbus RTU message', function(done) {
             port.once('data', function(data) {
-                expect(data.toString('hex')).to.equal('010380018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018301830183018346e0');
+                expect(data.toString('hex')).to.equal(LONG_MSG);
                 done();
             });
             port.open(function() {
                 port.write(new Buffer('010300000040443A', 'hex'));
                 setTimeout(function() {
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('03', 'hex'));
-                    port._client.receive(new Buffer('80', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-                    port._client.receive(new Buffer('01', 'hex'));
-                    port._client.receive(new Buffer('83', 'hex'));
-
-                    port._client.receive(new Buffer('46', 'hex'));
-                    port._client.receive(new Buffer('e0', 'hex'));
+                    for (var i = 0; i < LONG_MSG.length; i += 2) {
+                      port._client.receive(new Buffer(LONG_MSG.slice(i, i + 2), 'hex'));
+                    }
                 });
             });
         });
-        
+
         it('Illegal start chars, should synchronize to valid Modbus RTU message', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('110306ae415652434049ad');
@@ -257,8 +131,7 @@ describe('Modbus RTU buffered port', function() {
                 });
             });
         });
-        
-        
+
         it('Illegal end chars, should return a valid Modbus RTU message', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('110306ae415652434049ad');
@@ -285,7 +158,7 @@ describe('Modbus RTU buffered port', function() {
                 });
             });
         });
-        
+
         it('should return a valid Modbus RTU message on illegal chars', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('110306ae415652434049ad');
