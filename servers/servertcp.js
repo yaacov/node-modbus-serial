@@ -59,7 +59,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         // read coils
         if (vector.getCoil) {
             for (var i = 0; i < length; i++) {
-              responseBuffer.writeBit(vector.getCoil(address + i), i % 8, 3 + parseInt(i / 8));
+              responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
             }
         }
     }
@@ -81,7 +81,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         // read registers
         if (vector.getHoldingRegister) {
           for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i), 3 + i * 2);
+              responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
           }
         }
     }
@@ -103,7 +103,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         // read registers
         if (vector.getInputRegister) {
           for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getInputRegister(address + i), 3 + i * 2);
+              responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
           }
         }
     }
@@ -125,7 +125,7 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // write coil
         if (vector.setCoil) {
-            vector.setCoil(address, state === 0xff00);
+            vector.setCoil(address, state === 0xff00, unitID);
         }
     }
 
@@ -143,7 +143,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         responseBuffer.writeUInt16BE(address, 2);
         responseBuffer.writeUInt16BE(value, 4);
 
-        if (vector.setRegister) vector.setRegister(address, value);
+        if (vector.setRegister) vector.setRegister(address, value, unitID);
     }
 
     // function code 15
@@ -165,7 +165,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         if (vector.setCoil) {
             for (var i = 0; i < length; i++) {
                 var state = requestBuffer.readBit(i, 7);
-                vector.setCoil(address + i, state !== 0);
+                vector.setCoil(address + i, state !== 0, unitID);
             }
         }
     }
@@ -189,7 +189,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         if (vector.setRegister) {
             for (var i = 0; i < length; i++) {
                 var value = requestBuffer.readUInt16BE(7 + i * 2);
-                vector.setRegister(address + i, value);
+                vector.setRegister(address + i, value, unitID);
             }
         }
     }
@@ -216,7 +216,6 @@ function parseModbusBuffer(requestBuffer, vector) {
 var ServerTCP = function (vector, options) {
     var modbus = this;
     options = options || {};
-    modbus._unitID = options.unitID || 1;
     modbus.debug = options.debug || false;
 
     // create a tcp server
