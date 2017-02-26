@@ -23,11 +23,11 @@ var TcpRTUBufferedPort = function(ip, options) {
     this.ip = ip;
     this.openFlag = false;
     this.callback = null;
-    this.removeCRC = true;
 
     // options
     if (typeof(options) == 'undefined') options = {};
     this.port = options.port || MODBUS_PORT;
+    this.removeCRC = options.removeCRC || true;
 
     // internal buffer
     this._buffer = new Buffer(0);
