@@ -14,13 +14,14 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
- var util = require('util');
- var events = require('events');
- var EventEmitter = events.EventEmitter || events;
- var net = require('net');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter || events;
+var net = require('net');
+var modbusSerialDebug = require('debug')('modbus-serial');
 
- var HOST = '127.0.0.1';
- var MODBUS_PORT = 502;
+var HOST = '127.0.0.1';
+var MODBUS_PORT = 502;
 
 /* Add bit operation functions to Buffer
  */
@@ -59,7 +60,7 @@ function parseModbusBuffer(requestBuffer, vector) {
         // read coils
         if (vector.getCoil) {
             for (var i = 0; i < length; i++) {
-              responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
+                responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
             }
         }
     }
@@ -80,9 +81,9 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // read registers
         if (vector.getHoldingRegister) {
-          for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
-          }
+            for (var i = 0; i < length; i++) {
+                responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
+            }
         }
     }
 
@@ -102,9 +103,9 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // read registers
         if (vector.getInputRegister) {
-          for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
-          }
+            for (var i = 0; i < length; i++) {
+                responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
+            }
         }
     }
 
@@ -222,7 +223,7 @@ var ServerTCP = function (vector, options) {
     modbus._server = net.createServer();
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
-    modbus._server.on('connection', function(sock) {
+    modbus._server.on('connection', function (sock) {
         // emit debug data
         if (modbus.debug) modbus.emit('debug', {action: 'connected', data: null});
 
@@ -234,7 +235,8 @@ var ServerTCP = function (vector, options) {
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
             // emit debug data
-            if (modbus.debug) modbus.emit('debug', {action: 'recive', data: requestBuffer});
+            modbusSerialDebug(JSON.stringify({action: 'receive', data: requestBuffer}));
+            if (modbus.debug) modbus.emit('debug', {action: 'receive', data: requestBuffer});
 
             // if length is too short, ignore message
             if (requestBuffer.length < 8) {

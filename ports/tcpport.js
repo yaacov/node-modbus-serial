@@ -3,11 +3,16 @@ var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var net = require('net');
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 var crc16 = require('../utils/crc16');
 
+/* TODO: const should be set once, maybe */
 var MODBUS_PORT = 502; // modbus port
 var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
+var MIN_DATA_LENGTH = 6;
+var MIN_MBAP_LENGTH = 6;
+var CRC_LENGTH = 2;
 
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
@@ -18,6 +23,7 @@ var TcpPort = function(ip, options) {
     this.openFlag = false;
     this.callback = null;
     this.debug = false;
+    this._transactionId = 0;
 
     // options
     if (typeof(options) == 'undefined') options = {};
@@ -39,19 +45,21 @@ var TcpPort = function(ip, options) {
         var crc;
 
         // check data length
-        if (data.length < 6) return;
+        if (data.length < MIN_MBAP_LENGTH) return;
 
         // cut 6 bytes of mbap, copy pdu and add crc
-        buffer = new Buffer(data.length - 6 + 2);
-        data.copy(buffer, 0, 6);
-        crc = crc16(buffer.slice(0, -2));
-        buffer.writeUInt16LE(crc, buffer.length - 2);
+        buffer = new Buffer(data.length - MIN_MBAP_LENGTH + CRC_LENGTH);
+        data.copy(buffer, 0, MIN_MBAP_LENGTH);
+        crc = crc16(buffer.slice(0, -CRC_LENGTH));
+        buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
         // update transaction id
-        modbus._transactionId = data.readUInt16BE(0)
+        modbus._transactionId = data.readUInt16BE(0);
+
+        modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
 
         // emit debug message
-        if (modbus.debug) { modbus.emit('debug', {action: 'recive', data: buffer}); }
+        if (modbus.debug) { modbus.emit('debug', {action: 'receive', data: buffer}); }
 
         // emit a data signal
         modbus.emit('data', buffer);
@@ -103,6 +111,11 @@ TcpPort.prototype.isOpen = function() {
  * Send data to a modbus-tcp slave
  */
 TcpPort.prototype.write = function (data) {
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        return;
+    }
+
     // get next transaction id
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
@@ -115,6 +128,8 @@ TcpPort.prototype.write = function (data) {
 
     // send buffer to slave
     this._client.write(buffer);
+
+    modbusSerialDebug(JSON.stringify({action: 'send tcp', data: buffer}));
 
     // emit debug message
     if (this.debug) { this.emit('debug', {action: 'send', data: buffer}); }

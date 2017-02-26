@@ -3,9 +3,15 @@ var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport");
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 var crc16 = require('../utils/crc16');
 var calculateLrc = require('./../utils/lrc');
+
+/* TODO: const should be set once, maybe */
+var EXCEPTION_LENGTH = 5;
+var MIN_DATA_LENGTH = 6;
+var MAX_BUFFER_LENGTH = 256;
 
 /**
  * Ascii encode a 'request' buffer and return it. This includes removing
@@ -174,9 +180,8 @@ AsciiPort.prototype.isOpen = function() {
  * Send data to a modbus slave
  */
 AsciiPort.prototype.write = function (data) {
-    // check data length
-    if (data.length < 6) {
-        // raise an error ?
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
 
@@ -210,6 +215,8 @@ AsciiPort.prototype.write = function (data) {
 
     // ascii encode buffer
     var _encodedData = asciiEncodeRequestBuffer(data);
+
+    modbusSerialDebug(JSON.stringify({action: 'send ascii', data: _encodedData}));
 
     // send buffer to slave
     this._client.write(_encodedData);

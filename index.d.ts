@@ -18,6 +18,7 @@ declare namespace ModbusRTU {
     // Connection shorthand API
     connectRTU(path: string, options: SerialPortOptions, next: Function): Promise<void>;
     connectTCP(ip: string, options: TcpPortOptions, next: Function): Promise<void>;
+    connectTcpRTUBuffered(ip: string, options: TcpRTUPortOptions, next: Function): Promise<void>;
     connectTelnet(ip: string, options: TelnetPortOptions, next: Function): Promise<void>;
     connectC701(ip: string, options: C701PortOptions, next: Function): Promise<void>;
     connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): Promise<void>;
@@ -89,6 +90,11 @@ declare namespace ModbusRTU {
 
   interface TcpPortOptions {
     port?: number;
+  }
+
+  interface TcpRTUPortOptions {
+    port?: number;
+    removeCRC?: boolean;
   }
 
   interface TelnetPortOptions {

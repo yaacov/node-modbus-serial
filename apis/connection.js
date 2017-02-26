@@ -20,34 +20,34 @@
  *
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
-var addConnctionAPI = function(Modbus) {
+var addConnctionAPI = function (Modbus) {
 
     var cl = Modbus.prototype;
 
-    var open = function(obj, next) {
-      /* the function check for a callback
-       * if we have a callback, use it
-       * o/w build a promise.
-       */
-      if (next) {
-          // if we have a callback, use the callback
-          obj.open(next);
-      } else {
-          // o/w use  a promise
-          var promise = new Promise( function (resolve, reject) {
-              function cb(err) {
-                  if (err) {
-                      reject(err);
-                  } else {
-                      resolve();
-                  }
-              }
+    var open = function (obj, next) {
+        /* the function check for a callback
+         * if we have a callback, use it
+         * o/w build a promise.
+         */
+        if (next) {
+            // if we have a callback, use the callback
+            obj.open(next);
+        } else {
+            // o/w use  a promise
+            var promise = new Promise(function (resolve, reject) {
+                function cb(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                }
 
-              obj.open(cb);
-          });
+                obj.open(cb);
+            });
 
-          return promise;
-      }
+            return promise;
+        }
     }
 
     /**
@@ -91,6 +91,27 @@ var addConnctionAPI = function(Modbus) {
         // create the TcpPort
         var TcpPort = require('../ports/tcpport');
         this._port = new TcpPort(ip, options);
+
+        // open and call next
+        return open(this, next);
+    };
+
+    /**
+     * Connect to a communication port, using TcpRTUBufferedPort.
+     *
+     * @param {string} ip the ip of the TCP Port - required.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
+     */
+    cl.connectTcpRTUBuffered = function (ip, options, next) {
+        // check if we have options
+        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+            next = options;
+            options = {};
+        }
+
+        var TcpRTUBufferedPort = require('../ports/tcprtubufferedport');
+        this._port = new TcpRTUBufferedPort(ip, options);
 
         // open and call next
         return open(this, next);
@@ -180,9 +201,9 @@ var addConnctionAPI = function(Modbus) {
         var SerialPortAscii = require('../ports/asciiport');
         this._port = new SerialPortAscii(path, options);
 
-         // open and call next
-         open(this, next);
-     }
+        // open and call next
+        open(this, next);
+    }
 };
 
 module.exports = addConnctionAPI;

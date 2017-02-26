@@ -2,11 +2,14 @@
 var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 /* Add bit operation functions to Buffer
  */
 require('../utils/buffer_bit')();
 var crc16 = require('../utils/crc16');
+
+var MIN_DATA_LENGTH = 8;
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected
@@ -60,8 +63,8 @@ TestPort.prototype.isOpen = function() {
 TestPort.prototype.write = function (buf) {
     var buffer = null;
 
-    // if length is too short, ignore message
-    if (buf.length < 8) {
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
 
@@ -258,6 +261,8 @@ TestPort.prototype.write = function (buf) {
         if (unitNumber == 3) {
             buffer.writeUInt16LE(crc + 1, buffer.length - 2);
         }
+
+        modbusSerialDebug(JSON.stringify({action: 'send test', data: buffer}));
 
         this.emit('data', buffer);
     }
