@@ -2,16 +2,6 @@
 var expect = require('chai').expect;
 var mockery = require('mockery');
 
-var LONG_MSG = '010380018301830183018301830183018301830183018301830183018301830\
-1830183018301830183018301830183018301830183018301830183018301830183018301830183\
-0183018301830183018301830183018301830183018301830183018301830183018301830183018\
-3018301830183018301830183018301830183018346e0';
-
-var LONG_MSG_RECEIVED = '010380018301830183018301830183018301830183018301830183018301830\
-1830183018301830183018301830183018301830183018301830183018301830183018301830183\
-0183018301830183018301830183018301830183018301830183018301830183018301830183018\
-3018301830183018301830183018301830183018346e00000';
-
 describe('Modbus TCP RTU buffered port', function () {
     var port;
 
@@ -91,21 +81,6 @@ describe('Modbus TCP RTU buffered port', function () {
                     port._client.receive(new Buffer('00000000000604', 'hex'));
                     port._client.receive(new Buffer('00000000000641', 'hex'));
                     port._client.receive(new Buffer('00000000000636', 'hex'));
-                });
-            });
-        });
-
-        it('Special data package, should return a valid Modbus TCP RTU message', function(done) {
-            port.once('data', function(data) {
-                expect(data.toString('hex')).to.equal(LONG_MSG_RECEIVED);
-                done();
-            });
-            port.open(function() {
-                port.write(new Buffer('010300000040443A0000', 'hex'));
-                setTimeout(function() {
-                    for (var i = 0; i < LONG_MSG.length; i += 2) {
-                        port._client.receive(Buffer.concat([new Buffer('000000000006', 'hex'), new Buffer(LONG_MSG.slice(i, i + 2), 'hex')]));
-                    }
                 });
             });
         });

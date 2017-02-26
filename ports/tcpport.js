@@ -50,13 +50,13 @@ var TcpPort = function(ip, options) {
         // cut 6 bytes of mbap, copy pdu and add crc
         buffer = new Buffer(data.length - MIN_MBAP_LENGTH + CRC_LENGTH);
         data.copy(buffer, 0, MIN_MBAP_LENGTH);
-        crc = crc16(buffer.slice(0, -CRC_LENGTH));
+        crc = crc16(buffer.slice(0, -2));
         buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
         // update transaction id
         modbus._transactionId = data.readUInt16BE(0);
 
-        modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
+        modbusSerialDebug( {action: 'receive', data: buffer});
 
         // emit debug message
         if (modbus.debug) { modbus.emit('debug', {action: 'receive', data: buffer}); }
@@ -120,11 +120,11 @@ TcpPort.prototype.write = function (data) {
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
     // remove crc and add mbap
-    var buffer = new Buffer(data.length + 6 - 2);
+    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(transactionsId, 0);
     buffer.writeUInt16BE(0, 2);
-    buffer.writeUInt16BE(data.length - 2, 4);
-    data.copy(buffer, 6);
+    buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
+    data.copy(buffer, MIN_MBAP_LENGTH);
 
     // send buffer to slave
     this._client.write(buffer);
