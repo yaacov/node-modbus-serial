@@ -60,7 +60,7 @@ TestPort.prototype.isOpen = function() {
 /**
  * Simulate successful/failure port requests and replays
  */
-TestPort.prototype.write = function (buf) {
+TestPort.prototype.write = function (data) {
     var buffer = null;
 
     if(data.length < MIN_DATA_LENGTH) {
@@ -68,22 +68,22 @@ TestPort.prototype.write = function (buf) {
         return;
     }
 
-    var unitNumber = buf[0];
-    var functionCode = buf[1];
-    var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
+    var unitNumber = data[0];
+    var functionCode = data[1];
+    var crc = data[data.length - 2] + data[data.length - 1] * 0x100;
 
     // if crc is bad, ignore message
-    if (crc != crc16(buf.slice(0, -2))) {
+    if (crc != crc16(data.slice(0, -2))) {
         return;
     }
 
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -97,11 +97,11 @@ TestPort.prototype.write = function (buf) {
 
     // function code 3
     if (functionCode == 3) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -117,11 +117,11 @@ TestPort.prototype.write = function (buf) {
 
     // function code 4
     if (functionCode == 4) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -137,11 +137,11 @@ TestPort.prototype.write = function (buf) {
 
     // function code 5
     if (functionCode == 5) {
-        var address = buf.readUInt16BE(2);
-        var state = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var state = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -160,10 +160,10 @@ TestPort.prototype.write = function (buf) {
 
     // function code 6
     if (functionCode == 6) {
-        var address = buf.readUInt16BE(2);
-        var value = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var value = data.readUInt16BE(4);
         // if length is bad, ignore message
-        if (buf.length != (6 + 2)) {
+        if (data.length != (6 + 2)) {
             return;
         }
 
@@ -177,11 +177,11 @@ TestPort.prototype.write = function (buf) {
 
     // function code 15
     if (functionCode == 15) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 7 + Math.ceil(length / 8) + 2) {
+        if (data.length != 7 + Math.ceil(length / 8) + 2) {
             return;
         }
 
@@ -192,7 +192,7 @@ TestPort.prototype.write = function (buf) {
 
         // write coils
         for (var i = 0; i < length; i++) {
-            var state = buf.readBit(i, 7);
+            var state = data.readBit(i, 7);
 
             if (state) {
                 this._coils |= (1 << (address + i));
@@ -204,11 +204,11 @@ TestPort.prototype.write = function (buf) {
 
     // function code 16
     if (functionCode == 16) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        var address = data.readUInt16BE(2);
+        var length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != (7 + length * 2 + 2)) {
+        if (data.length != (7 + length * 2 + 2)) {
             return;
         }
 
@@ -219,7 +219,7 @@ TestPort.prototype.write = function (buf) {
 
         // write registers
         for (var i = 0; i < length; i++) {
-            this._holding_registers[address + i] = buf.readUInt16BE(7 + i * 2);
+            this._holding_registers[address + i] = data.readUInt16BE(7 + i * 2);
         }
     }
 
