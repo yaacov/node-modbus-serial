@@ -85,7 +85,7 @@ util.inherits(TcpPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-TcpPort.prototype.open = function (callback) {
+TcpPort.prototype.open = function(callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -93,7 +93,7 @@ TcpPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TcpPort.prototype.close = function (callback) {
+TcpPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
 };

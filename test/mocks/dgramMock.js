@@ -33,11 +33,11 @@ Socket.prototype.send = function(buffer, offset, length, port, address, callback
     }
 };
 
-Socket.prototype.listen = function () {
+Socket.prototype.listen = function() {
     this.emit('listening');
 };
 
-Socket.prototype.receive = function (buffer) {
+Socket.prototype.receive = function(buffer) {
     this.emit('message', buffer);
 };
 

@@ -163,14 +163,14 @@ util.inherits(AsciiPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-AsciiPort.prototype.open = function (callback) {
+AsciiPort.prototype.open = function(callback) {
     this._client.open(callback);
 };
 
 /**
  * Simulate successful close port
  */
-AsciiPort.prototype.close = function (callback) {
+AsciiPort.prototype.close = function(callback) {
     this._client.close(callback);
 };
 
@@ -198,12 +198,12 @@ AsciiPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

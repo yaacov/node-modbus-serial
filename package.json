@@ -26,7 +26,9 @@
   "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
   "devDependencies": {
     "chai": "^3.5.0",
+    "eslint": "^3.16.1",
     "mocha": "^3.2.0",
+    "mocha-eslint": "^3.0.1",
     "mockery": "^2.0.0",
     "serialport": "^4.0.7",
     "sinon": "^1.17.7"

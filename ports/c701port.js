@@ -50,6 +50,8 @@ var UdpPort = function(ip, options) {
 
     // wait for answer
     this._client.on('message', function(data) {
+        var buffer = null;
+
         // check expected length
         if (modbus.length < 6) return;
 
@@ -61,7 +63,7 @@ var UdpPort = function(ip, options) {
 
         // check for modbus valid answer
         // get the serial data from the C701 packet
-        var buffer = data.slice(data.length - modbus._length);
+        buffer = data.slice(data.length - modbus._length);
 
         modbusSerialDebug({action: 'receive c701 upd port', data: data, buffer: buffer});
         modbusSerialDebug(JSON.stringify({action: 'receive c701 upd port strings', data: data, buffer: buffer}));
@@ -94,7 +96,7 @@ var UdpPort = function(ip, options) {
         modbus.openFlag = true;
     });
 
-    this._client.on('close', function(had_error) {
+    this._client.on('close', function() {
         modbus.openFlag = false;
     });
 
@@ -105,7 +107,7 @@ util.inherits(UdpPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-UdpPort.prototype.open = function (callback) {
+UdpPort.prototype.open = function(callback) {
     if (callback)
         callback(null);
 };
@@ -113,7 +115,7 @@ UdpPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-UdpPort.prototype.close = function (callback) {
+UdpPort.prototype.close = function(callback) {
     this._client.close();
     if (callback)
         callback(null);
@@ -143,12 +145,12 @@ UdpPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 // create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
@@ -27,9 +29,9 @@ function setClient() {
 function run() {
     client.readInputRegisters(4, 12)
       .then(function(d) {
-          floatA = d.buffer.readFloatBE(0);
-          floatB = d.buffer.readFloatBE(4);
-          floatC = d.buffer.readFloatBE(8);
+          var floatA = d.buffer.readFloatBE(0);
+          var floatB = d.buffer.readFloatBE(4);
+          var floatC = d.buffer.readFloatBE(8);
           console.log("Receive:", floatA, floatB, floatC); })
       .catch(function(e) {
           console.log(e.message); })

@@ -119,7 +119,7 @@ TelnetPort.prototype._emitData = function(start, length) {
 /**
  * Simulate successful port open
  */
-TelnetPort.prototype.open = function (callback) {
+TelnetPort.prototype.open = function(callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -127,7 +127,7 @@ TelnetPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TelnetPort.prototype.close = function (callback) {
+TelnetPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
 };
@@ -156,12 +156,12 @@ TelnetPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

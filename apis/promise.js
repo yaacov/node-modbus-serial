@@ -35,7 +35,7 @@ var convert = function(f) {
             f.bind(client)(id, address, arg, next);
         } else {
             // o/w use  a promise
-            var promise = new Promise( function (resolve, reject) {
+            var promise = new Promise( function(resolve, reject) {
                 function cb(err, data) {
                     if (err) {
                         reject(err);
@@ -77,7 +77,7 @@ var addPromiseAPI = function(Modbus) {
     cl.readHoldingRegisters = convert(cl.writeFC3);
     cl.readInputRegisters = convert(cl.writeFC4);
     cl.writeCoil = convert(cl.writeFC5);
-    cl.writeRegister  = convert(cl.writeFC6);
+    cl.writeRegister = convert(cl.writeFC6);
     cl.writeCoils = convert(cl.writeFC15);
     cl.writeRegisters = convert(cl.writeFC16);
 };
