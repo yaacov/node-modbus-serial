@@ -11,7 +11,8 @@ var paths = [
 
 var options = {
   // Specify style of output
-    formatter: 'compact'  // Defaults to `stylish`
+    formatter: 'compact', // Defaults to `stylish`
+    timeout: 5000
 };
 
 // Run the tests
