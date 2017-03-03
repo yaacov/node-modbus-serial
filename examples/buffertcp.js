@@ -3,11 +3,10 @@
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
-// open connection to a serial port
-//client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-client.connectTCP("192.168.1.20", {port: 502})
-// client.connectTCP("192.168.1.73", {port: 502})
-// client.connectTCP("127.0.0.1", {port: 8502})
+// NPort Gateway 801D NetPort
+// client.connectTcpRTUBuffered("192.168.1.73", {port: 502, removeCrc: true})
+// client.connectTcpRTUBuffered("192.168.1.73", {port: 502, removeCrc: false
+client.connectTcpRTUBuffered("192.168.1.20", {port: 502, removeCrc: false})
     .then(setClient)
     .then(function () {
         console.log("Connected");
@@ -20,7 +19,7 @@ function setClient() {
     // set the client's unit id
     // set a timout for requests default is null (no timeout)
     client.setID(1);
-    client.setTimeout(1000);
+    client.setTimeout(2000);
 
     // run program
     run();

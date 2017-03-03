@@ -94,7 +94,7 @@ declare namespace ModbusRTU {
 
   interface TcpRTUPortOptions {
     port?: number;
-    removeCRC?: boolean;
+    removeCrc?: boolean;
   }
 
   interface TelnetPortOptions {

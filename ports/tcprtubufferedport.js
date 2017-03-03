@@ -12,13 +12,14 @@ var EXCEPTION_LENGTH = 5;
 var MIN_DATA_LENGTH = 6;
 var MIN_MBAP_LENGTH = 6;
 var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
+var CRC_LENGTH = 2;
 
 var MODBUS_PORT = 502;
 
 /**
  * Simulate a modbus-RTU port using TCP connection
  */
-var TcpRTUBufferedPort = function(ip, options) {
+var TcpRTUBufferedPort = function (ip, options) {
     var self = this;
     this.ip = ip;
     this.openFlag = false;
@@ -27,7 +28,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     // options
     if (typeof(options) == 'undefined') options = {};
     this.port = options.port || MODBUS_PORT;
-    this.removeCRC = options.removeCRC || true;
+    this.removeCrc = options.removeCrc;
 
     // internal buffer
     this._buffer = new Buffer(0);
@@ -38,7 +39,7 @@ var TcpRTUBufferedPort = function(ip, options) {
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
-    var handleCallback = function(had_error) {
+    var handleCallback = function (had_error) {
         if (self.callback) {
             self.callback(had_error);
             self.callback = null;
@@ -50,19 +51,32 @@ var TcpRTUBufferedPort = function(ip, options) {
 
     // register the port data event
     this._client.on('data', function onData(data) {
+        modbusSerialDebug(JSON.stringify({data: data}));
+
+        var buffer;
+        var crc;
+
         // check data length
-        if (data.length < MIN_MBAP_LENGTH) return; // missing mbap on tcp
+        if (data.length < MIN_MBAP_LENGTH) return;
 
         // cut 6 bytes of mbap
-        var buffer = new Buffer(data.length - 6);
-        data.copy(buffer, 0, 6);
+        buffer = new Buffer(data.length - MIN_MBAP_LENGTH);
+        data.copy(buffer, 0, MIN_MBAP_LENGTH);
 
-        // add data (PDU / ADU) to buffer
+        // add data to buffer
         self._buffer = Buffer.concat([self._buffer, buffer]);
+
+        modbusSerialDebug({action: 'receive', data: data, buffer: buffer});
+        modbusSerialDebug(JSON.stringify({action: 'receive strings', data: data, buffer: buffer}));
+
+        // emit debug message
+        if (self.debug) {
+            self.emit('debug', {action: 'receive', data: data, buffer: buffer});
+        }
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
-        var bufferLength = self._buffer.length;
+        var bufferLength = self._buffer.length + CRC_LENGTH;
 
         modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
 
@@ -73,7 +87,7 @@ var TcpRTUBufferedPort = function(ip, options) {
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
         for (var i = 0; i <= maxOffset; i++) {
             var unitId = self._buffer[i];
-            var functionCode = self._buffer[i+1];
+            var functionCode = self._buffer[i + 1];
 
             if (unitId !== self._id) continue;
 
@@ -88,17 +102,17 @@ var TcpRTUBufferedPort = function(ip, options) {
         }
     });
 
-    this._client.on('connect', function() {
+    this._client.on('connect', function () {
         self.openFlag = true;
         handleCallback();
     });
 
-    this._client.on('close', function(had_error) {
+    this._client.on('close', function (had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
 
-    this._client.on('error', function(had_error) {
+    this._client.on('error', function (had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
@@ -113,7 +127,7 @@ util.inherits(TcpRTUBufferedPort, EventEmitter);
  * @param {number} length the length of the response
  * @private
  */
-TcpRTUBufferedPort.prototype._emitData = function(start, length) {
+TcpRTUBufferedPort.prototype._emitData = function (start, length) {
 
     var data = this._buffer.slice(start, start + length);
     this._buffer = this._buffer.slice(start + length);
@@ -121,21 +135,17 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
     // update transaction id
     this._transactionId = data.readUInt16BE(0);
 
-    if(data.length > 0) {
-        var buffer;
-        if(this.removeCRC) {
-            buffer = Buffer.alloc(data.length + 2);
-            data.copy(buffer, 0);
+    if (data.length > 0) {
+        var buffer = Buffer.alloc(data.length + CRC_LENGTH);
+        data.copy(buffer, 0);
 
-            // add crc
-            var crc = crc16(buffer.slice(0, -2));
-            buffer.writeUInt16LE(crc, buffer.length - 2);
-        } else {
-            buffer = Buffer.alloc(data.length);
-            data.copy(buffer, 0);
-        }
+        // add crc
+        var crc = crc16(buffer.slice(0, -CRC_LENGTH));
+        buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
         this.emit('data', buffer);
+    } else {
+        modbusSerialDebug({action: 'emit data to short', data: data})
     }
 
     // reset internal vars
@@ -163,7 +173,7 @@ TcpRTUBufferedPort.prototype.close = function (callback) {
 /**
  * Check if port is open
  */
-TcpRTUBufferedPort.prototype.isOpen = function() {
+TcpRTUBufferedPort.prototype.isOpen = function () {
     return this.openFlag;
 };
 
@@ -171,7 +181,7 @@ TcpRTUBufferedPort.prototype.isOpen = function() {
  * Send data to a modbus slave via telnet server
  */
 TcpRTUBufferedPort.prototype.write = function (data) {
-    if(data.length < MIN_DATA_LENGTH) {
+    if (data.length < MIN_DATA_LENGTH) {
         modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
@@ -180,7 +190,7 @@ TcpRTUBufferedPort.prototype.write = function (data) {
     this._id = data[0];
     this._cmd = data[1];
 
-    // calculate expected answer length of PDU / ADU
+    // calculate expected answer length
     switch (this._cmd) {
         case 1:
         case 2:
@@ -207,24 +217,23 @@ TcpRTUBufferedPort.prototype.write = function (data) {
     // get next transaction id
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
-    // add mbap
-    var buffer = new Buffer(data.length + 6 - 2);
+    // remove crc and add mbap
+    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(transactionsId, 0);
     buffer.writeUInt16BE(0, 2);
-
-    if(this.removeCRC) {
-        buffer.writeUInt16BE(data.length - 2, 4); /* overwrite CRC */
-    }
-
-    data.copy(buffer, 6);
-
-    modbusSerialDebug(JSON.stringify({action: 'send rtu serial over tcp', data: buffer}));
+    buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
+    data.copy(buffer, MIN_MBAP_LENGTH);
 
     // send buffer to slave
     this._client.write(buffer);
 
+    modbusSerialDebug({action: 'send tcp', data: data, buffer: buffer});
+    modbusSerialDebug(JSON.stringify({action: 'send tcp strings', data: data, buffer: buffer}));
+
     // emit debug message
-    if (this.debug) { this.emit('debug', {action: 'send', data: buffer}); }
+    if (this.debug) {
+        this.emit('debug', {action: 'send', data: data, buffer: buffer});
+    }
 };
 
 module.exports = TcpRTUBufferedPort;

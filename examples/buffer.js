@@ -23,7 +23,6 @@ function setClient() {
 }
 
 function run() {
-    // read the 4 registers starting at address 5
     client.readInputRegisters(4, 12)
       .then(function(d) {
           floatA = d.buffer.readFloatBE(0);

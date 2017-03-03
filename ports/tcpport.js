@@ -56,7 +56,7 @@ var TcpPort = function(ip, options) {
         // update transaction id
         modbus._transactionId = data.readUInt16BE(0);
 
-        modbusSerialDebug( {action: 'receive', data: buffer});
+        modbusSerialDebug( {action: 'receive', data: data, buffer: buffer});
 
         // emit debug message
         if (modbus.debug) { modbus.emit('debug', {action: 'receive', data: buffer}); }
@@ -129,10 +129,10 @@ TcpPort.prototype.write = function (data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug(JSON.stringify({action: 'send tcp', data: buffer}));
+    modbusSerialDebug(JSON.stringify({action: 'send tcp', data: data, buffer: buffer}));
 
     // emit debug message
-    if (this.debug) { this.emit('debug', {action: 'send', data: buffer}); }
+    if (this.debug) { this.emit('debug', {action: 'send', data: data, buffer: buffer}); }
 };
 
 module.exports = TcpPort;
