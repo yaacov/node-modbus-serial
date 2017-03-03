@@ -5,17 +5,21 @@ var EventEmitter = events.EventEmitter || events;
 var net = require('net');
 var modbusSerialDebug = require('debug')('modbus-serial');
 
+var crc16 = require('../utils/crc16');
+
 /* TODO: const should be set once, maybe */
 var EXCEPTION_LENGTH = 5;
 var MIN_DATA_LENGTH = 6;
-var MAX_BUFFER_LENGTH = 256;
+var MIN_MBAP_LENGTH = 6;
+var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
+var CRC_LENGTH = 2;
 
-var TELNET_PORT = 2217;
+var MODBUS_PORT = 502;
 
 /**
- * Simulate a modbus-RTU port using Telent connection
+ * Simulate a modbus-RTU port using TCP connection
  */
-var TelnetPort = function(ip, options) {
+var TcpRTUBufferedPort = function (ip, options) {
     var self = this;
     this.ip = ip;
     this.openFlag = false;
@@ -23,17 +27,19 @@ var TelnetPort = function(ip, options) {
 
     // options
     if (typeof(options) == 'undefined') options = {};
-    this.port = options.port || TELNET_PORT; // telnet server port
+    this.port = options.port || MODBUS_PORT;
+    this.removeCrc = options.removeCrc;
 
     // internal buffer
     this._buffer = new Buffer(0);
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
+    this._transactionId = 0;
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
-    var handleCallback = function(had_error) {
+    var handleCallback = function (had_error) {
         if (self.callback) {
             self.callback(had_error);
             self.callback = null;
@@ -45,25 +51,43 @@ var TelnetPort = function(ip, options) {
 
     // register the port data event
     this._client.on('data', function onData(data) {
+        modbusSerialDebug(JSON.stringify({data: data}));
+
+        var buffer;
+        var crc;
+
+        // check data length
+        if (data.length < MIN_MBAP_LENGTH) return;
+
+        // cut 6 bytes of mbap
+        buffer = new Buffer(data.length - MIN_MBAP_LENGTH);
+        data.copy(buffer, 0, MIN_MBAP_LENGTH);
+
         // add data to buffer
-        self._buffer = Buffer.concat([self._buffer, data]);
+        self._buffer = Buffer.concat([self._buffer, buffer]);
+
+        modbusSerialDebug({action: 'receive tcp rtu buffered port', data: data, buffer: buffer});
+        modbusSerialDebug(JSON.stringify({action: 'receive tcp rtu buffered port strings', data: data, buffer: buffer}));
+
+        // emit debug message
+        if (self.debug) {
+            self.emit('debug', {action: 'receive', data: data, buffer: buffer});
+        }
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
-        var bufferLength = self._buffer.length ;
+        var bufferLength = self._buffer.length + CRC_LENGTH;
+
         modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
 
-        modbusSerialDebug({action: 'receive tcp telnet port', data: data, buffer: self._buffer});
-        modbusSerialDebug(JSON.stringify({action: 'receive tcp telnet port strings', data: data, buffer: self._buffer}));
-
         // check data length
-        if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
+        if (expectedLength < MIN_MBAP_LENGTH || bufferLength < EXCEPTION_LENGTH) return;
 
         // loop and check length-sized buffer chunks
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
         for (var i = 0; i <= maxOffset; i++) {
             var unitId = self._buffer[i];
-            var functionCode = self._buffer[i+1];
+            var functionCode = self._buffer[i + 1];
 
             if (unitId !== self._id) continue;
 
@@ -75,30 +99,27 @@ var TelnetPort = function(ip, options) {
                 self._emitData(i, EXCEPTION_LENGTH);
                 return;
             }
-
-            // frame header matches, but still missing bytes pending
-            if (functionCode === (0x7f & self._cmd)) break;
         }
     });
 
-    this._client.on('connect', function() {
+    this._client.on('connect', function () {
         self.openFlag = true;
         handleCallback();
     });
 
-    this._client.on('close', function(had_error) {
+    this._client.on('close', function (had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
 
-    this._client.on('error', function(had_error) {
+    this._client.on('error', function (had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
 
     EventEmitter.call(this);
 };
-util.inherits(TelnetPort, EventEmitter);
+util.inherits(TcpRTUBufferedPort, EventEmitter);
 
 /**
  * Emit the received response, cut the buffer and reset the internal vars.
@@ -106,9 +127,26 @@ util.inherits(TelnetPort, EventEmitter);
  * @param {number} length the length of the response
  * @private
  */
-TelnetPort.prototype._emitData = function(start, length) {
-    this.emit('data', this._buffer.slice(start, start + length));
+TcpRTUBufferedPort.prototype._emitData = function (start, length) {
+
+    var data = this._buffer.slice(start, start + length);
     this._buffer = this._buffer.slice(start + length);
+
+    // update transaction id
+    this._transactionId = data.readUInt16BE(0);
+
+    if (data.length > 0) {
+        var buffer = Buffer.alloc(data.length + CRC_LENGTH);
+        data.copy(buffer, 0);
+
+        // add crc
+        var crc = crc16(buffer.slice(0, -CRC_LENGTH));
+        buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
+
+        this.emit('data', buffer);
+    } else {
+        modbusSerialDebug({action: 'emit data to short', data: data})
+    }
 
     // reset internal vars
     this._id = 0;
@@ -119,7 +157,7 @@ TelnetPort.prototype._emitData = function(start, length) {
 /**
  * Simulate successful port open
  */
-TelnetPort.prototype.open = function(callback) {
+TcpRTUBufferedPort.prototype.open = function (callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -127,7 +165,7 @@ TelnetPort.prototype.open = function(callback) {
 /**
  * Simulate successful close port
  */
-TelnetPort.prototype.close = function(callback) {
+TcpRTUBufferedPort.prototype.close = function (callback) {
     this.callback = callback;
     this._client.end();
 };
@@ -135,15 +173,15 @@ TelnetPort.prototype.close = function(callback) {
 /**
  * Check if port is open
  */
-TelnetPort.prototype.isOpen = function() {
+TcpRTUBufferedPort.prototype.isOpen = function () {
     return this.openFlag;
 };
 
 /**
  * Send data to a modbus slave via telnet server
  */
-TelnetPort.prototype.write = function (data) {
-    if(data.length < MIN_DATA_LENGTH) {
+TcpRTUBufferedPort.prototype.write = function (data) {
+    if (data.length < MIN_DATA_LENGTH) {
         modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
@@ -156,12 +194,12 @@ TelnetPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            length = data.readUInt16BE(4);
+            var length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            length = data.readUInt16BE(4);
+            var length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:
@@ -176,11 +214,21 @@ TelnetPort.prototype.write = function (data) {
             break;
     }
 
-    // send buffer to slave
-    this._client.write(data);
+    // get next transaction id
+    var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
-    modbusSerialDebug({action: 'send tcp telnet port', data: data});
-    modbusSerialDebug(JSON.stringify({action: 'send tcp telnet port strings', data: data}));
+    // remove crc and add mbap
+    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+    buffer.writeUInt16BE(transactionsId, 0);
+    buffer.writeUInt16BE(0, 2);
+    buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
+    data.copy(buffer, MIN_MBAP_LENGTH);
+
+    // send buffer to slave
+    this._client.write(buffer);
+
+    modbusSerialDebug({action: 'send tcp rtu buffered port', data: data, buffer: buffer});
+    modbusSerialDebug(JSON.stringify({action: 'send tcp rtu buffered port strings', data: data, buffer: buffer}));
 };
 
-module.exports = TelnetPort;
+module.exports = TcpRTUBufferedPort;
