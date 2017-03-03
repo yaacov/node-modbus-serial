@@ -259,7 +259,7 @@ Duration of the timeout
 
 *callback {function}:*
 Called if port emit a 'debug' message (e.g. on send and recive data)
-that looks like: function (data) { ... }
+that looks like: function(data) { ... }
 
 ----
 ##### .readCoils (address, length)
@@ -390,7 +390,7 @@ The total number of registers requested.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
@@ -413,7 +413,7 @@ The total number of registers requested.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
@@ -436,7 +436,7 @@ The total number of registers requested.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
@@ -459,7 +459,7 @@ The total number of registers requested.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 ```
 error - null on success, error string o/w
 data - an object with two fildes:
@@ -482,7 +482,7 @@ The coil state.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 
 ----
 ##### .writeFC15 (unit, address, array, callback)
@@ -499,7 +499,7 @@ The array of states to send to unit.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 
 ----
 ##### .writeFC6 (unit, address, value, callback)
@@ -516,7 +516,7 @@ The value to sent to unit.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 
 ----
 ##### .writeFC16 (unit, address, array, callback)
@@ -533,7 +533,7 @@ The array of values to sent to unit.
 
 *callback {function}:* (optional)
 Called once the unit returns an answer. The callback should be a function
-that looks like: function (error, data) { ... }
+that looks like: function(error, data) { ... }
 
 ----
 ###### API connection shorthand

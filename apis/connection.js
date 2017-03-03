@@ -25,29 +25,29 @@ var addConnctionAPI = function(Modbus) {
     var cl = Modbus.prototype;
 
     var open = function(obj, next) {
-      /* the function check for a callback
-       * if we have a callback, use it
-       * o/w build a promise.
-       */
-      if (next) {
-          // if we have a callback, use the callback
-          obj.open(next);
-      } else {
-          // o/w use  a promise
-          var promise = new Promise( function (resolve, reject) {
-              function cb(err) {
-                  if (err) {
-                      reject(err);
-                  } else {
-                      resolve();
-                  }
-              }
+        /* the function check for a callback
+         * if we have a callback, use it
+         * o/w build a promise.
+         */
+        if (next) {
+            // if we have a callback, use the callback
+            obj.open(next);
+        } else {
+            // o/w use  a promise
+            var promise = new Promise( function(resolve, reject) {
+                function cb(err) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve();
+                    }
+                }
 
-              obj.open(cb);
-          });
+                obj.open(cb);
+            });
 
-          return promise;
-      }
+            return promise;
+        }
     }
 
     /**
@@ -57,7 +57,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectRTU = function (path, options, next) {
+    cl.connectRTU = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -81,7 +81,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectTCP = function (ip, options, next) {
+    cl.connectTCP = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -103,7 +103,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectTelnet = function (ip, options, next) {
+    cl.connectTelnet = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -125,7 +125,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectC701 = function (ip, options, next) {
+    cl.connectC701 = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -147,7 +147,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectRTUBuffered = function (path, options, next) {
+    cl.connectRTUBuffered = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -169,7 +169,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectAsciiSerial = function (path, options, next) {
+    cl.connectAsciiSerial = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -180,9 +180,9 @@ var addConnctionAPI = function(Modbus) {
         var SerialPortAscii = require('../ports/asciiport');
         this._port = new SerialPortAscii(path, options);
 
-         // open and call next
-         open(this, next);
-     }
+        // open and call next
+        open(this, next);
+    }
 };
 
 module.exports = addConnctionAPI;

@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 // create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");

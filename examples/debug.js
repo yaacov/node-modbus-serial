@@ -1,3 +1,5 @@
+/* eslint-disable no-console */
+
 // create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
@@ -26,15 +28,15 @@ function setClient() {
 }
 
 function run() {
-  // read the 4 registers starting at address 5
-  client.readHoldingRegisters(5, 4)
-    .then(function(d) {
-      console.log("Receive:", d.data); })
-    .catch(function(e) {
-      console.log(e.message); })
-    .then(close);
+    // read the 4 registers starting at address 5
+    client.readHoldingRegisters(5, 4)
+        .then(function(d) {
+            console.log("Receive:", d.data); })
+        .catch(function(e) {
+            console.log(e.message); })
+        .then(close);
 }
 
 function close() {
-  client.close();
+    client.close();
 }

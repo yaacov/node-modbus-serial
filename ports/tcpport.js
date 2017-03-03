@@ -79,7 +79,7 @@ util.inherits(TcpPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-TcpPort.prototype.open = function (callback) {
+TcpPort.prototype.open = function(callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -87,7 +87,7 @@ TcpPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TcpPort.prototype.close = function (callback) {
+TcpPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
 };
@@ -102,7 +102,7 @@ TcpPort.prototype.isOpen = function() {
 /**
  * Send data to a modbus-tcp slave
  */
-TcpPort.prototype.write = function (data) {
+TcpPort.prototype.write = function(data) {
     // get next transaction id
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 

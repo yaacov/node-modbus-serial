@@ -91,14 +91,14 @@ RTUBufferedPort.prototype._emitData = function(start, length) {
 /**
  * Simulate successful port open
  */
-RTUBufferedPort.prototype.open = function (callback) {
+RTUBufferedPort.prototype.open = function(callback) {
     this._client.open(callback);
 };
 
 /**
  * Simulate successful close port
  */
-RTUBufferedPort.prototype.close = function (callback) {
+RTUBufferedPort.prototype.close = function(callback) {
     this._client.close(callback);
 };
 
@@ -112,7 +112,9 @@ RTUBufferedPort.prototype.isOpen = function() {
 /**
  * Send data to a modbus slave
  */
-RTUBufferedPort.prototype.write = function (data) {
+RTUBufferedPort.prototype.write = function(data) {
+    var length = null;
+
     // check data length
     if (data.length < 6) {
         // raise an error ?
@@ -127,12 +129,12 @@ RTUBufferedPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

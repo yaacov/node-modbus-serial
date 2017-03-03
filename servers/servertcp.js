@@ -14,13 +14,13 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
- var util = require('util');
- var events = require('events');
- var EventEmitter = events.EventEmitter || events;
- var net = require('net');
+var util = require('util');
+var events = require('events');
+var EventEmitter = events.EventEmitter || events;
+var net = require('net');
 
- var HOST = '127.0.0.1';
- var MODBUS_PORT = 502;
+var HOST = '127.0.0.1';
+var MODBUS_PORT = 502;
 
 /* Add bit operation functions to Buffer
  */
@@ -35,6 +35,10 @@ function parseModbusBuffer(requestBuffer, vector) {
     var unitID = requestBuffer[0];
     var functionCode = requestBuffer[1];
     var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
+    var address = null;
+    var length = null;
+    var value = null;
+    var i = null;
 
     // if crc is bad, ignore message
     if (crc != crc16(requestBuffer.slice(0, -2))) {
@@ -43,8 +47,8 @@ function parseModbusBuffer(requestBuffer, vector) {
 
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
-        var address = requestBuffer.readUInt16BE(2);
-        var length = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != 8) {
@@ -58,16 +62,16 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // read coils
         if (vector.getCoil) {
-            for (var i = 0; i < length; i++) {
-              responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
+            for (i = 0; i < length; i++) {
+                responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
             }
         }
     }
 
     // function code 3
     if (functionCode == 3) {
-        var address = requestBuffer.readUInt16BE(2);
-        var length = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != 8) {
@@ -80,16 +84,16 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // read registers
         if (vector.getHoldingRegister) {
-          for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
-          }
+            for (i = 0; i < length; i++) {
+                responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
+            }
         }
     }
 
     // function code 4
     if (functionCode == 4) {
-        var address = requestBuffer.readUInt16BE(2);
-        var length = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != 8) {
@@ -102,16 +106,16 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // read registers
         if (vector.getInputRegister) {
-          for (var i = 0; i < length; i++) {
-              responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
-          }
+            for (i = 0; i < length; i++) {
+                responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
+            }
         }
     }
 
     // function code 5
     if (functionCode == 5) {
-        var address = requestBuffer.readUInt16BE(2);
-        var state = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        state = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != 8) {
@@ -131,8 +135,8 @@ function parseModbusBuffer(requestBuffer, vector) {
 
     // function code 6
     if (functionCode == 6) {
-        var address = requestBuffer.readUInt16BE(2);
-        var value = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        value = requestBuffer.readUInt16BE(4);
         // if length is bad, ignore message
         if (requestBuffer.length != (6 + 2)) {
             return;
@@ -148,8 +152,8 @@ function parseModbusBuffer(requestBuffer, vector) {
 
     // function code 15
     if (functionCode == 15) {
-        var address = requestBuffer.readUInt16BE(2);
-        var length = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != 7 + Math.ceil(length / 8) + 2) {
@@ -163,7 +167,7 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // write coils
         if (vector.setCoil) {
-            for (var i = 0; i < length; i++) {
+            for (i = 0; i < length; i++) {
                 var state = requestBuffer.readBit(i, 7);
                 vector.setCoil(address + i, state !== 0, unitID);
             }
@@ -172,8 +176,8 @@ function parseModbusBuffer(requestBuffer, vector) {
 
     // function code 16
     if (functionCode == 16) {
-        var address = requestBuffer.readUInt16BE(2);
-        var length = requestBuffer.readUInt16BE(4);
+        address = requestBuffer.readUInt16BE(2);
+        length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (requestBuffer.length != (7 + length * 2 + 2)) {
@@ -187,8 +191,8 @@ function parseModbusBuffer(requestBuffer, vector) {
 
         // write registers
         if (vector.setRegister) {
-            for (var i = 0; i < length; i++) {
-                var value = requestBuffer.readUInt16BE(7 + i * 2);
+            for (i = 0; i < length; i++) {
+                value = requestBuffer.readUInt16BE(7 + i * 2);
                 vector.setRegister(address + i, value, unitID);
             }
         }
@@ -213,7 +217,7 @@ function parseModbusBuffer(requestBuffer, vector) {
  *
  * @param {object} options the server options
  */
-var ServerTCP = function (vector, options) {
+var ServerTCP = function(vector, options) {
     var modbus = this;
     options = options || {};
     modbus.debug = options.debug || false;
@@ -226,7 +230,7 @@ var ServerTCP = function (vector, options) {
         // emit debug data
         if (modbus.debug) modbus.emit('debug', {action: 'connected', data: null});
 
-        sock.on('data', function (data) {
+        sock.on('data', function(data) {
             // remove mbap and add crc16
             var requestBuffer = new Buffer(data.length - 6 + 2);
             data.copy(requestBuffer, 0, 6);
