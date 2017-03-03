@@ -16,7 +16,7 @@ var SerialPortMock = function(path, options, callback) {
 };
 util.inherits(SerialPortMock, EventEmitter);
 
-SerialPortMock.prototype.open = function (callback) {
+SerialPortMock.prototype.open = function(callback) {
     this._openFlag = true;
     if (callback) {
         callback(null);
@@ -35,7 +35,7 @@ SerialPortMock.prototype.write = function(buffer, callback) {
     }
 };
 
-SerialPortMock.prototype.close = function (callback) {
+SerialPortMock.prototype.close = function(callback) {
     this._openFlag = false;
     if (callback) {
         callback(null);
@@ -43,7 +43,7 @@ SerialPortMock.prototype.close = function (callback) {
     this.emit('close');
 };
 
-SerialPortMock.prototype.receive = function (buffer) {
+SerialPortMock.prototype.receive = function(buffer) {
     this.emit('data', buffer);
 };
 

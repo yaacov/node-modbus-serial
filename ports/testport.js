@@ -22,7 +22,7 @@ var TestPort = function() {
     this._registers = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     // simulate 11 holding registers
-    this._holding_registers = [0,0,0,0,0,0,0,0, 0xa12b, 0xffff, 0xb21a ];
+    this._holding_registers = [0, 0, 0, 0, 0, 0, 0, 0, 0xa12b, 0xffff, 0xb21a];
 
     // simulate 16 coils / digital inputs
     this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
@@ -34,7 +34,7 @@ util.inherits(TestPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-TestPort.prototype.open = function (callback) {
+TestPort.prototype.open = function(callback) {
     if (callback)
         callback(null);
 };
@@ -42,7 +42,7 @@ TestPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TestPort.prototype.close = function (callback) {
+TestPort.prototype.close = function(callback) {
     if (callback)
         callback(null);
 };
@@ -57,8 +57,13 @@ TestPort.prototype.isOpen = function() {
 /**
  * Simulate successful/failure port requests and replays
  */
-TestPort.prototype.write = function (buf) {
+TestPort.prototype.write = function(buf) {
     var buffer = null;
+    var length = null;
+    var address = null;
+    var value = null;
+    var state = null;
+    var i = null;
 
     // if length is too short, ignore message
     if (buf.length < 8) {
@@ -76,8 +81,8 @@ TestPort.prototype.write = function (buf) {
 
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        length = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != 8) {
@@ -94,8 +99,8 @@ TestPort.prototype.write = function (buf) {
 
     // function code 3
     if (functionCode == 3) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        length = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != 8) {
@@ -107,15 +112,15 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt8(length * 2, 2);
 
         // read registers
-        for (var i = 0; i < length; i++) {
+        for (i = 0; i < length; i++) {
             buffer.writeUInt16BE(this._holding_registers[address + i], 3 + i * 2);
         }
     }
 
     // function code 4
     if (functionCode == 4) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        length = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != 8) {
@@ -127,15 +132,15 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt8(length * 2, 2);
 
         // read registers
-        for (var i = 0; i < length; i++) {
+        for (i = 0; i < length; i++) {
             buffer.writeUInt16BE(this._registers[address + i], 3 + i * 2);
         }
     }
 
     // function code 5
     if (functionCode == 5) {
-        var address = buf.readUInt16BE(2);
-        var state = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        state = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != 8) {
@@ -157,8 +162,8 @@ TestPort.prototype.write = function (buf) {
 
     // function code 6
     if (functionCode == 6) {
-        var address = buf.readUInt16BE(2);
-        var value = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        value = buf.readUInt16BE(4);
         // if length is bad, ignore message
         if (buf.length != (6 + 2)) {
             return;
@@ -174,8 +179,8 @@ TestPort.prototype.write = function (buf) {
 
     // function code 15
     if (functionCode == 15) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        length = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != 7 + Math.ceil(length / 8) + 2) {
@@ -188,8 +193,8 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt16BE(length, 4);
 
         // write coils
-        for (var i = 0; i < length; i++) {
-            var state = buf.readBit(i, 7);
+        for (i = 0; i < length; i++) {
+            state = buf.readBit(i, 7);
 
             if (state) {
                 this._coils |= (1 << (address + i));
@@ -201,8 +206,8 @@ TestPort.prototype.write = function (buf) {
 
     // function code 16
     if (functionCode == 16) {
-        var address = buf.readUInt16BE(2);
-        var length = buf.readUInt16BE(4);
+        address = buf.readUInt16BE(2);
+        length = buf.readUInt16BE(4);
 
         // if length is bad, ignore message
         if (buf.length != (7 + length * 2 + 2)) {
@@ -215,7 +220,7 @@ TestPort.prototype.write = function (buf) {
         buffer.writeUInt16BE(length, 4);
 
         // write registers
-        for (var i = 0; i < length; i++) {
+        for (i = 0; i < length; i++) {
             this._holding_registers[address + i] = buf.readUInt16BE(7 + i * 2);
         }
     }

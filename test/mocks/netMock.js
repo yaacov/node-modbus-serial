@@ -29,7 +29,7 @@ Socket.prototype.write = function(data, encoding, callback) {
     this._data = data;
 };
 
-Socket.prototype.receive = function (buffer) {
+Socket.prototype.receive = function(buffer) {
     this.emit('data', buffer);
 };
 
