@@ -34,7 +34,7 @@ var addConnctionAPI = function(Modbus) {
             obj.open(next);
         } else {
             // o/w use  a promise
-          var promise = new Promise( function (resolve, reject) {
+            var promise = new Promise( function(resolve, reject) {
                 function cb(err) {
                     if (err) {
                         reject(err);
@@ -57,7 +57,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectRTU = function (path, options, next) {
+    cl.connectRTU = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -81,7 +81,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectTCP = function (ip, options, next) {
+    cl.connectTCP = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -103,7 +103,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial tcp port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectTcpRTUBuffered = function (ip, options, next) {
+    cl.connectTcpRTUBuffered = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -124,7 +124,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectTelnet = function (ip, options, next) {
+    cl.connectTelnet = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -146,7 +146,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectC701 = function (ip, options, next) {
+    cl.connectC701 = function(ip, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -168,7 +168,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectRTUBuffered = function (path, options, next) {
+    cl.connectRTUBuffered = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;
@@ -190,7 +190,7 @@ var addConnctionAPI = function(Modbus) {
      * @param {Object} options - the serial port options - optional.
      * @param {Function} next the function to call next.
      */
-    cl.connectAsciiSerial = function (path, options, next) {
+    cl.connectAsciiSerial = function(path, options, next) {
         // check if we have options
         if (typeof(next) == 'undefined' && typeof(options) == 'function') {
             next = options;

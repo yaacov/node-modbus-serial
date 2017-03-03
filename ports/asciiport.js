@@ -9,9 +9,7 @@ var crc16 = require('../utils/crc16');
 var calculateLrc = require('./../utils/lrc');
 
 /* TODO: const should be set once, maybe */
-var EXCEPTION_LENGTH = 5;
 var MIN_DATA_LENGTH = 6;
-var MAX_BUFFER_LENGTH = 256;
 
 /**
  * Ascii encode a 'request' buffer and return it. This includes removing
@@ -143,8 +141,8 @@ var AsciiPort = function(path, options) {
 
                 // check if this is the data we are waiting for
                 if (checkData(modbus, _data)) {
-                    modbusSerialDebug({action: 'emit data serial ascii port', data: data, buffer: buffer});
-                    modbusSerialDebug(JSON.stringify({action: 'emit data serial ascii port strings', data: data, buffer: buffer}));
+                    modbusSerialDebug({action: 'emit data serial ascii port', data: data, buffer: modbus._buffer});
+                    modbusSerialDebug(JSON.stringify({action: 'emit data serial ascii port strings', data: data, buffer: modbus._buffer}));
                     // emit a data signal
                     modbus.emit('data', _data);
                 }
@@ -163,14 +161,14 @@ util.inherits(AsciiPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-AsciiPort.prototype.open = function (callback) {
+AsciiPort.prototype.open = function(callback) {
     this._client.open(callback);
 };
 
 /**
  * Simulate successful close port
  */
-AsciiPort.prototype.close = function (callback) {
+AsciiPort.prototype.close = function(callback) {
     this._client.close(callback);
 };
 
@@ -184,11 +182,13 @@ AsciiPort.prototype.isOpen = function() {
 /**
  * Send data to a modbus slave
  */
-AsciiPort.prototype.write = function (data) {
+AsciiPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
         modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
+
+    var length = null;
 
     // remember current unit and command
     this._id = data[0];
@@ -198,12 +198,12 @@ AsciiPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

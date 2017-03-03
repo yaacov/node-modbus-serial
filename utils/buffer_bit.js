@@ -27,7 +27,7 @@ var addBufferBitOp = function() {
      * @param {number} bit, The bit offset.
      * @param {number} offset, the byte offset.
      */
-    Buffer.prototype.writeBit = function (value, bit, offset) {
+    Buffer.prototype.writeBit = function(value, bit, offset) {
         var byteOffset = bit / 8 + offset;
         var bitOffset = bit % 8;
         var bitMask = 0x1 << bitOffset;
@@ -54,7 +54,7 @@ var addBufferBitOp = function() {
      *
      * @return {boolean} the state of the bit.
      */
-    Buffer.prototype.readBit = function (bit, offset) {
+    Buffer.prototype.readBit = function(bit, offset) {
         var byteOffset = bit / 8 + offset;
         var bitOffset = bit % 8;
         var bitMask = 0x1 << bitOffset;

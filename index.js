@@ -142,7 +142,7 @@ function _startTimeout(duration, next) {
     if (!duration) {
         return undefined;
     }
-    return setTimeout(function () {
+    return setTimeout(function() {
         if (next) {
             next(new Error('Timed out'));
         }
@@ -155,7 +155,7 @@ function _startTimeout(duration, next) {
  * @private
  */
 function _cancelTimeout(timeoutHandle) {
-   clearTimeout(timeoutHandle);
+    clearTimeout(timeoutHandle);
 }
 
 /**
@@ -163,7 +163,7 @@ function _cancelTimeout(timeoutHandle) {
  *
  * @param {SerialPort} port the serial port to use.
  */
-var ModbusRTU = function (port) {
+var ModbusRTU = function(port) {
     // the serial port to use
     this._port = port;
 
@@ -182,11 +182,11 @@ var ModbusRTU = function (port) {
  * @param {Function} callback the function to call next on open success
  *      of failure.
  */
-ModbusRTU.prototype.open = function (callback) {
+ModbusRTU.prototype.open = function(callback) {
     var modbus = this;
 
     // open the serial port
-    modbus._port.open(function (error) {
+    modbus._port.open(function(error) {
         if (error) {
             /* On serial port open error
              * call next function
@@ -203,7 +203,7 @@ ModbusRTU.prototype.open = function (callback) {
             /* On serial port success
              * register the modbus parser functions
              */
-            modbus._port.on('data', function (data) {
+            modbus._port.on('data', function(data) {
                 // set locale helpers variables
                 var transaction = modbus._transactions[modbus._transactionId];
 
@@ -315,7 +315,7 @@ ModbusRTU.prototype.open = function (callback) {
  * @param {Function} callback the function to call next on close success
  *      or failure.
  */
-ModbusRTU.prototype.close = function (callback) {
+ModbusRTU.prototype.close = function(callback) {
     // close the serial port
     this._port.close(callback);
     this._port.removeAllListeners('data');
@@ -325,7 +325,7 @@ ModbusRTU.prototype.close = function (callback) {
 /**
  * Check if port is open
  */
-ModbusRTU.prototype.isOpen = function () {
+ModbusRTU.prototype.isOpen = function() {
     return this._port && this._port.isOpen();
 };
 
@@ -334,7 +334,7 @@ ModbusRTU.prototype.isOpen = function () {
  *
  * @param {Function} callback the function to call on debug message
  */
-ModbusRTU.prototype.setDebug = function (callback) {
+ModbusRTU.prototype.setDebug = function(callback) {
     // close the serial port
     this._port.debug = true;
     this._port.on('debug', callback);
@@ -348,7 +348,7 @@ ModbusRTU.prototype.setDebug = function (callback) {
  * @param {number} length the total number of coils requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next) {
+ModbusRTU.prototype.writeFC1 = function(address, dataAddress, length, next) {
     this.writeFC2(address, dataAddress, length, next, 1);
 };
 
@@ -360,7 +360,7 @@ ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next) {
  * @param {number} length the total number of digital inputs requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, code) {
+ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code) {
     // function code defaults to 2
     code = code || 2;
 
@@ -372,10 +372,10 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 3 + parseInt((length - 1) / 8 + 1) + 2,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 3 + parseInt((length - 1) / 8 + 1) + 2,
+        next: next
     };
 
     var codeLength = 6;
@@ -401,7 +401,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
  * @param {number} length the total number of registers requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next) {
+ModbusRTU.prototype.writeFC3 = function(address, dataAddress, length, next) {
     this.writeFC4(address, dataAddress, length, next, 3);
 };
 
@@ -413,7 +413,7 @@ ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next) {
  * @param {number} length the total number of registers requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, code) {
+ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code) {
     // function code defaults to 4
     code = code || 4;
 
@@ -425,10 +425,10 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 3 + 2 * length + 2,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 3 + 2 * length + 2,
+        next: next
     };
 
     var codeLength = 6;
@@ -454,7 +454,7 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  * @param {number} state the boolean state to write to the coil (true / false).
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
+ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     var code = 5;
 
     // check port is actually open before attempting write
@@ -465,10 +465,10 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 8,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 8,
+        next: next
     };
 
     var codeLength = 6;
@@ -499,7 +499,7 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next) {
  * @param {number} value the value to write to the register.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
+ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     var code = 6;
 
     // check port is actually open before attempting write
@@ -510,10 +510,10 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 8,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 8,
+        next: next
     };
 
     var codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
@@ -540,8 +540,9 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next) {
  * @param {Array} array the array of boolean states to write to coils.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
+ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     var code = 15;
+    var i = 0;
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
@@ -551,10 +552,10 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 8,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 8,
+        next: next
     };
 
     var dataBytes = Math.ceil(array.length / 8);
@@ -568,11 +569,11 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
     buf.writeUInt8(dataBytes, 6);
 
     // clear the data bytes before writing bits data
-    for (var i = 0; i < dataBytes; i++) {
+    for (i = 0; i < dataBytes; i++) {
         buf.writeUInt8(0, 7 + i);
     }
 
-    for (var i = 0; i < array.length; i++) {
+    for (i = 0; i < array.length; i++) {
         // buffer bits are already all zero (0)
         // only set the ones set to one (1)
         if (array[i]) {
@@ -595,7 +596,7 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next) {
  * @param {Array} array the array of values to write to registers.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
+ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     var code = 16;
 
     // check port is actually open before attempting write
@@ -606,10 +607,10 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next) {
 
     // set state variables
     this._transactions[this._transactionId] = {
-      nextAddress: address,
-      nextCode: code,
-      nextLength: 8,
-      next: next
+        nextAddress: address,
+        nextCode: code,
+        nextLength: 8,
+        next: next
     };
 
     var codeLength = 7 + 2 * array.length;

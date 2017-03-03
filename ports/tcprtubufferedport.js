@@ -19,7 +19,7 @@ var MODBUS_PORT = 502;
 /**
  * Simulate a modbus-RTU port using TCP connection
  */
-var TcpRTUBufferedPort = function (ip, options) {
+var TcpRTUBufferedPort = function(ip, options) {
     var self = this;
     this.ip = ip;
     this.openFlag = false;
@@ -39,7 +39,7 @@ var TcpRTUBufferedPort = function (ip, options) {
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
-    var handleCallback = function (had_error) {
+    var handleCallback = function(had_error) {
         if (self.callback) {
             self.callback(had_error);
             self.callback = null;
@@ -51,10 +51,7 @@ var TcpRTUBufferedPort = function (ip, options) {
 
     // register the port data event
     this._client.on('data', function onData(data) {
-        modbusSerialDebug(JSON.stringify({data: data}));
-
         var buffer;
-        var crc;
 
         // check data length
         if (data.length < MIN_MBAP_LENGTH) return;
@@ -102,17 +99,17 @@ var TcpRTUBufferedPort = function (ip, options) {
         }
     });
 
-    this._client.on('connect', function () {
+    this._client.on('connect', function() {
         self.openFlag = true;
         handleCallback();
     });
 
-    this._client.on('close', function (had_error) {
+    this._client.on('close', function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
 
-    this._client.on('error', function (had_error) {
+    this._client.on('error', function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
@@ -127,7 +124,7 @@ util.inherits(TcpRTUBufferedPort, EventEmitter);
  * @param {number} length the length of the response
  * @private
  */
-TcpRTUBufferedPort.prototype._emitData = function (start, length) {
+TcpRTUBufferedPort.prototype._emitData = function(start, length) {
 
     var data = this._buffer.slice(start, start + length);
     this._buffer = this._buffer.slice(start + length);
@@ -157,7 +154,7 @@ TcpRTUBufferedPort.prototype._emitData = function (start, length) {
 /**
  * Simulate successful port open
  */
-TcpRTUBufferedPort.prototype.open = function (callback) {
+TcpRTUBufferedPort.prototype.open = function(callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -165,7 +162,7 @@ TcpRTUBufferedPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TcpRTUBufferedPort.prototype.close = function (callback) {
+TcpRTUBufferedPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
 };
@@ -173,18 +170,20 @@ TcpRTUBufferedPort.prototype.close = function (callback) {
 /**
  * Check if port is open
  */
-TcpRTUBufferedPort.prototype.isOpen = function () {
+TcpRTUBufferedPort.prototype.isOpen = function() {
     return this.openFlag;
 };
 
 /**
  * Send data to a modbus slave via telnet server
  */
-TcpRTUBufferedPort.prototype.write = function (data) {
+TcpRTUBufferedPort.prototype.write = function(data) {
     if (data.length < MIN_DATA_LENGTH) {
         modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
+
+    var length = 0;
 
     // remember current unit and command
     this._id = data[0];
@@ -194,12 +193,12 @@ TcpRTUBufferedPort.prototype.write = function (data) {
     switch (this._cmd) {
         case 1:
         case 2:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
             break;
         case 3:
         case 4:
-            var length = data.readUInt16BE(4);
+            length = data.readUInt16BE(4);
             this._length = 3 + 2 * length + 2;
             break;
         case 5:

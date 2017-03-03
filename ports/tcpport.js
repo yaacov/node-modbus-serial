@@ -50,7 +50,7 @@ var TcpPort = function(ip, options) {
         // cut 6 bytes of mbap, copy pdu and add crc
         buffer = new Buffer(data.length - MIN_MBAP_LENGTH + CRC_LENGTH);
         data.copy(buffer, 0, MIN_MBAP_LENGTH);
-        crc = crc16(buffer.slice(0, -2));
+        crc = crc16(buffer.slice(0, -CRC_LENGTH));
         buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
         // update transaction id
@@ -85,7 +85,7 @@ util.inherits(TcpPort, EventEmitter);
 /**
  * Simulate successful port open
  */
-TcpPort.prototype.open = function (callback) {
+TcpPort.prototype.open = function(callback) {
     this.callback = callback;
     this._client.connect(this.port, this.ip);
 };
@@ -93,7 +93,7 @@ TcpPort.prototype.open = function (callback) {
 /**
  * Simulate successful close port
  */
-TcpPort.prototype.close = function (callback) {
+TcpPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
 };
@@ -108,7 +108,7 @@ TcpPort.prototype.isOpen = function() {
 /**
  * Send data to a modbus-tcp slave
  */
-TcpPort.prototype.write = function (data) {
+TcpPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
         modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
