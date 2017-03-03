@@ -114,6 +114,9 @@ var AsciiPort = function(path, options) {
         // add new data to buffer
         modbus._buffer = Buffer.concat([modbus._buffer, data]);
 
+        modbusSerialDebug({action: 'receive serial ascii port', data: data, buffer: modbus._buffer});
+        modbusSerialDebug(JSON.stringify({action: 'receive serial ascii port strings', data: data, buffer: modbus._buffer}));
+
         // check buffer for start delimiter
         var sdIndex = modbus._buffer.indexOf(0x3A); // ascii for ':'
         if( sdIndex === -1) {
@@ -140,6 +143,8 @@ var AsciiPort = function(path, options) {
 
                 // check if this is the data we are waiting for
                 if (checkData(modbus, _data)) {
+                    modbusSerialDebug({action: 'emit data serial ascii port', data: data, buffer: buffer});
+                    modbusSerialDebug(JSON.stringify({action: 'emit data serial ascii port strings', data: data, buffer: buffer}));
                     // emit a data signal
                     modbus.emit('data', _data);
                 }
@@ -216,10 +221,11 @@ AsciiPort.prototype.write = function (data) {
     // ascii encode buffer
     var _encodedData = asciiEncodeRequestBuffer(data);
 
-    modbusSerialDebug(JSON.stringify({action: 'send ascii', data: _encodedData}));
-
     // send buffer to slave
     this._client.write(_encodedData);
+
+    modbusSerialDebug({action: 'send serial ascii port', data: _encodedData});
+    modbusSerialDebug(JSON.stringify({action: 'send serial ascii port', data: _encodedData}));
 };
 
 module.exports = AsciiPort;

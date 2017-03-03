@@ -20,11 +20,11 @@
  *
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
-var addConnctionAPI = function (Modbus) {
+var addConnctionAPI = function(Modbus) {
 
     var cl = Modbus.prototype;
 
-    var open = function (obj, next) {
+    var open = function(obj, next) {
         /* the function check for a callback
          * if we have a callback, use it
          * o/w build a promise.
@@ -34,7 +34,7 @@ var addConnctionAPI = function (Modbus) {
             obj.open(next);
         } else {
             // o/w use  a promise
-            var promise = new Promise(function (resolve, reject) {
+          var promise = new Promise( function (resolve, reject) {
                 function cb(err) {
                     if (err) {
                         reject(err);
