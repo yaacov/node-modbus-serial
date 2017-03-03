@@ -561,6 +561,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     var dataBytes = Math.ceil(array.length / 8);
     var codeLength = 7 + dataBytes;
     var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
+    var i = null;
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
