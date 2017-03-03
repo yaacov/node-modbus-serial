@@ -3,8 +3,11 @@ var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport");
+var modbusSerialDebug = require('debug')('modbus-serial');
 
+/* TODO: const should be set once, maybe */
 var EXCEPTION_LENGTH = 5;
+var MIN_DATA_LENGTH = 6;
 var MAX_BUFFER_LENGTH = 256;
 
 /**
@@ -37,6 +40,9 @@ var RTUBufferedPort = function(path, options) {
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
         var bufferLength = self._buffer.length;
+
+        modbusSerialDebug({action: 'receive serial rtu buffered port', data: data, buffer: self._buffer});
+        modbusSerialDebug(JSON.stringify({action: 'receive serial rtu buffered port strings', data: data, buffer: self._buffer}));
 
         // check data length
         if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
@@ -81,8 +87,8 @@ util.inherits(RTUBufferedPort, EventEmitter);
 RTUBufferedPort.prototype._emitData = function(start, length) {
     var buffer = this._buffer.slice(start, start + length);
 
-    // emit debug message
-    if (this.debug) { this.emit('debug', {action: 'recive', data: buffer}); }
+    modbusSerialDebug({action: 'emit data serial rtu buffered port', buffer: buffer});
+    modbusSerialDebug(JSON.stringify({action: 'emit data serial rtu buffered port strings', buffer: buffer}));
 
     this.emit('data', buffer);
     this._buffer = this._buffer.slice(start + length);
@@ -112,12 +118,9 @@ RTUBufferedPort.prototype.isOpen = function() {
 /**
  * Send data to a modbus slave
  */
-RTUBufferedPort.prototype.write = function(data) {
-    var length = null;
-
-    // check data length
-    if (data.length < 6) {
-        // raise an error ?
+RTUBufferedPort.prototype.write = function (data) {
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
 
@@ -149,11 +152,11 @@ RTUBufferedPort.prototype.write = function(data) {
             break;
     }
 
-    // emit debug message
-    if (this.debug) { this.emit('debug', {action: 'send', data: data}); }
-
     // send buffer to slave
     this._client.write(data);
+
+    modbusSerialDebug({action: 'send serial rtu buffered', data: data});
+    modbusSerialDebug(JSON.stringify({action: 'send serial rtu buffered strings', data: data}));
 };
 
 module.exports = RTUBufferedPort;
