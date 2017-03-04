@@ -2,11 +2,14 @@
 var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 /* Add bit operation functions to Buffer
  */
 require('../utils/buffer_bit')();
 var crc16 = require('../utils/crc16');
+
+var MIN_DATA_LENGTH = 8;
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected
@@ -57,7 +60,7 @@ TestPort.prototype.isOpen = function() {
 /**
  * Simulate successful/failure port requests and replays
  */
-TestPort.prototype.write = function(buf) {
+TestPort.prototype.write = function(data) {
     var buffer = null;
     var length = null;
     var address = null;
@@ -65,27 +68,27 @@ TestPort.prototype.write = function(buf) {
     var state = null;
     var i = null;
 
-    // if length is too short, ignore message
-    if (buf.length < 8) {
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
 
-    var unitNumber = buf[0];
-    var functionCode = buf[1];
-    var crc = buf[buf.length - 2] + buf[buf.length - 1] * 0x100;
+    var unitNumber = data[0];
+    var functionCode = data[1];
+    var crc = data[data.length - 2] + data[data.length - 1] * 0x100;
 
     // if crc is bad, ignore message
-    if (crc != crc16(buf.slice(0, -2))) {
+    if (crc != crc16(data.slice(0, -2))) {
         return;
     }
 
     // function code 1 and 2
     if (functionCode == 1 || functionCode == 2) {
-        address = buf.readUInt16BE(2);
-        length = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -99,11 +102,11 @@ TestPort.prototype.write = function(buf) {
 
     // function code 3
     if (functionCode == 3) {
-        address = buf.readUInt16BE(2);
-        length = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -119,11 +122,11 @@ TestPort.prototype.write = function(buf) {
 
     // function code 4
     if (functionCode == 4) {
-        address = buf.readUInt16BE(2);
-        length = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -139,11 +142,11 @@ TestPort.prototype.write = function(buf) {
 
     // function code 5
     if (functionCode == 5) {
-        address = buf.readUInt16BE(2);
-        state = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        state = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 8) {
+        if (data.length != 8) {
             return;
         }
 
@@ -162,10 +165,10 @@ TestPort.prototype.write = function(buf) {
 
     // function code 6
     if (functionCode == 6) {
-        address = buf.readUInt16BE(2);
-        value = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        value = data.readUInt16BE(4);
         // if length is bad, ignore message
-        if (buf.length != (6 + 2)) {
+        if (data.length != (6 + 2)) {
             return;
         }
 
@@ -179,11 +182,11 @@ TestPort.prototype.write = function(buf) {
 
     // function code 15
     if (functionCode == 15) {
-        address = buf.readUInt16BE(2);
-        length = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != 7 + Math.ceil(length / 8) + 2) {
+        if (data.length != 7 + Math.ceil(length / 8) + 2) {
             return;
         }
 
@@ -194,7 +197,7 @@ TestPort.prototype.write = function(buf) {
 
         // write coils
         for (i = 0; i < length; i++) {
-            state = buf.readBit(i, 7);
+            state = data.readBit(i, 7);
 
             if (state) {
                 this._coils |= (1 << (address + i));
@@ -206,11 +209,11 @@ TestPort.prototype.write = function(buf) {
 
     // function code 16
     if (functionCode == 16) {
-        address = buf.readUInt16BE(2);
-        length = buf.readUInt16BE(4);
+        address = data.readUInt16BE(2);
+        length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (buf.length != (7 + length * 2 + 2)) {
+        if (data.length != (7 + length * 2 + 2)) {
             return;
         }
 
@@ -221,7 +224,7 @@ TestPort.prototype.write = function(buf) {
 
         // write registers
         for (i = 0; i < length; i++) {
-            this._holding_registers[address + i] = buf.readUInt16BE(7 + i * 2);
+            this._holding_registers[address + i] = data.readUInt16BE(7 + i * 2);
         }
     }
 
@@ -265,6 +268,9 @@ TestPort.prototype.write = function(buf) {
         }
 
         this.emit('data', buffer);
+
+        modbusSerialDebug({action: 'send test port', data: data, buffer: buffer});
+        modbusSerialDebug(JSON.stringify({action: 'send test port strings', data: data, buffer: buffer}));
     }
 };
 

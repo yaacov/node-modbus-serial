@@ -47,7 +47,7 @@ describe('Modbus TCP port', function() {
     });
 
     describe('data handler', function() {
-        it('should return a valid Modbus RTU message', function(done) {
+        it('should return a valid Modbus TCP message', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('1103667788994fa2');
                 done();
@@ -55,13 +55,13 @@ describe('Modbus TCP port', function() {
             port.open(function() {
                 port.write(new Buffer('1103006B00037687', 'hex'));
 
-                if (port._client._data.equals(new Buffer('0000000000061103006B0003', 'hex'))) {
-                    port._client.receive(new Buffer('000000000006110366778899', 'hex'));
+                if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
+                    port._client.receive(new Buffer('000100000006110366778899', 'hex'));
                 }
             });
         });
 
-        it('should return a valid Modbus RTU exception', function(done) {
+        it('should return a valid Modbus TCP exception', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('1183044136');
                 done();
@@ -69,7 +69,7 @@ describe('Modbus TCP port', function() {
             port.open(function() {
                 port.write(new Buffer('1103006B00037687', 'hex'));
 
-                if (port._client._data.equals(new Buffer('0001000000061103006B0003', 'hex'))) {
+                if (port._client._data.equals(new Buffer('0002000000061103006B0003', 'hex'))) {
                     port._client.receive(new Buffer('000100000005118304', 'hex'));
                 }
             });

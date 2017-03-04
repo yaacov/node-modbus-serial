@@ -542,6 +542,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
  */
 ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     var code = 15;
+    var i = 0;
 
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
@@ -560,7 +561,6 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     var dataBytes = Math.ceil(array.length / 8);
     var codeLength = 7 + dataBytes;
     var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
-    var i = null;
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -646,6 +646,7 @@ try {
     module.exports.RTUBufferedPort = require('./ports/rtubufferedport');
 } catch (err) {}
 module.exports.TcpPort = require('./ports/tcpport');
+module.exports.TcpRTUBufferedPort = require('./ports/tcprtubufferedport');
 module.exports.TelnetPort = require('./ports/telnetport');
 module.exports.C701Port = require('./ports/c701port');
 

@@ -189,5 +189,4 @@ describe('Modbus RTU buffered port', function() {
             expect(port._client._data.toString('hex')).to.equal('1103006b00037687');
         });
     });
-
 });

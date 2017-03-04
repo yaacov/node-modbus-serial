@@ -18,6 +18,7 @@ var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var net = require('net');
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 var HOST = '127.0.0.1';
 var MODBUS_PORT = 502;
@@ -227,8 +228,7 @@ var ServerTCP = function(vector, options) {
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
     modbus._server.on('connection', function(sock) {
-        // emit debug data
-        if (modbus.debug) modbus.emit('debug', {action: 'connected', data: null});
+        modbusSerialDebug({action: 'connected', data: null});
 
         sock.on('data', function(data) {
             // remove mbap and add crc16
@@ -237,8 +237,8 @@ var ServerTCP = function(vector, options) {
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-            // emit debug data
-            if (modbus.debug) modbus.emit('debug', {action: 'recive', data: requestBuffer});
+            modbusSerialDebug({action: 'receive', data: requestBuffer});
+            modbusSerialDebug(JSON.stringify({action: 'receive', data: requestBuffer}));
 
             // if length is too short, ignore message
             if (requestBuffer.length < 8) {
@@ -260,8 +260,8 @@ var ServerTCP = function(vector, options) {
                 outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
                 responseBuffer.copy(outTcp, 6);
 
-                // emit debug data
-                if (modbus.debug) modbus.emit('debug', {action: 'send', data: responseBuffer});
+                modbusSerialDebug({action: 'send', data: responseBuffer});
+                modbusSerialDebug(JSON.stringify({action: 'send string', data: responseBuffer}));
 
                 // write to port
                 sock.write(outTcp);

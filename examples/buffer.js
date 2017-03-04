@@ -7,7 +7,9 @@ var client = new ModbusRTU();
 
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-client.connectTCP("10.205.1.42")
+// client.connectTCP("10.205.1.42")
+// client.connectTCP("192.168.1.20")
+client.connectTCP("127.0.0.1", {port: 8502})
     .then(setClient)
     .then(function() {
         console.log("Connected"); })
@@ -25,7 +27,6 @@ function setClient() {
 }
 
 function run() {
-    // read the 4 registers starting at address 5
     client.readInputRegisters(4, 12)
       .then(function(d) {
           var floatA = d.buffer.readFloatBE(0);

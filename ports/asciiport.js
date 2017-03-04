@@ -3,9 +3,13 @@ var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport");
+var modbusSerialDebug = require('debug')('modbus-serial');
 
 var crc16 = require('../utils/crc16');
 var calculateLrc = require('./../utils/lrc');
+
+/* TODO: const should be set once, maybe */
+var MIN_DATA_LENGTH = 6;
 
 /**
  * Ascii encode a 'request' buffer and return it. This includes removing
@@ -108,6 +112,9 @@ var AsciiPort = function(path, options) {
         // add new data to buffer
         modbus._buffer = Buffer.concat([modbus._buffer, data]);
 
+        modbusSerialDebug({action: 'receive serial ascii port', data: data, buffer: modbus._buffer});
+        modbusSerialDebug(JSON.stringify({action: 'receive serial ascii port strings', data: data, buffer: modbus._buffer}));
+
         // check buffer for start delimiter
         var sdIndex = modbus._buffer.indexOf(0x3A); // ascii for ':'
         if( sdIndex === -1) {
@@ -134,6 +141,8 @@ var AsciiPort = function(path, options) {
 
                 // check if this is the data we are waiting for
                 if (checkData(modbus, _data)) {
+                    modbusSerialDebug({action: 'emit data serial ascii port', data: data, buffer: modbus._buffer});
+                    modbusSerialDebug(JSON.stringify({action: 'emit data serial ascii port strings', data: data, buffer: modbus._buffer}));
                     // emit a data signal
                     modbus.emit('data', _data);
                 }
@@ -174,13 +183,12 @@ AsciiPort.prototype.isOpen = function() {
  * Send data to a modbus slave
  */
 AsciiPort.prototype.write = function(data) {
-    var length = null;
-
-    // check data length
-    if (data.length < 6) {
-        // raise an error ?
+    if(data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
         return;
     }
+
+    var length = null;
 
     // remember current unit and command
     this._id = data[0];
@@ -215,6 +223,9 @@ AsciiPort.prototype.write = function(data) {
 
     // send buffer to slave
     this._client.write(_encodedData);
+
+    modbusSerialDebug({action: 'send serial ascii port', data: _encodedData});
+    modbusSerialDebug(JSON.stringify({action: 'send serial ascii port', data: _encodedData}));
 };
 
 module.exports = AsciiPort;
