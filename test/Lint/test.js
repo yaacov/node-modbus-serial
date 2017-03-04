@@ -10,7 +10,7 @@ var paths = [
 ];
 
 var options = {
-  // Specify style of output
+    // Specify style of output
     formatter: 'compact', // Defaults to `stylish`
     timeout: 5000
 };
