@@ -28,14 +28,14 @@ function setClient() {
 
 function run() {
     client.readInputRegisters(4, 12)
-      .then(function(d) {
-          var floatA = d.buffer.readFloatBE(0);
-          var floatB = d.buffer.readFloatBE(4);
-          var floatC = d.buffer.readFloatBE(8);
-          console.log("Receive:", floatA, floatB, floatC); })
-      .catch(function(e) {
-          console.log(e.message); })
-      .then(close);
+        .then(function(d) {
+            var floatA = d.buffer.readFloatBE(0);
+            var floatB = d.buffer.readFloatBE(4);
+            var floatC = d.buffer.readFloatBE(8);
+            console.log("Receive:", floatA, floatB, floatC); })
+        .catch(function(e) {
+            console.log(e.message); })
+        .then(close);
 }
 
 function close() {

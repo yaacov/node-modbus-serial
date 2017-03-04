@@ -29,21 +29,21 @@ function setClient() {
 function run() {
     // write to coil
     client.writeCoil(5, true)
-      .then(function(d) {
-          console.log("Write true to coil 5", d); })
-      .catch(function(e) {
-          console.log(e.message); })
-      .then(writeRegisters);
+        .then(function(d) {
+            console.log("Write true to coil 5", d); })
+        .catch(function(e) {
+            console.log(e.message); })
+        .then(writeRegisters);
 }
 
 function writeRegisters() {
     // write 3 registers statrting at register 101
     client.writeRegisters(101, [10, 9, 8])
-      .then(function(d) {
-          console.log("Write 10, 9, 8 to registers 101, 102 and 103", d); })
-      .catch(function(e) {
-          console.log(e.message); })
-      .then(close);
+        .then(function(d) {
+            console.log("Write 10, 9, 8 to registers 101, 102 and 103", d); })
+        .catch(function(e) {
+            console.log(e.message); })
+        .then(close);
 }
 
 function close() {
