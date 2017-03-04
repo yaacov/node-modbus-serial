@@ -44,7 +44,7 @@ var RTUBufferedPort = function(path, options) {
         modbusSerialDebug(JSON.stringify({action: 'receive serial rtu buffered port strings', data: data, buffer: self._buffer}));
 
         // check data length
-        if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
+        if (expectedLength < MIN_DATA_LENGTH || bufferLength < EXCEPTION_LENGTH) return;
 
         // check buffer size for MAX_BUFFER_SIZE
         if (bufferLength > MAX_BUFFER_LENGTH) {

@@ -66,7 +66,8 @@
             "error",
             4,
             {
-                "SwitchCase": 1
+                "SwitchCase": 1,
+                "MemberExpression": 1
             }
         ],
         "init-declarations": "off",
