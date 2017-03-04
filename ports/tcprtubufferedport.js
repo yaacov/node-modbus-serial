@@ -35,7 +35,6 @@ var TcpRTUBufferedPort = function(ip, options) {
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
-    this._transactionId = 0;
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
