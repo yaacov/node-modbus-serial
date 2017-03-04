@@ -4,7 +4,9 @@
   "description": "A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "mocha --recursive",
+    "build": "gulp publish",
+    "prepublish": "npm run build && npm test"
   },
   "repository": {
     "type": "git",
@@ -27,13 +29,24 @@
   "devDependencies": {
     "chai": "^3.5.0",
     "eslint": "^3.16.1",
+    "gulp": "^3.9.1",
+    "gulp-clean": "^0.3.2",
+    "gulp-jsdoc3": "^1.0.1",
     "mocha": "^3.2.0",
     "mocha-eslint": "^3.0.1",
     "mockery": "^2.0.0",
-    "serialport": "^4.0.7",
+    "pump": "^1.0.2",
+    "serialport": "4.0.7",
     "sinon": "^1.17.7"
   },
   "dependencies": {
     "debug": "^2.6.1"
-  }
+  },
+  "directories": {
+    "example": "examples",
+    "test": "test"
+  },
+  "files": [
+    "modbus-serial"
+  ]
 }

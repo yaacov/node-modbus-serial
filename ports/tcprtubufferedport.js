@@ -18,6 +18,10 @@ var MODBUS_PORT = 502;
 
 /**
  * Simulate a modbus-RTU port using TCP connection
+ * @module TcpRTUBufferedPort
+ *
+ * @param {string} ip - ip address
+ * @param {object} options - all options as JSON object
  */
 var TcpRTUBufferedPort = function(ip, options) {
     var self = this;
@@ -43,7 +47,7 @@ var TcpRTUBufferedPort = function(ip, options) {
             self.callback(had_error);
             self.callback = null;
         }
-    }
+    };
 
     // create a socket
     this._client = new net.Socket();
