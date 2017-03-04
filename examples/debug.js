@@ -1,5 +1,14 @@
 /* eslint-disable no-console */
 
+/* DEBUG environment variable is then used to enable
+
+  Set the DEBUG variable to be "modbus-serial" before running this example:
+  export DEBUG=modbus-serial
+
+  To stop debugging, unset the DEBUG variable:
+  unset DEBUG
+ */
+
 // create an empty modbus client
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
@@ -21,9 +30,6 @@ function setClient() {
     // set a timout for requests default is null (no timeout)
     client.setID(1);
     client.setTimeout(1000);
-
-    // register a debug function
-    client.setDebug(console.log);
 
     // run program
     run();

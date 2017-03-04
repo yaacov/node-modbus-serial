@@ -27,7 +27,6 @@ var RTUBufferedPort = function(path, options) {
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
-    this.debug = false;
 
     // create the SerialPort
     this._client= new SerialPort(path, options);

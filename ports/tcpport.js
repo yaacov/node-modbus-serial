@@ -22,7 +22,6 @@ var TcpPort = function(ip, options) {
     this.ip = ip;
     this.openFlag = false;
     this.callback = null;
-    this.debug = false;
     this._transactionId = 0;
 
     // options
