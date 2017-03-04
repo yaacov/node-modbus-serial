@@ -1,4 +1,6 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var expect = require('chai').expect;
 var mockery = require('mockery');
 
@@ -8,10 +10,10 @@ describe('Modbus TCP port', function() {
     before(function() {
         var mock = require('./../mocks/netMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace:false, useCleanCache:true, warnOnUnregistered:false});
+        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
         mockery.registerMock('net', mock);
         var TcpPort = require('./../../ports/tcpport');
-        port = new TcpPort('127.0.0.1', {port:9999});
+        port = new TcpPort('127.0.0.1', {port: 9999});
     });
 
     after(function() {
@@ -24,7 +26,7 @@ describe('Modbus TCP port', function() {
 
     describe('#isOpen', function() {
         it('should not be open before #open', function() {
-           expect(port.isOpen()).to.be.false;
+            expect(port.isOpen()).to.be.false;
         });
 
         it('should be open after #open', function(done) {

@@ -1,4 +1,6 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var ModbusRTU = require("../index");
 var TestPort = ModbusRTU.TestPort;
 var testPort = new TestPort();
@@ -65,7 +67,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on short data answer', function(done) {
-                modbusRTU.writeFC3(2, 8, 3, function(err, data) {
+                modbusRTU.writeFC3(2, 8, 3, function(err) {
                     expect(err.message).to.have.string('Data length error');
 
                     done();
@@ -73,7 +75,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on CRC error', function(done) {
-                modbusRTU.writeFC3(3, 8, 3, function(err, data) {
+                modbusRTU.writeFC3(3, 8, 3, function(err) {
                     expect(err.message).to.have.string('CRC error');
 
                     done();
@@ -81,7 +83,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on unexpected reply', function(done) {
-                modbusRTU.writeFC3(4, 8, 3, function(err, data) {
+                modbusRTU.writeFC3(4, 8, 3, function(err) {
                     expect(err.message).to.have.string('Unexpected data error');
 
                     done();
@@ -89,7 +91,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail with an exception', function(done) {
-                modbusRTU.writeFC3(5, 8, 3, function(err, data) {
+                modbusRTU.writeFC3(5, 8, 3, function(err) {
                     expect(err.message).to.have.string('Modbus exception');
 
                     done();
@@ -109,7 +111,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on short data answer', function(done) {
-                modbusRTU.writeFC4(2, 8, 1, function(err, data) {
+                modbusRTU.writeFC4(2, 8, 1, function(err) {
                     expect(err.message).to.have.string('Data length error');
 
                     done();
@@ -117,7 +119,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on CRC error', function(done) {
-                modbusRTU.writeFC4(3, 8, 1, function(err, data) {
+                modbusRTU.writeFC4(3, 8, 1, function(err) {
                     expect(err.message).to.have.string('CRC error');
 
                     done();
@@ -125,7 +127,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on unexpected reply', function(done) {
-                modbusRTU.writeFC4(4, 8, 1, function(err, data) {
+                modbusRTU.writeFC4(4, 8, 1, function(err) {
                     expect(err.message).to.have.string('Unexpected data error');
 
                     done();
@@ -133,7 +135,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail with an exception', function(done) {
-                modbusRTU.writeFC4(5, 8, 3, function(err, data) {
+                modbusRTU.writeFC4(5, 8, 3, function(err) {
                     expect(err.message).to.have.string('Modbus exception');
 
                     done();
@@ -153,7 +155,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on short data answer', function(done) {
-                modbusRTU.writeFC6(2, 1, 42, function(err, data) {
+                modbusRTU.writeFC6(2, 1, 42, function(err) {
                     expect(err.message).to.have.string('Data length error');
 
                     done();
@@ -161,7 +163,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on CRC error', function(done) {
-                modbusRTU.writeFC6(3, 1, 42, function(err, data) {
+                modbusRTU.writeFC6(3, 1, 42, function(err) {
                     expect(err.message).to.have.string('CRC error');
 
                     done();
@@ -169,7 +171,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on unexpected reply', function(done) {
-                modbusRTU.writeFC6(4, 1, 42, function(err, data) {
+                modbusRTU.writeFC6(4, 1, 42, function(err) {
                     expect(err.message).to.have.string('Unexpected data error');
 
                     done();
@@ -177,7 +179,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail with an exception', function(done) {
-                modbusRTU.writeFC6(5, 1, 42, function(err, data) {
+                modbusRTU.writeFC6(5, 1, 42, function(err) {
                     expect(err.message).to.have.string('Modbus exception');
 
                     done();
@@ -187,7 +189,7 @@ describe('ModbusRTU', function() {
 
         describe('#writeFC15() - force multiple coils.', function() {
             it('should write 3 coils [true, false, true] without errors', function(done) {
-                modbusRTU.writeFC15(1, 8, [true, false, true], function(err, data) {
+                modbusRTU.writeFC15(1, 8, [true, false, true], function(err) {
                     expect(err).to.be.a('null');
 
                     done();
@@ -195,7 +197,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on short data answer', function(done) {
-                modbusRTU.writeFC15(2, 8, [true, false, true], function(err, data) {
+                modbusRTU.writeFC15(2, 8, [true, false, true], function(err) {
                     expect(err.message).to.have.string('Data length error');
 
                     done();
@@ -203,7 +205,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on CRC error', function(done) {
-                modbusRTU.writeFC15(3, 8, [true, false, true], function(err, data) {
+                modbusRTU.writeFC15(3, 8, [true, false, true], function(err) {
                     expect(err.message).to.have.string('CRC error');
 
                     done();
@@ -211,7 +213,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on unexpected reply', function(done) {
-                modbusRTU.writeFC15(4, 8, [true, false, true], function(err, data) {
+                modbusRTU.writeFC15(4, 8, [true, false, true], function(err) {
                     expect(err.message).to.have.string('Unexpected data error');
 
                     done();
@@ -219,7 +221,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail with an exception', function(done) {
-                modbusRTU.writeFC15(5, 8, [true, false, true], function(err, data) {
+                modbusRTU.writeFC15(5, 8, [true, false, true], function(err) {
                     expect(err.message).to.have.string('Modbus exception');
 
                     done();
@@ -243,7 +245,7 @@ describe('ModbusRTU', function() {
 
         describe('#writeFC16() - write holding registers.', function() {
             it('should write 3 registers [42, 128, 5] without errors', function(done) {
-                modbusRTU.writeFC16(1, 8, [42, 128, 5], function(err, data) {
+                modbusRTU.writeFC16(1, 8, [42, 128, 5], function(err) {
                     expect(err).to.be.a('null');
 
                     done();
@@ -251,7 +253,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on short data answer', function(done) {
-                modbusRTU.writeFC16(2, 8, [42, 128, 5], function(err, data) {
+                modbusRTU.writeFC16(2, 8, [42, 128, 5], function(err) {
                     expect(err.message).to.have.string('Data length error');
 
                     done();
@@ -259,7 +261,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on CRC error', function(done) {
-                modbusRTU.writeFC16(3, 8, [42, 128, 5], function(err, data) {
+                modbusRTU.writeFC16(3, 8, [42, 128, 5], function(err) {
                     expect(err.message).to.have.string('CRC error');
 
                     done();
@@ -267,7 +269,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail on unexpected reply', function(done) {
-                modbusRTU.writeFC16(4, 8, [42, 128, 5], function(err, data) {
+                modbusRTU.writeFC16(4, 8, [42, 128, 5], function(err) {
                     expect(err.message).to.have.string('Unexpected data error');
 
                     done();
@@ -275,7 +277,7 @@ describe('ModbusRTU', function() {
             });
 
             it('should fail with an exception', function(done) {
-                modbusRTU.writeFC16(5, 8, [42, 128, 5], function(err, data) {
+                modbusRTU.writeFC16(5, 8, [42, 128, 5], function(err) {
                     expect(err.message).to.have.string('Modbus exception');
 
                     done();
@@ -341,12 +343,12 @@ describe('ModbusRTU', function() {
             });
 
             afterEach(function(){
-               clock.restore();
+                clock.restore();
             });
 
             it('should time out', function(done) {
                 modbusRTU._timeout = timeout;
-                modbusRTU.writeFC3(6, 8, 3, function(err, data) {
+                modbusRTU.writeFC3(6, 8, 3, function(err) {
                     expect(err.message).to.have.string('Timed out');
                     done();
                 });
