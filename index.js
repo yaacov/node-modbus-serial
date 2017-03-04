@@ -319,7 +319,6 @@ ModbusRTU.prototype.close = function(callback) {
     // close the serial port
     this._port.close(callback);
     this._port.removeAllListeners('data');
-    this._port.removeAllListeners('debug');
 };
 
 /**

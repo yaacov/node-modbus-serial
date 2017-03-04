@@ -14,6 +14,3 @@ var vector = {
 // set the server to answer for modbus requests
 console.log('ModbusTCP listening on modbus://0.0.0.0:8502');
 var serverTCP = new ModbusRTU.ServerTCP(vector, {host: '0.0.0.0', port: 8502, debug: true, unitID: 1});
-
-// register debug reciver
-serverTCP.on('debug', console.log)
