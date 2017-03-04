@@ -1,4 +1,6 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var expect = require('chai').expect;
 
 var calculateLrc = require('./../../utils/lrc');
@@ -15,4 +17,3 @@ describe('Modbus LRC', function() {
     });
 
 });
-

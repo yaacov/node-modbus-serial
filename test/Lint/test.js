@@ -1,3 +1,6 @@
+'use strict';
+/* eslint-disable no-undef */
+
 var lint = require('mocha-eslint');
 
 var paths = [
@@ -6,7 +9,8 @@ var paths = [
     'servers/**/*.js',
     'apis/**/*.js',
     'utils/**/*.js',
-    'examples/**/*.js'
+    'examples/**/*.js',
+    'test/**/*.js'
 ];
 
 var options = {

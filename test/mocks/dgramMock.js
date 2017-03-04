@@ -3,7 +3,7 @@ var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var util = require('util');
 
-var Socket = function(type, listener) {
+var Socket = function() {
     EventEmitter.call(this);
 };
 

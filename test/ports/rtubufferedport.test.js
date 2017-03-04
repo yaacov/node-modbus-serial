@@ -1,4 +1,6 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var expect = require('chai').expect;
 var mockery = require('mockery');
 
@@ -13,7 +15,7 @@ describe('Modbus RTU buffered port', function() {
     before(function() {
         var mock = require('./../mocks/SerialPortMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace:false, useCleanCache:true, warnOnUnregistered:false});
+        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
         mockery.registerMock('serialport', mock);
         var RTUBufferedPort = require('./../../ports/rtubufferedport');
         port = new RTUBufferedPort('/dev/null', {});
@@ -29,7 +31,7 @@ describe('Modbus RTU buffered port', function() {
 
     describe('#isOpen', function() {
         it('should not be open before #open', function() {
-           expect(port.isOpen()).to.be.false;
+            expect(port.isOpen()).to.be.false;
         });
 
         it('should be open after #open', function(done) {
@@ -99,7 +101,7 @@ describe('Modbus RTU buffered port', function() {
                 port.write(new Buffer('010300000040443A', 'hex'));
                 setTimeout(function() {
                     for (var i = 0; i < LONG_MSG.length; i += 2) {
-                      port._client.receive(new Buffer(LONG_MSG.slice(i, i + 2), 'hex'));
+                        port._client.receive(new Buffer(LONG_MSG.slice(i, i + 2), 'hex'));
                     }
                 });
             });

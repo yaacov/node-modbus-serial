@@ -1,11 +1,13 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var expect = require('chai').expect;
 var mockery = require('mockery');
 
-describe('Modbus TCP RTU buffered port', function () {
+describe('Modbus TCP RTU buffered port', function() {
     var port;
 
-    before(function () {
+    before(function() {
         var mock = require('./../mocks/netMock');
         mockery.resetCache();
         mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
@@ -45,7 +47,7 @@ describe('Modbus TCP RTU buffered port', function () {
     });
 
     describe('data handler', function() {
-        it('should return a valid Modbus TCP message at once', function (done) {
+        it('should return a valid Modbus TCP message at once', function(done) {
             port.once('data', function(data) {
                 expect(data.toString('hex')).to.equal('01030802070207020702072637');
                 done();

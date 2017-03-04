@@ -1,10 +1,11 @@
 'use strict';
+/* eslint-disable no-undef */
+
 var ModbusRTU = require("../../index");
 var TestPort = ModbusRTU.TestPort;
 var testPort = new TestPort();
 var modbusRTU = new ModbusRTU(testPort);
 
-var sinon = require('sinon');
 var expect = require('chai').expect;
 
 describe('Promise', function() {

@@ -3,13 +3,13 @@ var events = require('events');
 var EventEmitter = events.EventEmitter || events;
 var util = require('util');
 
-var Server = function(options, connectionListener) {
+var Server = function() {
     EventEmitter.call(this);
 };
 util.inherits(Server, EventEmitter);
 exports.Server = Server;
 
-var Socket = function(options) {
+var Socket = function() {
     EventEmitter.call(this);
 };
 util.inherits(Socket, EventEmitter);
@@ -21,11 +21,11 @@ Socket.prototype.connect = function(port, host, connectListener) {
     }
 };
 
-Socket.prototype.end = function(data, encoding) {
+Socket.prototype.end = function() {
     this.emit('close', false);
 };
 
-Socket.prototype.write = function(data, encoding, callback) {
+Socket.prototype.write = function(data) {
     this._data = data;
 };
 
@@ -40,4 +40,3 @@ exports.Socket = Socket;
 exports.createServer = function(options, connectionListener) {
     return new Server(options, connectionListener);
 };
-
