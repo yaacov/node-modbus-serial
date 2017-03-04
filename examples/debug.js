@@ -1,6 +1,6 @@
 /* eslint-disable no-console */
 
-/* DEBUG environment variable is then used to enable
+/* DEBUG environment variable is used to enable debug logging
 
   Set the DEBUG variable to be "modbus-serial" before running this example:
   export DEBUG=modbus-serial
@@ -16,8 +16,6 @@ var client = new ModbusRTU();
 
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-// client.connectTCP("10.205.1.42")
-// client.connectTCP("192.168.1.20")
 client.connectTCP("127.0.0.1", {port: 8502})
     .then(setClient)
     .then(function() {
