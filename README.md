@@ -254,14 +254,6 @@ Duration of the timeout
 
 
 ----
-##### .setDebug(callback)
-      Set the port to emit debug messages into callback
-
-*callback {function}:*
-Called if port emit a 'debug' message (e.g. on send and recive data)
-that looks like: function(data) { ... }
-
-----
 ##### .readCoils (address, length)
       Writes "Read Coils" (FC=1) request to serial port.
 

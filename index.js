@@ -330,17 +330,6 @@ ModbusRTU.prototype.isOpen = function() {
 };
 
 /**
- * Set the port to emit debug messages into callback
- *
- * @param {Function} callback the function to call on debug message
- */
-ModbusRTU.prototype.setDebug = function(callback) {
-    // close the serial port
-    this._port.debug = true;
-    this._port.on('debug', callback);
-};
-
-/**
  * Write a Modbus "Read Coil Status" (FC=01) to serial port.
  *
  * @param {number} address the slave unit address.

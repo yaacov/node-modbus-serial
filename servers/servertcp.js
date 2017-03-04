@@ -221,7 +221,6 @@ function parseModbusBuffer(requestBuffer, vector) {
 var ServerTCP = function(vector, options) {
     var modbus = this;
     options = options || {};
-    modbus.debug = options.debug || false;
 
     // create a tcp server
     modbus._server = net.createServer();

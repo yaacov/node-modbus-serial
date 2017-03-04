@@ -66,11 +66,6 @@ var TcpRTUBufferedPort = function(ip, options) {
         modbusSerialDebug({action: 'receive tcp rtu buffered port', data: data, buffer: buffer});
         modbusSerialDebug(JSON.stringify({action: 'receive tcp rtu buffered port strings', data: data, buffer: buffer}));
 
-        // emit debug message
-        if (self.debug) {
-            self.emit('debug', {action: 'receive', data: data, buffer: buffer});
-        }
-
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
         var bufferLength = self._buffer.length + CRC_LENGTH;
