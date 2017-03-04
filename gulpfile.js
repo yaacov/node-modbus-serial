@@ -14,7 +14,7 @@ gulp.task('build', ['apis', 'ports', 'servers', 'utils']);
 gulp.task('publish', ['build', 'docs']);
 
 gulp.task('clean', function() {
-    return gulp.src('modbus-serial')
+    return gulp.src('modbus-serial', 'docs/gen')
         .pipe(clean({force: true}))
 });
 
