@@ -15,7 +15,7 @@ client.connectTCP("127.0.0.1", {port: 8502})
         console.log("Connected"); })
     .catch(function(e) {
         if(e.errno) {
-            if(networkErrors.contains(e.errno)) {
+            if(networkErrors.includes(e.errno)) {
                 console.log('we have to reconnect');
             }
         }
