@@ -29,7 +29,7 @@ var RTUBufferedPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client= new SerialPort(path, options);
+    this._client = new SerialPort(path, options);
 
     // register the port data event
     this._client.on('data', function onData(data) {
@@ -55,7 +55,7 @@ var RTUBufferedPort = function(path, options) {
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
         for (var i = 0; i <= maxOffset; i++) {
             var unitId = self._buffer[i];
-            var functionCode = self._buffer[i+1];
+            var functionCode = self._buffer[i + 1];
 
             if (unitId !== self._id) continue;
 
