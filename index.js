@@ -350,7 +350,7 @@ ModbusRTU.prototype.writeFC1 = function(address, dataAddress, length, next) {
 ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code) {
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error());
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
 
