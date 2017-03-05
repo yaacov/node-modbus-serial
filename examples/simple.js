@@ -1,14 +1,14 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, spaced-comment */
 
 // create an empty modbus client
-// var ModbusRTU = require("modbus-serial");
+//var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 var networkErrors = ['ESOCKETTIMEDOUT', 'ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED'];
 
 // open connection to a serial port
-// client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
+//client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
 client.connectTCP("127.0.0.1", {port: 8502})
     .then(setClient)
     .then(function() {
