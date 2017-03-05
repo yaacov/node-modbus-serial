@@ -21,20 +21,20 @@ var MIN_DATA_LENGTH = 6;
 function asciiEncodeRequestBuffer(buf) {
 
     // replace the 2 byte crc16 with a single byte lrc
-    buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length-2);
+    buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length - 2);
 
     // create a new buffer of the correct size
-    var bufAscii = new Buffer(buf.length*2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
+    var bufAscii = new Buffer(buf.length * 2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
 
     // create the ascii payload
 
     // start with the single start delimiter
     bufAscii.write(':', 0);
     // encode the data, with the new single byte lrc
-    bufAscii.write(buf.toString('hex', 0, buf.length-1).toUpperCase(), 1);
+    bufAscii.write(buf.toString('hex', 0, buf.length - 1).toUpperCase(), 1);
     // end with the two end delimiters
-    bufAscii.write('\r', bufAscii.length-2);
-    bufAscii.write('\n', bufAscii.length-1);
+    bufAscii.write('\r', bufAscii.length - 2);
+    bufAscii.write('\n', bufAscii.length - 1);
 
     return bufAscii;
 }
@@ -48,11 +48,11 @@ function asciiEncodeRequestBuffer(buf) {
 function asciiDecodeResponseBuffer(bufAscii) {
 
     // create a new buffer of the correct size (based on ascii encoded buffer length)
-    var bufDecoded = new Buffer((bufAscii.length-1)/2);
+    var bufDecoded = new Buffer((bufAscii.length - 1) / 2);
 
     // decode into new buffer (removing delimiters at start and end)
-    for (var i = 0; i < (bufAscii.length-3)/2; i++) {
-        bufDecoded.write(String.fromCharCode(bufAscii.readUInt8(i*2+1), bufAscii.readUInt8(i*2+2)), i, 1, 'hex');
+    for (var i = 0; i < (bufAscii.length - 3) / 2; i++) {
+        bufDecoded.write(String.fromCharCode(bufAscii.readUInt8(i * 2 + 1), bufAscii.readUInt8(i * 2 + 2)), i, 1, 'hex');
     }
 
     // check the lrc is true
@@ -63,7 +63,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
     }
 
     // replace the 1 byte lrc with a two byte crc16
-    bufDecoded.writeUInt16LE(crc16(bufDecoded.slice(0, -2)), bufDecoded.length-2);
+    bufDecoded.writeUInt16LE(crc16(bufDecoded.slice(0, -2)), bufDecoded.length - 2);
 
     return bufDecoded;
 }
@@ -104,7 +104,7 @@ var AsciiPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client= new SerialPort(path, options);
+    this._client = new SerialPort(path, options);
 
     // register the port data event
     this._client.on('data', function(data) {
@@ -130,9 +130,9 @@ var AsciiPort = function(path, options) {
         if(modbus._buffer.includes('\r\n', 1, 'ascii') === true) {
             // check there is no excess data after end delimiters
             var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
-            if(edIndex != modbus._buffer.length-1) {
+            if(edIndex != modbus._buffer.length - 1) {
                 // if there is, remove it
-                modbus._buffer = modbus._buffer.slice(0, edIndex+1);
+                modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
             }
 
             // we have what looks like a complete ascii encoded response message, so decode

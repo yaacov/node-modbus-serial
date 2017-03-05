@@ -253,7 +253,12 @@
             "never"
         ],
         "space-in-parens": "error",
-        "space-infix-ops": "off",
+        "space-infix-ops": [
+            "error",
+            {
+                "int32Hint": true
+            }
+        ],
         "space-unary-ops": [
             "error",
             {

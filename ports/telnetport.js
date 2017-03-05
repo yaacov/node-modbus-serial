@@ -62,7 +62,7 @@ var TelnetPort = function(ip, options) {
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
         for (var i = 0; i <= maxOffset; i++) {
             var unitId = self._buffer[i];
-            var functionCode = self._buffer[i+1];
+            var functionCode = self._buffer[i + 1];
 
             if (unitId !== self._id) continue;
 
