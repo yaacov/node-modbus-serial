@@ -37,7 +37,7 @@ var TelnetPort = function(ip, options) {
             self.callback(had_error);
             self.callback = null;
         }
-    }
+    };
 
     // create a socket
     this._client = new net.Socket();
@@ -49,7 +49,7 @@ var TelnetPort = function(ip, options) {
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
-        var bufferLength = self._buffer.length ;
+        var bufferLength = self._buffer.length;
         modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
 
         modbusSerialDebug({action: 'receive tcp telnet port', data: data, buffer: self._buffer});

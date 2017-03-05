@@ -34,7 +34,7 @@ var addConnctionAPI = function(Modbus) {
             obj.open(next);
         } else {
             // o/w use  a promise
-            var promise = new Promise( function(resolve, reject) {
+            var promise = new Promise(function(resolve, reject) {
                 function cb(err) {
                     if (err) {
                         reject(err);
@@ -48,7 +48,7 @@ var addConnctionAPI = function(Modbus) {
 
             return promise;
         }
-    }
+    };
 
     /**
      * Connect to a communication port, using SerialPort.
@@ -203,7 +203,7 @@ var addConnctionAPI = function(Modbus) {
 
         // open and call next
         open(this, next);
-    }
+    };
 };
 
 module.exports = addConnctionAPI;

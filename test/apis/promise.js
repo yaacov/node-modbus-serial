@@ -45,14 +45,14 @@ describe('Promise', function() {
         it('should set a timeout on modubusRtu instance', function() {
             var timeout = 1000;
             modbusRTU.setTimeout(timeout);
-            expect(modbusRTU._timeout).to.be.equal(timeout)
+            expect(modbusRTU._timeout).to.be.equal(timeout);
         });
     });
 
     describe('#getTimeout', function() {
         it('should return the timeout of modubusRtu instance', function() {
             modbusRTU._timeout = 1000;
-            expect(modbusRTU.getTimeout()).to.be.equal(modbusRTU._timeout)
+            expect(modbusRTU.getTimeout()).to.be.equal(modbusRTU._timeout);
         });
     });
 });

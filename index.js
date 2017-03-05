@@ -377,7 +377,7 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 /**
@@ -430,7 +430,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 /**
@@ -475,7 +475,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 /**
@@ -516,7 +516,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 /**
@@ -572,7 +572,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 /**
@@ -617,7 +617,7 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf)
+    _writeBufferToPort.call(this, buf);
 };
 
 // add the connection shorthand API

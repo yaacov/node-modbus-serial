@@ -242,8 +242,8 @@
         "require-await": "error",
         "require-jsdoc": "off",
         "rest-spread-spacing": "error",
-        "semi": "off",
-        "semi-spacing": "off",
+        "semi": "error",
+        "semi-spacing": "error",
         "sort-imports": "error",
         "sort-keys": "off",
         "sort-vars": "error",
@@ -252,7 +252,7 @@
             "error",
             "never"
         ],
-        "space-in-parens": "off",
+        "space-in-parens": "error",
         "space-infix-ops": "off",
         "space-unary-ops": [
             "error",
@@ -261,7 +261,7 @@
                 "words": false
             }
         ],
-        "spaced-comment": "off",
+        "spaced-comment": "error",
         "strict": "off",
         "symbol-description": "error",
         "template-curly-spacing": "error",

@@ -140,7 +140,7 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
 
         this.emit('data', buffer);
     } else {
-        modbusSerialDebug({action: 'emit data to short', data: data})
+        modbusSerialDebug({action: 'emit data to short', data: data});
     }
 
     // reset internal vars

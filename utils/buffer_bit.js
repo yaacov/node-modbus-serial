@@ -43,8 +43,8 @@ var addBufferBitOp = function() {
         }
 
         // set byte to buffer
-        this.writeUInt8(byte, byteOffset)
-    }
+        this.writeUInt8(byte, byteOffset);
+    };
 
     /**
      * Add get one bit in a Buffer prototype.
@@ -64,7 +64,7 @@ var addBufferBitOp = function() {
 
         // check bit state
         return (byte & bitMask) == bitMask;
-    }
-}
+    };
+};
 
 module.exports = addBufferBitOp;

@@ -1,7 +1,7 @@
 /* eslint-disable no-console,no-unused-vars */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
+// var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var vector = {
     getInputRegister: function(addr) { return addr; },
