@@ -19,7 +19,9 @@
  */
 require('./utils/buffer_bit')();
 var crc16 = require('./utils/crc16');
+var modbusSerialDebug = require('debug')('modbus-serial');
 
+var PORT_NOT_OPEN_MESSAGE = 'Port Not Open';
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
  * this class makes ModbusRTU calls fun and easy.
@@ -124,7 +126,7 @@ function _readFC16(data, next) {
  * @private
  */
 function _writeBufferToPort(buffer) {
-    var transaction = this._transactions[this._transactionId]
+    var transaction = this._transactions[this._transactionId];
 
     this._port.write(buffer);
     transaction._timeoutHandle = _startTimeout(this._timeout, transaction.next);
@@ -188,15 +190,12 @@ ModbusRTU.prototype.open = function(callback) {
     // open the serial port
     modbus._port.open(function(error) {
         if (error) {
-            /* On serial port open error
-             * call next function
-             */
+            modbusSerialDebug({action: 'port open error', error: error});
+            /* On serial port open error call next function */
             if (callback)
                 callback(error);
         } else {
-            /* On serial port open OK
-             * call next function
-             */
+            /* On serial port open OK call next function */
             if (callback)
                 callback(error);
 
@@ -349,14 +348,14 @@ ModbusRTU.prototype.writeFC1 = function(address, dataAddress, length, next) {
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code) {
-    // function code defaults to 2
-    code = code || 2;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error());
         return;
     }
+
+    // function code defaults to 2
+    code = code || 2;
 
     // set state variables
     this._transactions[this._transactionId] = {
@@ -402,14 +401,14 @@ ModbusRTU.prototype.writeFC3 = function(address, dataAddress, length, next) {
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code) {
-    // function code defaults to 4
-    code = code || 4;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
+
+    // function code defaults to 4
+    code = code || 4;
 
     // set state variables
     this._transactions[this._transactionId] = {
@@ -443,13 +442,13 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
-    var code = 5;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
+
+    var code = 5;
 
     // set state variables
     this._transactions[this._transactionId] = {
@@ -488,13 +487,13 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
-    var code = 6;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
+
+    var code = 6;
 
     // set state variables
     this._transactions[this._transactionId] = {
@@ -529,14 +528,14 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
-    var code = 15;
-    var i = 0;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
+
+    var code = 15;
+    var i = 0;
 
     // set state variables
     this._transactions[this._transactionId] = {
@@ -585,13 +584,13 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
  * @param {Function} next the function to call next.
  */
 ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
-    var code = 16;
-
     // check port is actually open before attempting write
     if (this._port.isOpen() === false) {
-        if (next) next(new Error("Port Not Open"));
+        if (next) next(new Error(PORT_NOT_OPEN_MESSAGE));
         return;
     }
+
+    var code = 16;
 
     // set state variables
     this._transactions[this._transactionId] = {

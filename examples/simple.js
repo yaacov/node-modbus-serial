@@ -5,6 +5,8 @@
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
+var networkErrors = ['ESOCKETTIMEDOUT', 'ETIMEDOUT', 'ECONNRESET', 'ECONNREFUSED'];
+
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
 client.connectTCP("127.0.0.1", {port: 8502})
@@ -12,6 +14,11 @@ client.connectTCP("127.0.0.1", {port: 8502})
     .then(function() {
         console.log("Connected"); })
     .catch(function(e) {
+        if(e.errno) {
+            if(networkErrors.contains(e.errno)) {
+                console.log('we have to reconnect');
+            }
+        }
         console.log(e.message); });
 
 function setClient() {
