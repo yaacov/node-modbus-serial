@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+/* eslint-disable no-console, spaced-comment */
 
 /* DEBUG environment variable is used to enable debug logging
 

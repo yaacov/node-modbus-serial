@@ -48,7 +48,7 @@ function asciiEncodeRequestBuffer(buf) {
 function asciiDecodeResponseBuffer(bufAscii) {
 
     // create a new buffer of the correct size (based on ascii encoded buffer length)
-    var bufDecoded = new Buffer( (bufAscii.length-1)/2 );
+    var bufDecoded = new Buffer((bufAscii.length-1)/2);
 
     // decode into new buffer (removing delimiters at start and end)
     for (var i = 0; i < (bufAscii.length-3)/2; i++) {
@@ -57,7 +57,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
 
     // check the lrc is true
     var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
-    if( calculateLrc(bufDecoded.slice(0, -2)) != lrcIn ) {
+    if(calculateLrc(bufDecoded.slice(0, -2)) != lrcIn) {
         // return null if lrc error
         return null;
     }
@@ -117,17 +117,17 @@ var AsciiPort = function(path, options) {
 
         // check buffer for start delimiter
         var sdIndex = modbus._buffer.indexOf(0x3A); // ascii for ':'
-        if( sdIndex === -1) {
+        if(sdIndex === -1) {
             // if not there, reset the buffer and return
             modbus._buffer = new Buffer(0);
             return;
         }
         // if there is data before the start delimiter, remove it
-        if( sdIndex > 0 ) {
+        if(sdIndex > 0) {
             modbus._buffer = modbus._buffer.slice(sdIndex);
         }
         // do we have the complete message (i.e. are the end delimiters there)
-        if( modbus._buffer.includes('\r\n', 1, 'ascii') === true ) {
+        if(modbus._buffer.includes('\r\n', 1, 'ascii') === true) {
             // check there is no excess data after end delimiters
             var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
             if(edIndex != modbus._buffer.length-1) {
@@ -137,7 +137,7 @@ var AsciiPort = function(path, options) {
 
             // we have what looks like a complete ascii encoded response message, so decode
             var _data = asciiDecodeResponseBuffer(modbus._buffer);
-            if( _data !== null ) {
+            if(_data !== null) {
 
                 // check if this is the data we are waiting for
                 if (checkData(modbus, _data)) {

@@ -34,7 +34,7 @@ var TcpPort = function(ip, options) {
             modbus.callback(had_error);
             modbus.callback = null;
         }
-    }
+    };
 
     // create a socket
     this._client = new net.Socket();

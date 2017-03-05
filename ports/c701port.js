@@ -68,7 +68,7 @@ var UdpPort = function(ip, options) {
         modbusSerialDebug({action: 'receive c701 upd port', data: data, buffer: buffer});
         modbusSerialDebug(JSON.stringify({action: 'receive c701 upd port strings', data: data, buffer: buffer}));
 
-        //check the serial data
+        // check the serial data
         if (checkData(modbus, buffer)) {
             modbusSerialDebug({action: 'emit data serial rtu buffered port', buffer: buffer});
             modbusSerialDebug(JSON.stringify({action: 'emit data serial rtu buffered port strings', buffer: buffer}));
@@ -79,7 +79,7 @@ var UdpPort = function(ip, options) {
             // get the serial data from the C701 packet
             buffer = data.slice(data.length - 5);
 
-            //check the serial data
+            // check the serial data
             if (checkData(modbus, buffer)) {
                 modbusSerialDebug({action: 'emit data serial rtu buffered port', buffer: buffer});
                 modbusSerialDebug(JSON.stringify({

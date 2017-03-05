@@ -35,7 +35,7 @@ var convert = function(f) {
             f.bind(client)(id, address, arg, next);
         } else {
             // o/w use  a promise
-            var promise = new Promise( function(resolve, reject) {
+            var promise = new Promise(function(resolve, reject) {
                 function cb(err, data) {
                     if (err) {
                         reject(err);
