@@ -57,7 +57,7 @@ function asciiDecodeResponseBuffer(bufAscii) {
 
     // check the lrc is true
     var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
-    if(calculateLrc(bufDecoded.slice(0, -2)) != lrcIn) {
+    if(calculateLrc(bufDecoded.slice(0, -2)) !== lrcIn) {
         // return null if lrc error
         return null;
     }
@@ -78,11 +78,11 @@ function asciiDecodeResponseBuffer(bufAscii) {
  */
 function checkData(modbus, buf) {
     // check buffer size
-    if (buf.length != modbus._length && buf.length != 5) return false;
+    if (buf.length !== modbus._length && buf.length !== 5) return false;
 
     // check buffer unit-id and command
-    return (buf[0] == modbus._id &&
-        (0x7f & buf[1]) == modbus._cmd);
+    return (buf[0] === modbus._id &&
+        (0x7f & buf[1]) === modbus._cmd);
 }
 
 /**
@@ -130,7 +130,7 @@ var AsciiPort = function(path, options) {
         if(modbus._buffer.includes('\r\n', 1, 'ascii') === true) {
             // check there is no excess data after end delimiters
             var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
-            if(edIndex != modbus._buffer.length - 1) {
+            if(edIndex !== modbus._buffer.length - 1) {
                 // if there is, remove it
                 modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
             }

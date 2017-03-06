@@ -63,7 +63,7 @@ var addBufferBitOp = function() {
         var byte = this.readUInt8(byteOffset);
 
         // check bit state
-        return (byte & bitMask) == bitMask;
+        return (byte & bitMask) === bitMask;
     };
 };
 

@@ -17,7 +17,7 @@ var RTUBufferedPort = function(path, options) {
     var self = this;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    if (typeof(options) === 'undefined') options = {};
 
     // disable auto open, as we handle the open
     options.autoOpen = false;

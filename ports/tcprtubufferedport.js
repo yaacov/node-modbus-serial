@@ -30,7 +30,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    if (typeof(options) === 'undefined') options = {};
     this.port = options.port || MODBUS_PORT;
     this.removeCrc = options.removeCrc;
 
