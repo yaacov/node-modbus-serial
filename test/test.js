@@ -338,11 +338,11 @@ describe('ModbusRTU', function() {
         describe('Timeout', function() {
             var timeout = 1000;
             var clock;
-            beforeEach(function(){
+            beforeEach(function() {
                 clock = sinon.useFakeTimers();
             });
 
-            afterEach(function(){
+            afterEach(function() {
                 clock.restore();
             });
 

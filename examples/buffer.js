@@ -7,7 +7,7 @@ var client = new ModbusRTU();
 
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-client.connectTCP("127.0.0.1", {port: 8502})
+client.connectTCP("127.0.0.1", { port: 8502 })
     .then(setClient)
     .then(function() {
         console.log("Connected"); })

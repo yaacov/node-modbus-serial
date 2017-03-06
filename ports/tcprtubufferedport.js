@@ -66,8 +66,8 @@ var TcpRTUBufferedPort = function(ip, options) {
         // add data to buffer
         self._buffer = Buffer.concat([self._buffer, buffer]);
 
-        modbusSerialDebug({action: 'receive tcp rtu buffered port', data: data, buffer: buffer});
-        modbusSerialDebug(JSON.stringify({action: 'receive tcp rtu buffered port strings', data: data, buffer: buffer}));
+        modbusSerialDebug({ action: 'receive tcp rtu buffered port', data: data, buffer: buffer });
+        modbusSerialDebug(JSON.stringify({ action: 'receive tcp rtu buffered port strings', data: data, buffer: buffer }));
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
@@ -140,7 +140,7 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
 
         this.emit('data', buffer);
     } else {
-        modbusSerialDebug({action: 'emit data to short', data: data});
+        modbusSerialDebug({ action: 'emit data to short', data: data });
     }
 
     // reset internal vars
@@ -224,8 +224,8 @@ TcpRTUBufferedPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug({action: 'send tcp rtu buffered port', data: data, buffer: buffer});
-    modbusSerialDebug(JSON.stringify({action: 'send tcp rtu buffered port strings', data: data, buffer: buffer}));
+    modbusSerialDebug({ action: 'send tcp rtu buffered port', data: data, buffer: buffer });
+    modbusSerialDebug(JSON.stringify({ action: 'send tcp rtu buffered port strings', data: data, buffer: buffer }));
 };
 
 module.exports = TcpRTUBufferedPort;

@@ -10,10 +10,10 @@ describe('Modbus TCP RTU buffered port', function() {
     before(function() {
         var mock = require('./../mocks/netMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
+        mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock('net', mock);
         var TcpRTUBufferedPort = require('./../../ports/tcprtubufferedport');
-        port = new TcpRTUBufferedPort('127.0.0.1', {port: 9999, removeCRC: true});
+        port = new TcpRTUBufferedPort('127.0.0.1', { port: 9999, removeCRC: true });
     });
 
     after(function() {

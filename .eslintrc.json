@@ -204,7 +204,7 @@
         "object-curly-newline": "error",
         "object-curly-spacing": [
             "error",
-            "never"
+            "always"
         ],
         "object-property-newline": [
             "error",
@@ -247,7 +247,7 @@
         "sort-imports": "error",
         "sort-keys": "off",
         "sort-vars": "error",
-        "space-before-blocks": "off",
+        "space-before-blocks": "error",
         "space-before-function-paren": [
             "error",
             "never"

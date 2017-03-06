@@ -10,10 +10,10 @@ describe('Modbus TCP port', function() {
     before(function() {
         var mock = require('./../mocks/netMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
+        mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock('net', mock);
         var TcpPort = require('./../../ports/tcpport');
-        port = new TcpPort('127.0.0.1', {port: 9999});
+        port = new TcpPort('127.0.0.1', { port: 9999 });
     });
 
     after(function() {

@@ -52,8 +52,8 @@ var TelnetPort = function(ip, options) {
         var bufferLength = self._buffer.length;
         modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
 
-        modbusSerialDebug({action: 'receive tcp telnet port', data: data, buffer: self._buffer});
-        modbusSerialDebug(JSON.stringify({action: 'receive tcp telnet port strings', data: data, buffer: self._buffer}));
+        modbusSerialDebug({ action: 'receive tcp telnet port', data: data, buffer: self._buffer });
+        modbusSerialDebug(JSON.stringify({ action: 'receive tcp telnet port strings', data: data, buffer: self._buffer }));
 
         // check data length
         if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
@@ -180,8 +180,8 @@ TelnetPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({action: 'send tcp telnet port', data: data});
-    modbusSerialDebug(JSON.stringify({action: 'send tcp telnet port strings', data: data}));
+    modbusSerialDebug({ action: 'send tcp telnet port', data: data });
+    modbusSerialDebug(JSON.stringify({ action: 'send tcp telnet port strings', data: data }));
 };
 
 module.exports = TelnetPort;

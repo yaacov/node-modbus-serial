@@ -269,8 +269,8 @@ TestPort.prototype.write = function(data) {
 
         this.emit('data', buffer);
 
-        modbusSerialDebug({action: 'send test port', data: data, buffer: buffer});
-        modbusSerialDebug(JSON.stringify({action: 'send test port strings', data: data, buffer: buffer}));
+        modbusSerialDebug({ action: 'send test port', data: data, buffer: buffer });
+        modbusSerialDebug(JSON.stringify({ action: 'send test port strings', data: data, buffer: buffer }));
     }
 };
 

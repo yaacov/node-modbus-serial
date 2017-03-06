@@ -227,7 +227,7 @@ var ServerTCP = function(vector, options) {
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
     modbus._server.on('connection', function(sock) {
-        modbusSerialDebug({action: 'connected', data: null});
+        modbusSerialDebug({ action: 'connected', data: null });
 
         sock.on('data', function(data) {
             // remove mbap and add crc16
@@ -236,8 +236,8 @@ var ServerTCP = function(vector, options) {
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-            modbusSerialDebug({action: 'receive', data: requestBuffer});
-            modbusSerialDebug(JSON.stringify({action: 'receive', data: requestBuffer}));
+            modbusSerialDebug({ action: 'receive', data: requestBuffer });
+            modbusSerialDebug(JSON.stringify({ action: 'receive', data: requestBuffer }));
 
             // if length is too short, ignore message
             if (requestBuffer.length < 8) {
@@ -259,8 +259,8 @@ var ServerTCP = function(vector, options) {
                 outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
                 responseBuffer.copy(outTcp, 6);
 
-                modbusSerialDebug({action: 'send', data: responseBuffer});
-                modbusSerialDebug(JSON.stringify({action: 'send string', data: responseBuffer}));
+                modbusSerialDebug({ action: 'send', data: responseBuffer });
+                modbusSerialDebug(JSON.stringify({ action: 'send string', data: responseBuffer }));
 
                 // write to port
                 sock.write(outTcp);
