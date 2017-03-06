@@ -156,11 +156,11 @@ setInterval(function() {
 // create an empty modbus client
 var ModbusRTU = require("modbus-serial");
 var vector = {
-  getInputRegister: function(addr, unitID) { return addr; },
-  getHoldingRegister: function(addr, unitID) { return addr + 8000; },
-  getCoil: function(addr, unitID) { return (addr % 2) === 0; },
-  setRegister: function(addr, value, unitID) { console.log('set register', addr, value, unitID); return; },
-  setCoil: function(addr, value, unitID) { console.log('set coil', addr, value, unitID); return; }
+      getInputRegister: function(addr, unitID) { return addr; },
+      getHoldingRegister: function(addr, unitID) { return addr + 8000; },
+      getCoil: function(addr, unitID) { return (addr % 2) === 0; },
+      setRegister: function(addr, value, unitID) { console.log('set register', addr, value, unitID); return; },
+      setCoil: function(addr, value, unitID) { console.log('set coil', addr, value, unitID); return; }
 };
 
 // set the server to answer for modbus requests
