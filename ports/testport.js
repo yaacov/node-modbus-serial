@@ -1,13 +1,13 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var modbusSerialDebug = require('debug')('modbus-serial');
+var modbusSerialDebug = require("debug")("modbus-serial");
 
 /* Add bit operation functions to Buffer
  */
-require('../utils/buffer_bit')();
-var crc16 = require('../utils/crc16');
+require("../utils/buffer_bit")();
+var crc16 = require("../utils/crc16");
 
 var MIN_DATA_LENGTH = 8;
 
@@ -69,7 +69,7 @@ TestPort.prototype.write = function(data) {
     var i = null;
 
     if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
         return;
     }
 
@@ -267,10 +267,10 @@ TestPort.prototype.write = function(data) {
             buffer.writeUInt16LE(crc + 1, buffer.length - 2);
         }
 
-        this.emit('data', buffer);
+        this.emit("data", buffer);
 
-        modbusSerialDebug({ action: 'send test port', data: data, buffer: buffer });
-        modbusSerialDebug(JSON.stringify({ action: 'send test port strings', data: data, buffer: buffer }));
+        modbusSerialDebug({ action: "send test port", data: data, buffer: buffer });
+        modbusSerialDebug(JSON.stringify({ action: "send test port strings", data: data, buffer: buffer }));
     }
 };
 

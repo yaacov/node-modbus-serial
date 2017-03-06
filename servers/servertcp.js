@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  * Copyright (c) 2017, Yaacov Zamir <kobi.zamir@gmail.com>
  *
@@ -14,19 +14,19 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
-var util = require('util');
-var events = require('events');
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var net = require('net');
-var modbusSerialDebug = require('debug')('modbus-serial');
+var net = require("net");
+var modbusSerialDebug = require("debug")("modbus-serial");
 
-var HOST = '127.0.0.1';
+var HOST = "127.0.0.1";
 var MODBUS_PORT = 502;
 
 /* Add bit operation functions to Buffer
  */
-require('../utils/buffer_bit')();
-var crc16 = require('../utils/crc16');
+require("../utils/buffer_bit")();
+var crc16 = require("../utils/crc16");
 
 /**
  * Parse a modbusRTU buffer and return an answer buffer
@@ -226,18 +226,18 @@ var ServerTCP = function(vector, options) {
     modbus._server = net.createServer();
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
-    modbus._server.on('connection', function(sock) {
-        modbusSerialDebug({ action: 'connected', data: null });
+    modbus._server.on("connection", function(sock) {
+        modbusSerialDebug({ action: "connected", data: null });
 
-        sock.on('data', function(data) {
+        sock.on("data", function(data) {
             // remove mbap and add crc16
             var requestBuffer = new Buffer(data.length - 6 + 2);
             data.copy(requestBuffer, 0, 6);
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-            modbusSerialDebug({ action: 'receive', data: requestBuffer });
-            modbusSerialDebug(JSON.stringify({ action: 'receive', data: requestBuffer }));
+            modbusSerialDebug({ action: "receive", data: requestBuffer });
+            modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
 
             // if length is too short, ignore message
             if (requestBuffer.length < 8) {
@@ -259,8 +259,8 @@ var ServerTCP = function(vector, options) {
                 outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
                 responseBuffer.copy(outTcp, 6);
 
-                modbusSerialDebug({ action: 'send', data: responseBuffer });
-                modbusSerialDebug(JSON.stringify({ action: 'send string', data: responseBuffer }));
+                modbusSerialDebug({ action: "send", data: responseBuffer });
+                modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                 // write to port
                 sock.write(outTcp);

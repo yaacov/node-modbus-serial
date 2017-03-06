@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  * Copyright (c) 2015, Yaacov Zamir <kobi.zamir@gmail.com>
  *
@@ -59,7 +59,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTU = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
@@ -83,13 +83,13 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTCP = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
         // create the TcpPort
-        var TcpPort = require('../ports/tcpport');
+        var TcpPort = require("../ports/tcpport");
         this._port = new TcpPort(ip, options);
 
         // open and call next
@@ -105,12 +105,12 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTcpRTUBuffered = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
-        var TcpRTUBufferedPort = require('../ports/tcprtubufferedport');
+        var TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
         this._port = new TcpRTUBufferedPort(ip, options);
 
         // open and call next
@@ -126,13 +126,13 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTelnet = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
         // create the TcpPort
-        var TelnetPort = require('../ports/telnetport');
+        var TelnetPort = require("../ports/telnetport");
         this._port = new TelnetPort(ip, options);
 
         // open and call next
@@ -148,13 +148,13 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectC701 = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
         // create the TcpPort
-        var C701Port = require('../ports/c701port');
+        var C701Port = require("../ports/c701port");
         this._port = new C701Port(ip, options);
 
         // open and call next
@@ -170,13 +170,13 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTUBuffered = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
         // create the SerialPort
-        var SerialPort = require('../ports/rtubufferedport');
+        var SerialPort = require("../ports/rtubufferedport");
         this._port = new SerialPort(path, options);
 
         // open and call next
@@ -192,13 +192,13 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectAsciiSerial = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
+        if (typeof(next) === "undefined" && typeof(options) === "function") {
             next = options;
             options = {};
         }
 
         // create the ASCII SerialPort
-        var SerialPortAscii = require('../ports/asciiport');
+        var SerialPortAscii = require("../ports/asciiport");
         this._port = new SerialPortAscii(path, options);
 
         // open and call next

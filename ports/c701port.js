@@ -1,11 +1,11 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var dgram = require('dgram');
-var modbusSerialDebug = require('debug')('modbus-serial');
+var dgram = require("dgram");
+var modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require('../utils/crc16');
+var crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
 var MIN_DATA_LENGTH = 6;
@@ -42,14 +42,14 @@ var UdpPort = function(ip, options) {
     this.openFlag = false;
 
     // options
-    if (typeof(options) === 'undefined') options = {};
+    if (typeof(options) === "undefined") options = {};
     this.port = options.port || C701_PORT; // C701 port
 
     // create a socket
     this._client = dgram.createSocket("udp4");
 
     // wait for answer
-    this._client.on('message', function(data) {
+    this._client.on("message", function(data) {
         var buffer = null;
 
         // check expected length
@@ -65,15 +65,15 @@ var UdpPort = function(ip, options) {
         // get the serial data from the C701 packet
         buffer = data.slice(data.length - modbus._length);
 
-        modbusSerialDebug({ action: 'receive c701 upd port', data: data, buffer: buffer });
-        modbusSerialDebug(JSON.stringify({ action: 'receive c701 upd port strings', data: data, buffer: buffer }));
+        modbusSerialDebug({ action: "receive c701 upd port", data: data, buffer: buffer });
+        modbusSerialDebug(JSON.stringify({ action: "receive c701 upd port strings", data: data, buffer: buffer }));
 
         // check the serial data
         if (checkData(modbus, buffer)) {
-            modbusSerialDebug({ action: 'emit data serial rtu buffered port', buffer: buffer });
-            modbusSerialDebug(JSON.stringify({ action: 'emit data serial rtu buffered port strings', buffer: buffer }));
+            modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
+            modbusSerialDebug(JSON.stringify({ action: "emit data serial rtu buffered port strings", buffer: buffer }));
 
-            modbus.emit('data', buffer);
+            modbus.emit("data", buffer);
         } else {
             // check for modbus exception
             // get the serial data from the C701 packet
@@ -81,22 +81,22 @@ var UdpPort = function(ip, options) {
 
             // check the serial data
             if (checkData(modbus, buffer)) {
-                modbusSerialDebug({ action: 'emit data serial rtu buffered port', buffer: buffer });
+                modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
                 modbusSerialDebug(JSON.stringify({
-                    action: 'emit data serial rtu buffered port strings',
+                    action: "emit data serial rtu buffered port strings",
                     buffer: buffer
                 }));
 
-                modbus.emit('data', buffer);
+                modbus.emit("data", buffer);
             }
         }
     });
 
-    this._client.on('listening', function() {
+    this._client.on("listening", function() {
         modbus.openFlag = true;
     });
 
-    this._client.on('close', function() {
+    this._client.on("close", function() {
         modbus.openFlag = false;
     });
 
@@ -133,7 +133,7 @@ UdpPort.prototype.isOpen = function() {
  */
 UdpPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
         return;
     }
 
@@ -182,8 +182,8 @@ UdpPort.prototype.write = function(data) {
     // send buffer to C701 UDP to serial bridge
     this._client.send(buffer, 0, buffer.length, this.port, this.ip);
 
-    modbusSerialDebug({ action: 'send c701 upd port', data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: 'send c701 upd port strings', data: data, buffer: buffer }));
+    modbusSerialDebug({ action: "send c701 upd port", data: data, buffer: buffer });
+    modbusSerialDebug(JSON.stringify({ action: "send c701 upd port strings", data: data, buffer: buffer }));
 };
 
 module.exports = UdpPort;

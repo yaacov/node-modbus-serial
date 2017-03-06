@@ -1,9 +1,9 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport");
-var modbusSerialDebug = require('debug')('modbus-serial');
+var modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
 var EXCEPTION_LENGTH = 5;
@@ -17,7 +17,7 @@ var RTUBufferedPort = function(path, options) {
     var self = this;
 
     // options
-    if (typeof(options) === 'undefined') options = {};
+    if (typeof(options) === "undefined") options = {};
 
     // disable auto open, as we handle the open
     options.autoOpen = false;
@@ -32,7 +32,7 @@ var RTUBufferedPort = function(path, options) {
     this._client = new SerialPort(path, options);
 
     // register the port data event
-    this._client.on('data', function onData(data) {
+    this._client.on("data", function onData(data) {
         // add data to buffer
         self._buffer = Buffer.concat([self._buffer, data]);
 
@@ -40,8 +40,8 @@ var RTUBufferedPort = function(path, options) {
         var expectedLength = self._length;
         var bufferLength = self._buffer.length;
 
-        modbusSerialDebug({ action: 'receive serial rtu buffered port', data: data, buffer: self._buffer });
-        modbusSerialDebug(JSON.stringify({ action: 'receive serial rtu buffered port strings', data: data, buffer: self._buffer }));
+        modbusSerialDebug({ action: "receive serial rtu buffered port", data: data, buffer: self._buffer });
+        modbusSerialDebug(JSON.stringify({ action: "receive serial rtu buffered port strings", data: data, buffer: self._buffer }));
 
         // check data length
         if (expectedLength < MIN_DATA_LENGTH || bufferLength < EXCEPTION_LENGTH) return;
@@ -86,10 +86,10 @@ util.inherits(RTUBufferedPort, EventEmitter);
 RTUBufferedPort.prototype._emitData = function(start, length) {
     var buffer = this._buffer.slice(start, start + length);
 
-    modbusSerialDebug({ action: 'emit data serial rtu buffered port', buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: 'emit data serial rtu buffered port strings', buffer: buffer }));
+    modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
+    modbusSerialDebug(JSON.stringify({ action: "emit data serial rtu buffered port strings", buffer: buffer }));
 
-    this.emit('data', buffer);
+    this.emit("data", buffer);
     this._buffer = this._buffer.slice(start + length);
 };
 
@@ -119,7 +119,7 @@ RTUBufferedPort.prototype.isOpen = function() {
  */
 RTUBufferedPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
         return;
     }
 
@@ -156,8 +156,8 @@ RTUBufferedPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({ action: 'send serial rtu buffered', data: data });
-    modbusSerialDebug(JSON.stringify({ action: 'send serial rtu buffered strings', data: data }));
+    modbusSerialDebug({ action: "send serial rtu buffered", data: data });
+    modbusSerialDebug(JSON.stringify({ action: "send serial rtu buffered strings", data: data }));
 };
 
 module.exports = RTUBufferedPort;

@@ -1,7 +1,7 @@
-'use strict';
-var events = require('events');
+"use strict";
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var util = require('util');
+var util = require("util");
 
 var Server = function() {
     EventEmitter.call(this);
@@ -15,14 +15,14 @@ var Socket = function() {
 util.inherits(Socket, EventEmitter);
 
 Socket.prototype.connect = function(port, host, connectListener) {
-    this.emit('connect');
+    this.emit("connect");
     if (connectListener) {
         connectListener(null);
     }
 };
 
 Socket.prototype.end = function() {
-    this.emit('close', false);
+    this.emit("close", false);
 };
 
 Socket.prototype.write = function(data) {
@@ -30,7 +30,7 @@ Socket.prototype.write = function(data) {
 };
 
 Socket.prototype.receive = function(buffer) {
-    this.emit('data', buffer);
+    this.emit("data", buffer);
 };
 
 exports.Socket = Socket;

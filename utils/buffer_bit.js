@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  * Copyright (c) 2015, Yaacov Zamir <kobi.zamir@gmail.com>
  *

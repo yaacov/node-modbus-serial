@@ -1,9 +1,9 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var net = require('net');
-var modbusSerialDebug = require('debug')('modbus-serial');
+var net = require("net");
+var modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
 var EXCEPTION_LENGTH = 5;
@@ -21,7 +21,7 @@ var TelnetPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) === 'undefined') options = {};
+    if (typeof(options) === "undefined") options = {};
     this.port = options.port || TELNET_PORT; // telnet server port
 
     // internal buffer
@@ -43,17 +43,17 @@ var TelnetPort = function(ip, options) {
     this._client = new net.Socket();
 
     // register the port data event
-    this._client.on('data', function onData(data) {
+    this._client.on("data", function onData(data) {
         // add data to buffer
         self._buffer = Buffer.concat([self._buffer, data]);
 
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
         var bufferLength = self._buffer.length;
-        modbusSerialDebug('on data expected length:' + expectedLength + ' buffer length:' + bufferLength);
+        modbusSerialDebug("on data expected length:" + expectedLength + " buffer length:" + bufferLength);
 
-        modbusSerialDebug({ action: 'receive tcp telnet port', data: data, buffer: self._buffer });
-        modbusSerialDebug(JSON.stringify({ action: 'receive tcp telnet port strings', data: data, buffer: self._buffer }));
+        modbusSerialDebug({ action: "receive tcp telnet port", data: data, buffer: self._buffer });
+        modbusSerialDebug(JSON.stringify({ action: "receive tcp telnet port strings", data: data, buffer: self._buffer }));
 
         // check data length
         if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
@@ -80,17 +80,17 @@ var TelnetPort = function(ip, options) {
         }
     });
 
-    this._client.on('connect', function() {
+    this._client.on("connect", function() {
         self.openFlag = true;
         handleCallback();
     });
 
-    this._client.on('close', function(had_error) {
+    this._client.on("close", function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
 
-    this._client.on('error', function(had_error) {
+    this._client.on("error", function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
     });
@@ -106,7 +106,7 @@ util.inherits(TelnetPort, EventEmitter);
  * @private
  */
 TelnetPort.prototype._emitData = function(start, length) {
-    this.emit('data', this._buffer.slice(start, start + length));
+    this.emit("data", this._buffer.slice(start, start + length));
     this._buffer = this._buffer.slice(start + length);
 
     // reset internal vars
@@ -143,7 +143,7 @@ TelnetPort.prototype.isOpen = function() {
  */
 TelnetPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
         return;
     }
 
@@ -180,8 +180,8 @@ TelnetPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({ action: 'send tcp telnet port', data: data });
-    modbusSerialDebug(JSON.stringify({ action: 'send tcp telnet port strings', data: data }));
+    modbusSerialDebug({ action: "send tcp telnet port", data: data });
+    modbusSerialDebug(JSON.stringify({ action: "send tcp telnet port strings", data: data }));
 };
 
 module.exports = TelnetPort;
