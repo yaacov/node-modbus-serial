@@ -94,7 +94,7 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", {baudrate: 9600}, write);
+client.connectRTU("/dev/ttyUSB0", { baudrate: 9600 }, write);
 
 function write() {
     client.setID(1);
@@ -120,7 +120,7 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTUBuffered("/dev/ttyUSB0", {baudrate: 9600});
+client.connectRTUBuffered("/dev/ttyUSB0", { baudrate: 9600 });
 client.setID(1);
 
 // read the values of 10 registers starting at address 0
@@ -139,7 +139,7 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a tcp line
-client.connectTCP("127.0.0.1", {port: 8502});
+client.connectTCP("127.0.0.1", { port: 8502 });
 client.setID(1);
 
 // read the values of 10 registers starting at address 0
@@ -165,7 +165,7 @@ var vector = {
 
 // set the server to answer for modbus requests
 console.log('ModbusTCP listening on modbus://0.0.0.0:8502');
-var serverTCP = new ModbusRTU.ServerTCP(vector, {host: '0.0.0.0', port: 8502, debug: true, unitID: 1});
+var serverTCP = new ModbusRTU.ServerTCP(vector, { host: '0.0.0.0', port: 8502, debug: true, unitID: 1 });
 ```
 
 to get more see [Examples](https://github.com/yaacov/node-modbus-serial/wiki)
