@@ -15,10 +15,10 @@ describe('Modbus Telnet port', function() {
     before(function() {
         var mock = require('./../mocks/netMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
+        mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock('net', mock);
         var TelnetPort = require('./../../ports/telnetport');
-        port = new TelnetPort('127.0.0.1', {port: 9999});
+        port = new TelnetPort('127.0.0.1', { port: 9999 });
     });
 
     after(function() {

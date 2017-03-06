@@ -10,10 +10,10 @@ describe('Modbus UDP port', function() {
     before(function() {
         var mock = require('./../mocks/dgramMock');
         mockery.resetCache();
-        mockery.enable({warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false});
+        mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock('dgram', mock);
         var UdpPort = require('./../../ports/c701port');
-        port = new UdpPort('127.0.0.1', {port: 9999});
+        port = new UdpPort('127.0.0.1', { port: 9999 });
     });
 
     after(function() {

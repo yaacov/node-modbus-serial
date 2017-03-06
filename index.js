@@ -52,7 +52,7 @@ function _readFC2(data, next) {
     }
 
     if (next)
-        next(null, {"data": contents, "buffer": data.slice(3, 3 + length)});
+        next(null, { "data": contents, "buffer": data.slice(3, 3 + length) });
 }
 
 /**
@@ -72,7 +72,7 @@ function _readFC4(data, next) {
     }
 
     if (next)
-        next(null, {"data": contents, "buffer": data.slice(3, 3 + length)});
+        next(null, { "data": contents, "buffer": data.slice(3, 3 + length) });
 }
 
 /**
@@ -87,7 +87,7 @@ function _readFC5(data, next) {
     var state = data.readUInt16BE(4);
 
     if (next)
-        next(null, {"address": dataAddress, "state": (state == 0xff00)});
+        next(null, { "address": dataAddress, "state": (state == 0xff00) });
 }
 
 /**
@@ -102,7 +102,7 @@ function _readFC6(data, next) {
     var value = data.readUInt16BE(4);
 
     if (next)
-        next(null, {"address": dataAddress, "value": value});
+        next(null, { "address": dataAddress, "value": value });
 }
 
 /**
@@ -117,7 +117,7 @@ function _readFC16(data, next) {
     var length = data.readUInt16BE(4);
 
     if (next)
-        next(null, {"address": dataAddress, "length": length});
+        next(null, { "address": dataAddress, "length": length });
 }
 
 /**
@@ -190,7 +190,7 @@ ModbusRTU.prototype.open = function(callback) {
     // open the serial port
     modbus._port.open(function(error) {
         if (error) {
-            modbusSerialDebug({action: 'port open error', error: error});
+            modbusSerialDebug({ action: 'port open error', error: error });
             /* On serial port open error call next function */
             if (callback)
                 callback(error);
