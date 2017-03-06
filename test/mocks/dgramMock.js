@@ -1,14 +1,14 @@
-'use strict';
-var events = require('events');
+"use strict";
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var util = require('util');
+var util = require("util");
 
 var Socket = function() {
     EventEmitter.call(this);
 };
 
 Socket.prototype.connect = function(port, host, connectListener) {
-    this.emit('connect');
+    this.emit("connect");
     if (connectListener) {
         connectListener(null);
     }
@@ -16,7 +16,7 @@ Socket.prototype.connect = function(port, host, connectListener) {
 util.inherits(Socket, EventEmitter);
 
 Socket.prototype.close = function(callback) {
-    this.emit('close', false);
+    this.emit("close", false);
     if (callback) {
         callback();
     }
@@ -34,11 +34,11 @@ Socket.prototype.send = function(buffer, offset, length, port, address, callback
 };
 
 Socket.prototype.listen = function() {
-    this.emit('listening');
+    this.emit("listening");
 };
 
 Socket.prototype.receive = function(buffer) {
-    this.emit('message', buffer);
+    this.emit("message", buffer);
 };
 
 exports.Socket = Socket;

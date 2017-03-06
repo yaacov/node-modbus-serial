@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  * Calculates the buffers CRC16.
  *

@@ -1,6 +1,6 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
 
 
@@ -21,7 +21,7 @@ SerialPortMock.prototype.open = function(callback) {
     if (callback) {
         callback(null);
     }
-    this.emit('open');
+    this.emit("open");
 };
 
 SerialPortMock.prototype.isOpen = function() {
@@ -40,11 +40,11 @@ SerialPortMock.prototype.close = function(callback) {
     if (callback) {
         callback(null);
     }
-    this.emit('close');
+    this.emit("close");
 };
 
 SerialPortMock.prototype.receive = function(buffer) {
-    this.emit('data', buffer);
+    this.emit("data", buffer);
 };
 
 module.exports = SerialPortMock;

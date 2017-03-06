@@ -1,4 +1,4 @@
-'use strict';
+"use strict";
 /**
  * Copyright (c) 2015-2017, Yaacov Zamir <kobi.zamir@gmail.com>
  *
@@ -17,11 +17,11 @@
 
 /* Add bit operation functions to Buffer
  */
-require('./utils/buffer_bit')();
-var crc16 = require('./utils/crc16');
-var modbusSerialDebug = require('debug')('modbus-serial');
+require("./utils/buffer_bit")();
+var crc16 = require("./utils/crc16");
+var modbusSerialDebug = require("debug")("modbus-serial");
 
-var PORT_NOT_OPEN_MESSAGE = 'Port Not Open';
+var PORT_NOT_OPEN_MESSAGE = "Port Not Open";
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
  * this class makes ModbusRTU calls fun and easy.
@@ -146,7 +146,7 @@ function _startTimeout(duration, next) {
     }
     return setTimeout(function() {
         if (next) {
-            next(new Error('Timed out'));
+            next(new Error("Timed out"));
         }
     }, duration);
 }
@@ -190,7 +190,7 @@ ModbusRTU.prototype.open = function(callback) {
     // open the serial port
     modbus._port.open(function(error) {
         if (error) {
-            modbusSerialDebug({ action: 'port open error', error: error });
+            modbusSerialDebug({ action: "port open error", error: error });
             /* On serial port open error call next function */
             if (callback)
                 callback(error);
@@ -202,7 +202,7 @@ ModbusRTU.prototype.open = function(callback) {
             /* On serial port success
              * register the modbus parser functions
              */
-            modbus._port.on('data', function(data) {
+            modbus._port.on("data", function(data) {
                 // set locale helpers variables
                 var transaction = modbus._transactions[modbus._transactionId];
 
@@ -317,7 +317,7 @@ ModbusRTU.prototype.open = function(callback) {
 ModbusRTU.prototype.close = function(callback) {
     // close the serial port
     this._port.close(callback);
-    this._port.removeAllListeners('data');
+    this._port.removeAllListeners("data");
 };
 
 /**
@@ -621,20 +621,20 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
 };
 
 // add the connection shorthand API
-require('./apis/connection')(ModbusRTU);
+require("./apis/connection")(ModbusRTU);
 
 // add the promise API
-require('./apis/promise')(ModbusRTU);
+require("./apis/promise")(ModbusRTU);
 
 // exports
 module.exports = ModbusRTU;
-module.exports.TestPort = require('./ports/testport');
+module.exports.TestPort = require("./ports/testport");
 try {
-    module.exports.RTUBufferedPort = require('./ports/rtubufferedport');
+    module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
 } catch (err) {}
-module.exports.TcpPort = require('./ports/tcpport');
-module.exports.TcpRTUBufferedPort = require('./ports/tcprtubufferedport');
-module.exports.TelnetPort = require('./ports/telnetport');
-module.exports.C701Port = require('./ports/c701port');
+module.exports.TcpPort = require("./ports/tcpport");
+module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
+module.exports.TelnetPort = require("./ports/telnetport");
+module.exports.C701Port = require("./ports/c701port");
 
-module.exports.ServerTCP = require('./servers/servertcp');
+module.exports.ServerTCP = require("./servers/servertcp");

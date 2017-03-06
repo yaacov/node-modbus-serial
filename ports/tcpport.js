@@ -1,11 +1,11 @@
-'use strict';
-var util = require('util');
-var events = require('events');
+"use strict";
+var util = require("util");
+var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var net = require('net');
-var modbusSerialDebug = require('debug')('modbus-serial');
+var net = require("net");
+var modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require('../utils/crc16');
+var crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
 var MODBUS_PORT = 502; // modbus port
@@ -24,7 +24,7 @@ var TcpPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) === 'undefined') options = {};
+    if (typeof(options) === "undefined") options = {};
     this.port = options.port || MODBUS_PORT; // modbus port
 
     // handle callback - call a callback function only once, for the first event
@@ -38,7 +38,7 @@ var TcpPort = function(ip, options) {
 
     // create a socket
     this._client = new net.Socket();
-    this._client.on('data', function(data) {
+    this._client.on("data", function(data) {
         var buffer;
         var crc;
 
@@ -54,24 +54,24 @@ var TcpPort = function(ip, options) {
         // update transaction id
         modbus._transactionId = data.readUInt16BE(0);
 
-        modbusSerialDebug({ action: 'receive tcp port', data: data, buffer: buffer });
-        modbusSerialDebug(JSON.stringify({ action: 'receive tcp port strings', data: data, buffer: buffer }));
+        modbusSerialDebug({ action: "receive tcp port", data: data, buffer: buffer });
+        modbusSerialDebug(JSON.stringify({ action: "receive tcp port strings", data: data, buffer: buffer }));
 
         // emit a data signal
-        modbus.emit('data', buffer);
+        modbus.emit("data", buffer);
     });
 
-    this._client.on('connect', function() {
+    this._client.on("connect", function() {
         modbus.openFlag = true;
         handleCallback();
     });
 
-    this._client.on('close', function(had_error) {
+    this._client.on("close", function(had_error) {
         modbus.openFlag = false;
         handleCallback(had_error);
     });
 
-    this._client.on('error', function(had_error) {
+    this._client.on("error", function(had_error) {
         modbus.openFlag = false;
         handleCallback(had_error);
     });
@@ -108,7 +108,7 @@ TcpPort.prototype.isOpen = function() {
  */
 TcpPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug('expected length of data is to small - minimum is ' + MIN_DATA_LENGTH);
+        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
         return;
     }
 
@@ -125,8 +125,8 @@ TcpPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug({ action: 'send tcp port', data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: 'send tcp port strings', data: data, buffer: buffer }));
+    modbusSerialDebug({ action: "send tcp port", data: data, buffer: buffer });
+    modbusSerialDebug(JSON.stringify({ action: "send tcp port strings", data: data, buffer: buffer }));
 };
 
 module.exports = TcpPort;
