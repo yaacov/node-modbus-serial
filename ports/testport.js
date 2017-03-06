@@ -78,17 +78,17 @@ TestPort.prototype.write = function(data) {
     var crc = data[data.length - 2] + data[data.length - 1] * 0x100;
 
     // if crc is bad, ignore message
-    if (crc != crc16(data.slice(0, -2))) {
+    if (crc !== crc16(data.slice(0, -2))) {
         return;
     }
 
     // function code 1 and 2
-    if (functionCode == 1 || functionCode == 2) {
+    if (functionCode === 1 || functionCode === 2) {
         address = data.readUInt16BE(2);
         length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != 8) {
+        if (data.length !== 8) {
             return;
         }
 
@@ -101,12 +101,12 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 3
-    if (functionCode == 3) {
+    if (functionCode === 3) {
         address = data.readUInt16BE(2);
         length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != 8) {
+        if (data.length !== 8) {
             return;
         }
 
@@ -121,12 +121,12 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 4
-    if (functionCode == 4) {
+    if (functionCode === 4) {
         address = data.readUInt16BE(2);
         length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != 8) {
+        if (data.length !== 8) {
             return;
         }
 
@@ -141,12 +141,12 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 5
-    if (functionCode == 5) {
+    if (functionCode === 5) {
         address = data.readUInt16BE(2);
         state = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != 8) {
+        if (data.length !== 8) {
             return;
         }
 
@@ -156,7 +156,7 @@ TestPort.prototype.write = function(data) {
         buffer.writeUInt16BE(state, 4);
 
         // write coil
-        if (state == 0xff00) {
+        if (state === 0xff00) {
             this._coils |= (1 << address);
         } else {
             this._coils &= ~(1 << address);
@@ -164,11 +164,11 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 6
-    if (functionCode == 6) {
+    if (functionCode === 6) {
         address = data.readUInt16BE(2);
         value = data.readUInt16BE(4);
         // if length is bad, ignore message
-        if (data.length != (6 + 2)) {
+        if (data.length !== (6 + 2)) {
             return;
         }
 
@@ -181,12 +181,12 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 15
-    if (functionCode == 15) {
+    if (functionCode === 15) {
         address = data.readUInt16BE(2);
         length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != 7 + Math.ceil(length / 8) + 2) {
+        if (data.length !== 7 + Math.ceil(length / 8) + 2) {
             return;
         }
 
@@ -208,12 +208,12 @@ TestPort.prototype.write = function(data) {
     }
 
     // function code 16
-    if (functionCode == 16) {
+    if (functionCode === 16) {
         address = data.readUInt16BE(2);
         length = data.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (data.length != (7 + length * 2 + 2)) {
+        if (data.length !== (7 + length * 2 + 2)) {
             return;
         }
 
@@ -263,7 +263,7 @@ TestPort.prototype.write = function(data) {
         buffer.writeUInt16LE(crc, buffer.length - 2);
 
         // unit 3: answers with bad crc
-        if (unitNumber == 3) {
+        if (unitNumber === 3) {
             buffer.writeUInt16LE(crc + 1, buffer.length - 2);
         }
 

@@ -24,7 +24,7 @@ var TcpPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    if (typeof(options) === 'undefined') options = {};
     this.port = options.port || MODBUS_PORT; // modbus port
 
     // handle callback - call a callback function only once, for the first event

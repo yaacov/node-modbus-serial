@@ -59,7 +59,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTU = function(path, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -83,7 +83,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTCP = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -105,7 +105,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTcpRTUBuffered = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -126,7 +126,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTelnet = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -148,7 +148,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectC701 = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -170,7 +170,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTUBuffered = function(path, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }
@@ -192,7 +192,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectAsciiSerial = function(path, options, next) {
         // check if we have options
-        if (typeof(next) == 'undefined' && typeof(options) == 'function') {
+        if (typeof(next) === 'undefined' && typeof(options) === 'function') {
             next = options;
             options = {};
         }

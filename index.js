@@ -46,7 +46,7 @@ function _readFC2(data, next) {
         var reg = data[i + 3];
 
         for (var j = 0; j < 8; j++) {
-            contents.push((reg & 1) == 1);
+            contents.push((reg & 1) === 1);
             reg = reg >> 1;
         }
     }
@@ -87,7 +87,7 @@ function _readFC5(data, next) {
     var state = data.readUInt16BE(4);
 
     if (next)
-        next(null, { "address": dataAddress, "state": (state == 0xff00) });
+        next(null, { "address": dataAddress, "state": (state === 0xff00) });
 }
 
 /**
@@ -227,7 +227,7 @@ ModbusRTU.prototype.open = function(callback) {
                  * if CRC is bad raise an error
                  */
                 var crcIn = data.readUInt16LE(data.length - 2);
-                if (crcIn != crc16(data.slice(0, -2))) {
+                if (crcIn !== crc16(data.slice(0, -2))) {
                     error = "CRC error";
                     if (transaction.next)
                         transaction.next(new Error(error));
@@ -240,8 +240,8 @@ ModbusRTU.prototype.open = function(callback) {
 
                 /* check for modbus exception
                  */
-                if (data.length == 5 &&
-                    code == (0x80 | transaction.nextCode)) {
+                if (data.length === 5 &&
+                    code === (0x80 | transaction.nextCode)) {
                     error = "Modbus exception " + data.readUInt8(2);
                     if (transaction.next)
                         transaction.next(new Error(error));
@@ -252,7 +252,7 @@ ModbusRTU.prototype.open = function(callback) {
                  * if we do not expect this data
                  * raise an error
                  */
-                if (data.length != transaction.nextLength) {
+                if (data.length !== transaction.nextLength) {
                     error = "Data length error, expected " +
                         transaction.nextLength + " got " + data.length;
                     if (transaction.next)
@@ -264,7 +264,7 @@ ModbusRTU.prototype.open = function(callback) {
                  * if we do not expect this message
                  * raise an error
                  */
-                if (address != transaction.nextAddress || code != transaction.nextCode) {
+                if (address !== transaction.nextAddress || code !== transaction.nextCode) {
                     error = "Unexpected data error, expected " +
                         transaction.nextAddress + " got " + address;
                     if (transaction.next)

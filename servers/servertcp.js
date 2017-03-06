@@ -42,17 +42,17 @@ function parseModbusBuffer(requestBuffer, vector) {
     var i = null;
 
     // if crc is bad, ignore message
-    if (crc != crc16(requestBuffer.slice(0, -2))) {
+    if (crc !== crc16(requestBuffer.slice(0, -2))) {
         return;
     }
 
     // function code 1 and 2
-    if (functionCode == 1 || functionCode == 2) {
+    if (functionCode === 1 || functionCode === 2) {
         address = requestBuffer.readUInt16BE(2);
         length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != 8) {
+        if (requestBuffer.length !== 8) {
             return;
         }
 
@@ -70,12 +70,12 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 3
-    if (functionCode == 3) {
+    if (functionCode === 3) {
         address = requestBuffer.readUInt16BE(2);
         length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != 8) {
+        if (requestBuffer.length !== 8) {
             return;
         }
 
@@ -92,12 +92,12 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 4
-    if (functionCode == 4) {
+    if (functionCode === 4) {
         address = requestBuffer.readUInt16BE(2);
         length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != 8) {
+        if (requestBuffer.length !== 8) {
             return;
         }
 
@@ -114,12 +114,12 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 5
-    if (functionCode == 5) {
+    if (functionCode === 5) {
         address = requestBuffer.readUInt16BE(2);
         state = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != 8) {
+        if (requestBuffer.length !== 8) {
             return;
         }
 
@@ -135,11 +135,11 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 6
-    if (functionCode == 6) {
+    if (functionCode === 6) {
         address = requestBuffer.readUInt16BE(2);
         value = requestBuffer.readUInt16BE(4);
         // if length is bad, ignore message
-        if (requestBuffer.length != (6 + 2)) {
+        if (requestBuffer.length !== (6 + 2)) {
             return;
         }
 
@@ -152,12 +152,12 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 15
-    if (functionCode == 15) {
+    if (functionCode === 15) {
         address = requestBuffer.readUInt16BE(2);
         length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != 7 + Math.ceil(length / 8) + 2) {
+        if (requestBuffer.length !== 7 + Math.ceil(length / 8) + 2) {
             return;
         }
 
@@ -176,12 +176,12 @@ function parseModbusBuffer(requestBuffer, vector) {
     }
 
     // function code 16
-    if (functionCode == 16) {
+    if (functionCode === 16) {
         address = requestBuffer.readUInt16BE(2);
         length = requestBuffer.readUInt16BE(4);
 
         // if length is bad, ignore message
-        if (requestBuffer.length != (7 + length * 2 + 2)) {
+        if (requestBuffer.length !== (7 + length * 2 + 2)) {
             return;
         }
 

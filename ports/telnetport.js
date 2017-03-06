@@ -21,7 +21,7 @@ var TelnetPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    if (typeof(options) === 'undefined') options = {};
     this.port = options.port || TELNET_PORT; // telnet server port
 
     // internal buffer

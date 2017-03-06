@@ -22,15 +22,15 @@ var C701_PORT = 0x7002;
  */
 function checkData(modbus, buf) {
     // check buffer size
-    if (buf.length != modbus._length && buf.length != 5) return false;
+    if (buf.length !== modbus._length && buf.length !== 5) return false;
 
     // calculate crc16
     var crcIn = buf.readUInt16LE(buf.length - 2);
 
     // check buffer unit-id, command and crc
-    return (buf[0] == modbus._id &&
-        (0x7f & buf[1]) == modbus._cmd &&
-        crcIn == crc16(buf.slice(0, -2)));
+    return (buf[0] === modbus._id &&
+        (0x7f & buf[1]) === modbus._cmd &&
+        crcIn === crc16(buf.slice(0, -2)));
 }
 
 /**
@@ -42,7 +42,7 @@ var UdpPort = function(ip, options) {
     this.openFlag = false;
 
     // options
-    if (typeof(options) == 'undefined') options = {};
+    if (typeof(options) === 'undefined') options = {};
     this.port = options.port || C701_PORT; // C701 port
 
     // create a socket
@@ -59,7 +59,7 @@ var UdpPort = function(ip, options) {
         if (data.length < (116 + 5)) return;
 
         // check the C701 packet magic
-        if (data.readUInt16LE(2) != 602) return;
+        if (data.readUInt16LE(2) !== 602) return;
 
         // check for modbus valid answer
         // get the serial data from the C701 packet
