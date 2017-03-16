@@ -30,10 +30,6 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
 
-For use over serial port (ModbusRTU), also install node-serialport:
-
-    npm install serialport@4.0.7
-
 
 #### What can I do with this module ?
 
