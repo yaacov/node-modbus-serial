@@ -63,16 +63,19 @@ var TcpPort = function(ip, options) {
 
     this._client.on("connect", function() {
         modbus.openFlag = true;
+        modbusSerialDebug("TCP port: signal connect");
         handleCallback();
     });
 
     this._client.on("close", function(had_error) {
         modbus.openFlag = false;
+        modbusSerialDebug("TCP port: signal close" + had_error);
         handleCallback(had_error);
     });
 
     this._client.on("error", function(had_error) {
         modbus.openFlag = false;
+        modbusSerialDebug("TCP port: signal error" + had_error);
         handleCallback(had_error);
     });
 
