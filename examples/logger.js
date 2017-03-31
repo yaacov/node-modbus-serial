@@ -4,6 +4,7 @@
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
+var timeoutRef = null;
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
 
@@ -11,6 +12,9 @@ var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED
 function checkError(e) {
     if(e.errno && networkErrors.includes(e.errno)) {
         console.log("we have to reconnect");
+
+        // stop reading loop
+        clearTimeout(timeoutRef);
 
         // close port
         client.close();
@@ -51,7 +55,7 @@ function run() {
         .catch(function(e) {
             checkError(e);
             console.log(e.message); })
-        .then(function() { setTimeout(run, 1000); });
+        .then(function() { timeoutRef = setTimeout(run, 1000); });
 }
 
 // connect and start logging
