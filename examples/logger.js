@@ -4,9 +4,22 @@
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
-var timeOutRef = null;
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
+
+// check error, and reconnect if needed
+function checkError(e) {
+    if(e.errno && networkErrors.includes(e.errno)) {
+        console.log("we have to reconnect");
+
+        // close port
+        client.close();
+
+        // re open client
+        client = new ModbusRTU();
+        setTimeout(connect, 3000);
+    }
+}
 
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
@@ -16,18 +29,7 @@ function connect() {
         .then(function() {
             console.log("Connected"); })
         .catch(function(e) {
-            if(e.errno) {
-                if(networkErrors.includes(e.errno)) {
-                    console.log("we have to reconnect");
-
-                    // close port
-                    client.close();
-
-                    // clear last run and try to re-connect
-                    clearTimeout(timeOutRef);
-                    setTimeout(connect, 1000);
-                }
-            }
+            checkError(e);
             console.log(e.message); });
 }
 
@@ -47,8 +49,9 @@ function run() {
         .then(function(d) {
             console.log("Receive:", d.data); })
         .catch(function(e) {
+            checkError(e);
             console.log(e.message); })
-        .then(function() { timeOutRef = setTimeout(run, 1000); });
+        .then(function() { setTimeout(run, 1000); });
 }
 
 // connect and start logging
