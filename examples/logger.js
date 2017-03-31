@@ -7,19 +7,31 @@ var client = new ModbusRTU();
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
 
+// check error, and reconnect if needed
+function checkError(e) {
+    if(e.errno && networkErrors.includes(e.errno)) {
+        console.log("we have to reconnect");
+
+        // close port
+        client.close();
+
+        // re open client
+        client = new ModbusRTU();
+        setTimeout(connect, 3000);
+    }
+}
+
 // open connection to a serial port
 //client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-client.connectTCP("127.0.0.1", { port: 8502 })
-    .then(setClient)
-    .then(function() {
-        console.log("Connected"); })
-    .catch(function(e) {
-        if(e.errno) {
-            if(networkErrors.includes(e.errno)) {
-                console.log("we have to reconnect");
-            }
-        }
-        console.log(e.message); });
+function connect() {
+    client.connectTCP("127.0.0.1", { port: 8502 })
+        .then(setClient)
+        .then(function() {
+            console.log("Connected"); })
+        .catch(function(e) {
+            checkError(e);
+            console.log(e.message); });
+}
 
 function setClient() {
     // set the client's unit id
@@ -37,6 +49,10 @@ function run() {
         .then(function(d) {
             console.log("Receive:", d.data); })
         .catch(function(e) {
+            checkError(e);
             console.log(e.message); })
         .then(function() { setTimeout(run, 1000); });
 }
+
+// connect and start logging
+connect();
