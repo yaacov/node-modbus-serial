@@ -4,7 +4,7 @@
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
-var timeoutRef = null;
+var timeoutRunRef = null;
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
 
@@ -13,11 +13,12 @@ function checkError(e) {
     if(e.errno && networkErrors.includes(e.errno)) {
         console.log("we have to reconnect");
 
-        // stop reading loop
-        clearTimeout(timeoutRef);
-
         // close port
         client.close();
+
+        // stop running
+        clearTimeout(timeoutRunRef);
+        timeoutRunRef = null;
 
         // re open client
         client = new ModbusRTU();
@@ -26,8 +27,13 @@ function checkError(e) {
 }
 
 // open connection to a serial port
-//client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
 function connect() {
+    // if client already open, just run
+    if (client.isOpen()) {
+        run();
+    }
+
+    // if client closed, open a new connection
     client.connectTCP("127.0.0.1", { port: 8502 })
         .then(setClient)
         .then(function() {
@@ -55,7 +61,9 @@ function run() {
         .catch(function(e) {
             checkError(e);
             console.log(e.message); })
-        .then(function() { timeoutRef = setTimeout(run, 1000); });
+        .then(function() {
+            clearTimeout(timeoutRunRef);
+            timeoutRunRef = setTimeout(run, 1000); });
 }
 
 // connect and start logging
