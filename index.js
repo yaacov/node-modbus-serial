@@ -638,7 +638,9 @@ require("./apis/promise")(ModbusRTU);
 // exports
 module.exports = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
-module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
+try {
+    module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
+} catch (err) {}
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
