@@ -5,6 +5,7 @@
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 var timeoutRunRef = null;
+var timeoutConnectRef = null;
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
 
@@ -16,18 +17,17 @@ function checkError(e) {
         // close port
         client.close();
 
-        // stop running
-        clearTimeout(timeoutRunRef);
-        timeoutRunRef = null;
-
         // re open client
         client = new ModbusRTU();
-        setTimeout(connect, 3000);
+        timeoutConnectRef = setTimeout(connect, 1000);
     }
 }
 
 // open connection to a serial port
 function connect() {
+    // clear pending timeouts
+    clearTimeout(timeoutConnectRef);
+
     // if client already open, just run
     if (client.isOpen()) {
         run();
@@ -54,16 +54,18 @@ function setClient() {
 }
 
 function run() {
+    // clear pending timeouts
+    clearTimeout(timeoutRunRef);
+
     // read the 4 registers starting at address 5
     client.readHoldingRegisters(5, 4)
         .then(function(d) {
             console.log("Receive:", d.data); })
+        .then(function() {
+            timeoutRunRef = setTimeout(run, 1000); })
         .catch(function(e) {
             checkError(e);
-            console.log(e.message); })
-        .then(function() {
-            clearTimeout(timeoutRunRef);
-            timeoutRunRef = setTimeout(run, 1000); });
+            console.log(e.message); });
 }
 
 // connect and start logging
