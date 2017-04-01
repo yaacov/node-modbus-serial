@@ -8,8 +8,8 @@ var client = new ModbusRTU();
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
 
 // open connection to a serial port
-//client.connectRTU("/dev/ttyUSB0", {baudrate: 9600})
-client.connectTCP("127.0.0.1", { port: 8502 })
+client.connectRTU("/dev/ttyUSB0", {baudrate: 115200})
+//client.connectTCP("modbus.local", { port: 502 })
     .then(setClient)
     .then(function() {
         console.log("Connected"); })
@@ -28,12 +28,22 @@ function setClient() {
     client.setTimeout(1000);
 
     // run program
-    run();
+    readRegisters();
 }
 
-function run() {
+function readRegisters() {
     // read the 4 registers starting at address 5
     client.readHoldingRegisters(5, 4)
+        .then(function(d) {
+            console.log("Receive:", d.data); })
+        .catch(function(e) {
+            console.log(e.message); })
+        .then(readCoils);
+}
+
+function readCoils() {
+    // read the 4 registers starting at address 5
+    client.readCoils(1, 20)
         .then(function(d) {
             console.log("Receive:", d.data); })
         .catch(function(e) {
