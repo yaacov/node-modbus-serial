@@ -138,7 +138,9 @@ function _writeBufferToPort(buffer) {
     var transaction = this._transactions[this._transactionId];
 
     this._port.write(buffer);
-    transaction._timeoutHandle = _startTimeout(this._timeout, transaction.next);
+    if (transaction) {
+        transaction._timeoutHandle = _startTimeout(this._timeout, transaction.next);
+    }
 }
 
 /**
@@ -216,8 +218,10 @@ ModbusRTU.prototype.open = function(callback) {
                 var transaction = modbus._transactions[modbus._transactionId];
 
                 /* cancel the timeout */
-                _cancelTimeout(transaction._timeoutHandle);
-                transaction._timeoutHandle = undefined;
+                if (transaction) {
+                    _cancelTimeout(transaction._timeoutHandle);
+                    transaction._timeoutHandle = undefined;
+                }
 
                 /* check incoming data
                  */
