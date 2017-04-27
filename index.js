@@ -217,11 +217,14 @@ ModbusRTU.prototype.open = function(callback) {
                 // set locale helpers variables
                 var transaction = modbus._transactions[modbus._transactionId];
 
-                /* cancel the timeout */
-                if (transaction) {
-                    _cancelTimeout(transaction._timeoutHandle);
-                    transaction._timeoutHandle = undefined;
+                // the _transactionId can be missing, ignore wrong transaction it's
+                if (!transaction) {
+                    return;
                 }
+
+                /* cancel the timeout */
+                _cancelTimeout(transaction._timeoutHandle);
+                transaction._timeoutHandle = undefined;
 
                 /* check incoming data
                  */
