@@ -9,7 +9,7 @@ var crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
 var MODBUS_PORT = 502; // modbus port
-var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
+var MAX_TRANSACTIONS = 256; // maximum transaction to wait for
 var MIN_DATA_LENGTH = 6;
 var MIN_MBAP_LENGTH = 6;
 var CRC_LENGTH = 2;
