@@ -59,6 +59,9 @@ function asciiDecodeResponseBuffer(bufAscii) {
     var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
     if(calculateLrc(bufDecoded.slice(0, -2)) !== lrcIn) {
         // return null if lrc error
+        var calcLrc = calculateLrc(bufDecoded.slice(0, -2));
+
+        modbusSerialDebug({ action: "LRC error", LRC: lrcIn.toString(16), calcLRC: calcLrc.toString(16) });
         return null;
     }
 
@@ -78,7 +81,11 @@ function asciiDecodeResponseBuffer(bufAscii) {
  */
 function checkData(modbus, buf) {
     // check buffer size
-    if (buf.length !== modbus._length && buf.length !== 5) return false;
+    if (buf.length !== modbus._length && buf.length !== 5) {
+        modbusSerialDebug({ action: "length error", recive: buf.length, expected: modbus._length });
+
+        return false;
+    }
 
     // check buffer unit-id and command
     return (buf[0] === modbus._id &&
@@ -137,6 +144,7 @@ var AsciiPort = function(path, options) {
 
             // we have what looks like a complete ascii encoded response message, so decode
             var _data = asciiDecodeResponseBuffer(modbus._buffer);
+            modbusSerialDebug({ action: "got EOM", data: _data, buffer: modbus._buffer });
             if(_data !== null) {
 
                 // check if this is the data we are waiting for
@@ -214,6 +222,7 @@ AsciiPort.prototype.write = function(data) {
             break;
         default:
             // raise and error ?
+            modbusSerialDebug({ action: "unknown command", id: this._id.toString(16), command: this._cmd.toString(16) });
             this._length = 0;
             break;
     }
