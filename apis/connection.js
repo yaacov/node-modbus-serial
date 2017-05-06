@@ -202,7 +202,7 @@ var addConnctionAPI = function(Modbus) {
         this._port = new SerialPortAscii(path, options);
 
         // open and call next
-        open(this, next);
+        return open(this, next);
     };
 };
 
