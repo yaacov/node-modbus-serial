@@ -117,8 +117,6 @@ TcpPort.prototype.write = function(data) {
 
     // get next transaction id
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
-
-    // remember current unit and command
     var unitNumber = data[0];
     var functionCode = data[1];
 
