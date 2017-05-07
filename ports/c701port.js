@@ -182,8 +182,21 @@ UdpPort.prototype.write = function(data) {
     // send buffer to C701 UDP to serial bridge
     this._client.send(buffer, 0, buffer.length, this.port, this.ip);
 
-    modbusSerialDebug({ action: "send c701 upd port", data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "send c701 upd port strings", data: data, buffer: buffer }));
+    modbusSerialDebug({
+        action: "send c701 upd port",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send c701 upd port strings",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
 module.exports = UdpPort;

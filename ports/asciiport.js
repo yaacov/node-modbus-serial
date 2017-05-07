@@ -233,8 +233,19 @@ AsciiPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(_encodedData);
 
-    modbusSerialDebug({ action: "send serial ascii port", data: _encodedData });
-    modbusSerialDebug(JSON.stringify({ action: "send serial ascii port", data: _encodedData }));
+    modbusSerialDebug({
+        action: "send serial ascii port",
+        data: _encodedData,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send serial ascii port",
+        data: _encodedData,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
 module.exports = AsciiPort;

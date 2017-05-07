@@ -224,8 +224,21 @@ TcpRTUBufferedPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug({ action: "send tcp rtu buffered port", data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "send tcp rtu buffered port strings", data: data, buffer: buffer }));
+    modbusSerialDebug({
+        action: "send tcp rtu buffered port",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send tcp rtu buffered port strings",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
 module.exports = TcpRTUBufferedPort;

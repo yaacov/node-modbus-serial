@@ -180,8 +180,19 @@ TelnetPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({ action: "send tcp telnet port", data: data });
-    modbusSerialDebug(JSON.stringify({ action: "send tcp telnet port strings", data: data }));
+    modbusSerialDebug({
+        action: "send tcp telnet port",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send tcp telnet port strings",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
 module.exports = TelnetPort;

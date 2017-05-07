@@ -118,6 +118,12 @@ TcpPort.prototype.write = function(data) {
     // get next transaction id
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
+    // remember current unit and command
+    this._id = data[0];
+    this._cmd = data[1];
+
+    // TODO: is it not interesting to have the expected length here as in all other ports?
+
     // remove crc and add mbap
     var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(transactionsId, 0);
@@ -128,8 +134,23 @@ TcpPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug({ action: "send tcp port", data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "send tcp port strings", data: data, buffer: buffer }));
+    modbusSerialDebug({
+        action: "send tcp port",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd,
+        transactionsId: transactionsId
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send tcp port strings",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd,
+        transactionsId: transactionsId
+    }));
 };
 
 module.exports = TcpPort;

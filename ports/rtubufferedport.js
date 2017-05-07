@@ -156,8 +156,19 @@ RTUBufferedPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({ action: "send serial rtu buffered", data: data });
-    modbusSerialDebug(JSON.stringify({ action: "send serial rtu buffered strings", data: data }));
+    modbusSerialDebug({
+        action: "send serial rtu buffered",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send serial rtu buffered strings",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
 module.exports = RTUBufferedPort;
