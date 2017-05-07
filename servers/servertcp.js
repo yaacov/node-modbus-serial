@@ -31,8 +31,8 @@ var crc16 = require("../utils/crc16");
 /**
  * Parse a ModbusRTU buffer and return an answer buffer.
  *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
+ * @param {Buffer} requestBuffer - request Buffer from client
+ * @param {object} vector - vector of functions for read and write
  * @returns {Buffer} - on error it is undefined
  */
 function parseModbusBuffer(requestBuffer, vector) {
@@ -52,25 +52,25 @@ function parseModbusBuffer(requestBuffer, vector) {
     switch (parseInt(functionCode)) {
         case 1:
         case 2:
-            responseBuffer = handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID);
+            responseBuffer = _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID);
             break;
         case 3:
-            responseBuffer = handleReadMultipleRegisters(requestBuffer, vector, unitID);
+            responseBuffer = _handleReadMultipleRegisters(requestBuffer, vector, unitID);
             break;
         case 4:
-            responseBuffer = handleReadInputRegisters(requestBuffer, vector, unitID);
+            responseBuffer = _handleReadInputRegisters(requestBuffer, vector, unitID);
             break;
         case 5:
-            responseBuffer = handleWriteCoil(requestBuffer, vector, unitID);
+            responseBuffer = _handleWriteCoil(requestBuffer, vector, unitID);
             break;
         case 6:
-            responseBuffer = handleWriteSingleRegister(requestBuffer, vector, unitID);
+            responseBuffer = _handleWriteSingleRegister(requestBuffer, vector, unitID);
             break;
         case 15:
-            responseBuffer = handleForceMultipleCoils(requestBuffer, vector, unitID);
+            responseBuffer = _handleForceMultipleCoils(requestBuffer, vector, unitID);
             break;
         case 16:
-            responseBuffer = handleWriteMultipleRegisters(requestBuffer, vector, unitID);
+            responseBuffer = _handleWriteMultipleRegisters(requestBuffer, vector, unitID);
             break;
         default:
             modbusSerialDebug({
@@ -107,8 +107,9 @@ function parseModbusBuffer(requestBuffer, vector) {
  *
  * @param requestBuffer - request Buffer from client
  * @returns {boolean} - if error it is true, otherwise false
+ * @private
  */
-function errorRequestBufferLength(requestBuffer) {
+function _errorRequestBufferLength(requestBuffer) {
 
     if (requestBuffer.length !== 8) {
         modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be >= 8");
@@ -125,12 +126,13 @@ function errorRequestBufferLength(requestBuffer) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID) {
+function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
-    if (errorRequestBufferLength(requestBuffer)) {
+    if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
@@ -156,12 +158,13 @@ function handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleReadMultipleRegisters(requestBuffer, vector, unitID) {
+function _handleReadMultipleRegisters(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
-    if (errorRequestBufferLength(requestBuffer)) {
+    if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
@@ -188,12 +191,13 @@ function handleReadMultipleRegisters(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleReadInputRegisters(requestBuffer, vector, unitID) {
+function _handleReadInputRegisters(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
-    if (errorRequestBufferLength(requestBuffer)) {
+    if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
@@ -217,12 +221,13 @@ function handleReadInputRegisters(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleWriteCoil(requestBuffer, vector, unitID) {
+function _handleWriteCoil(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var state = requestBuffer.readUInt16BE(4);
 
-    if (errorRequestBufferLength(requestBuffer)) {
+    if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
@@ -245,12 +250,13 @@ function handleWriteCoil(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleWriteSingleRegister(requestBuffer, vector, unitID) {
+function _handleWriteSingleRegister(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var value = requestBuffer.readUInt16BE(4);
 
-    if (errorRequestBufferLength(requestBuffer)) {
+    if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
@@ -273,8 +279,9 @@ function handleWriteSingleRegister(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleForceMultipleCoils(requestBuffer, vector, unitID) {
+function _handleForceMultipleCoils(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
@@ -306,8 +313,9 @@ function handleForceMultipleCoils(requestBuffer, vector, unitID) {
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function handleWriteMultipleRegisters(requestBuffer, vector, unitID) {
+function _handleWriteMultipleRegisters(requestBuffer, vector, unitID) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 

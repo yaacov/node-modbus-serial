@@ -17,8 +17,9 @@ var MIN_DATA_LENGTH = 6;
  *
  * @param {Buffer} buf the data buffer to encode.
  * @return {Buffer} the ascii encoded buffer
+ * @private
  */
-function asciiEncodeRequestBuffer(buf) {
+function _asciiEncodeRequestBuffer(buf) {
 
     // replace the 2 byte crc16 with a single byte lrc
     buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length - 2);
@@ -44,8 +45,9 @@ function asciiEncodeRequestBuffer(buf) {
  *
  * @param {Buffer} bufAscii the ascii data buffer to decode.
  * @return {Buffer} the decoded buffer, or null if decode error
+ * @private
  */
-function asciiDecodeResponseBuffer(bufAscii) {
+function _asciiDecodeResponseBuffer(bufAscii) {
 
     // create a new buffer of the correct size (based on ascii encoded buffer length)
     var bufDecoded = new Buffer((bufAscii.length - 1) / 2);
@@ -78,8 +80,9 @@ function asciiDecodeResponseBuffer(bufAscii) {
  * @param {AsciiPort} modbus
  * @param {Buffer} buf the buffer to check.
  * @return {boolean} if the buffer can be an answer
+ * @private
  */
-function checkData(modbus, buf) {
+function _checkData(modbus, buf) {
     // check buffer size
     if (buf.length !== modbus._length && buf.length !== 5) {
         modbusSerialDebug({ action: "length error", recive: buf.length, expected: modbus._length });
@@ -93,7 +96,11 @@ function checkData(modbus, buf) {
 }
 
 /**
- * Simulate a modbus-ascii port using serial connection
+ * Simulate a modbus-ascii port using serial connection.
+ *
+ * @param path
+ * @param options
+ * @constructor
  */
 var AsciiPort = function(path, options) {
     var modbus = this;
@@ -143,12 +150,12 @@ var AsciiPort = function(path, options) {
             }
 
             // we have what looks like a complete ascii encoded response message, so decode
-            var _data = asciiDecodeResponseBuffer(modbus._buffer);
+            var _data = _asciiDecodeResponseBuffer(modbus._buffer);
             modbusSerialDebug({ action: "got EOM", data: _data, buffer: modbus._buffer });
             if(_data !== null) {
 
                 // check if this is the data we are waiting for
-                if (checkData(modbus, _data)) {
+                if (_checkData(modbus, _data)) {
                     modbusSerialDebug({ action: "emit data serial ascii port", data: data, buffer: modbus._buffer });
                     modbusSerialDebug(JSON.stringify({ action: "emit data serial ascii port strings", data: data, buffer: modbus._buffer }));
                     // emit a data signal
@@ -167,28 +174,36 @@ var AsciiPort = function(path, options) {
 util.inherits(AsciiPort, EventEmitter);
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 AsciiPort.prototype.open = function(callback) {
     this._client.open(callback);
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 AsciiPort.prototype.close = function(callback) {
     this._client.close(callback);
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 AsciiPort.prototype.isOpen = function() {
     return this._client.isOpen();
 };
 
 /**
- * Send data to a modbus slave
+ * Send data to a modbus slave.
+ *
+ * @param data
  */
 AsciiPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
@@ -228,7 +243,7 @@ AsciiPort.prototype.write = function(data) {
     }
 
     // ascii encode buffer
-    var _encodedData = asciiEncodeRequestBuffer(data);
+    var _encodedData = _asciiEncodeRequestBuffer(data);
 
     // send buffer to slave
     this._client.write(_encodedData);
@@ -248,4 +263,9 @@ AsciiPort.prototype.write = function(data) {
     }));
 };
 
+/**
+ * ASCII port for Modbus.
+ *
+ * @type {AsciiPort}
+ */
 module.exports = AsciiPort;

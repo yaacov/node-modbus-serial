@@ -22,6 +22,7 @@ var MODBUS_PORT = 502;
  *
  * @param {string} ip - ip address
  * @param {object} options - all options as JSON object
+ * @constructor
  */
 var TcpRTUBufferedPort = function(ip, options) {
     var self = this;
@@ -118,6 +119,7 @@ util.inherits(TcpRTUBufferedPort, EventEmitter);
 
 /**
  * Emit the received response, cut the buffer and reset the internal vars.
+ *
  * @param {number} start the start index of the response within the buffer
  * @param {number} length the length of the response
  * @private
@@ -150,7 +152,9 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
 };
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 TcpRTUBufferedPort.prototype.open = function(callback) {
     this.callback = callback;
@@ -158,7 +162,9 @@ TcpRTUBufferedPort.prototype.open = function(callback) {
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 TcpRTUBufferedPort.prototype.close = function(callback) {
     this.callback = callback;
@@ -166,14 +172,18 @@ TcpRTUBufferedPort.prototype.close = function(callback) {
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 TcpRTUBufferedPort.prototype.isOpen = function() {
     return this.openFlag;
 };
 
 /**
- * Send data to a modbus slave via telnet server
+ * Send data to a modbus slave via telnet server.
+ *
+ * @param {Buffer} data
  */
 TcpRTUBufferedPort.prototype.write = function(data) {
     if (data.length < MIN_DATA_LENGTH) {
@@ -241,4 +251,9 @@ TcpRTUBufferedPort.prototype.write = function(data) {
     }));
 };
 
+/**
+ * TCP RTU bufferd port for Modbus.
+ *
+ * @type {TcpRTUBufferedPort}
+ */
 module.exports = TcpRTUBufferedPort;

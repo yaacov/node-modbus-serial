@@ -12,7 +12,11 @@ var MIN_DATA_LENGTH = 6;
 var TELNET_PORT = 2217;
 
 /**
- * Simulate a modbus-RTU port using Telent connection
+ * Simulate a modbus-RTU port using Telent connection.
+ *
+ * @param ip
+ * @param options
+ * @constructor
  */
 var TelnetPort = function(ip, options) {
     var self = this;
@@ -101,6 +105,7 @@ util.inherits(TelnetPort, EventEmitter);
 
 /**
  * Emit the received response, cut the buffer and reset the internal vars.
+ *
  * @param {number} start the start index of the response within the buffer
  * @param {number} length the length of the response
  * @private
@@ -116,7 +121,9 @@ TelnetPort.prototype._emitData = function(start, length) {
 };
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 TelnetPort.prototype.open = function(callback) {
     this.callback = callback;
@@ -124,7 +131,9 @@ TelnetPort.prototype.open = function(callback) {
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 TelnetPort.prototype.close = function(callback) {
     this.callback = callback;
@@ -132,14 +141,18 @@ TelnetPort.prototype.close = function(callback) {
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 TelnetPort.prototype.isOpen = function() {
     return this.openFlag;
 };
 
 /**
- * Send data to a modbus slave via telnet server
+ * Send data to a modbus slave via telnet server.
+ *
+ * @param {Buffer} data
  */
 TelnetPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
@@ -195,4 +208,9 @@ TelnetPort.prototype.write = function(data) {
     }));
 };
 
+/**
+ * Telnet port for Modbus.
+ *
+ * @type {TelnetPort}
+ */
 module.exports = TelnetPort;
