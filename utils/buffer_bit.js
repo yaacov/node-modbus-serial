@@ -67,4 +67,9 @@ var addBufferBitOp = function() {
     };
 };
 
+/**
+ * Buffer Bit operations.
+ *
+ * @type {addBufferBitOp}
+ */
 module.exports = addBufferBitOp;

@@ -34,8 +34,9 @@ var crc16 = require("../utils/crc16");
  * @param {Buffer} requestBuffer - request Buffer from client
  * @param {object} vector - vector of functions for read and write
  * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function parseModbusBuffer(requestBuffer, vector) {
+function _parseModbusBuffer(requestBuffer, vector) {
     var responseBuffer = null;
     var unitID = requestBuffer[0];
     var functionCode = requestBuffer[1];
@@ -382,7 +383,7 @@ var ServerTCP = function(vector, options) {
             }
 
             // parse the modbusRTU buffer
-            var responseBuffer = parseModbusBuffer(requestBuffer, vector);
+            var responseBuffer = _parseModbusBuffer(requestBuffer, vector);
 
             // send data back
             if (responseBuffer) {
