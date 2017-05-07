@@ -1,5 +1,5 @@
 "use strict";
-/* eslint-disable no-undef */
+/* eslint-disable no-undef, no-console */
 
 var expect = require("chai").expect;
 var net = require("net");
@@ -24,17 +24,17 @@ describe("Modbus TCP Server", function() {
         serverTCP = null;
     });
 
-    beforeEach(function () {
+    beforeEach(function() {
         sock = new net.Socket();
     });
 
-    afterEach(function () {
+    afterEach(function() {
         sock.end();
     });
 
     describe("function code handler", function() {
         it("should receive a valid Modbus TCP message", function(done) {
-            const client = net.connect({host: "0.0.0.0", port: 8512}, () => {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, () => {
                 client.write(new Buffer("0002000000061103006b0003", "hex"));
             });
 
@@ -49,7 +49,7 @@ describe("Modbus TCP Server", function() {
 
     describe("modbus exception handler", function() {
         it("should receive a valid Modbus TCP message", function(done) {
-            const client = net.connect({host: "0.0.0.0", port: 8512}, () => {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, () => {
                 client.write(new Buffer("0001000000061103006B0003", "hex"));
             });
 

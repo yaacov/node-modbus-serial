@@ -111,7 +111,7 @@ function parseModbusBuffer(requestBuffer, vector) {
 function errorRequestBufferLength(requestBuffer) {
 
     if (requestBuffer.length !== 8) {
-        modbusSerialDebug('request Buffer length ' + requestBuffer.length + ' is wrong - has to be >= 8');
+        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be >= 8");
         return true;
     }
 
@@ -207,7 +207,7 @@ function handleReadInputRegisters(requestBuffer, vector, unitID) {
         }
     }
 
-    return responseBuffer
+    return responseBuffer;
 }
 
 /**
@@ -340,7 +340,7 @@ function handleWriteMultipleRegisters(requestBuffer, vector, unitID) {
  * @param options - server options (host (IP), port, debug (true/false), unitID)
  * @constructor
  */
-var ServerTCP = function (vector, options) {
+var ServerTCP = function(vector, options) {
     var modbus = this;
     options = options || {};
 
@@ -348,7 +348,7 @@ var ServerTCP = function (vector, options) {
     modbus._server = net.createServer();
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
-    modbus._server.on("connection", function (sock) {
+    modbus._server.on("connection", function(sock) {
         modbusSerialDebug({
             action: "connected",
             address: sock.address(),
@@ -356,8 +356,8 @@ var ServerTCP = function (vector, options) {
             remotePort: sock.remotePort
         });
 
-        sock.on("data", function (data) {
-            modbusSerialDebug({action: "socket data", data: data});
+        sock.on("data", function(data) {
+            modbusSerialDebug({ action: "socket data", data: data });
 
             // remove mbap and add crc16
             var requestBuffer = new Buffer(data.length - 6 + 2);
@@ -365,8 +365,8 @@ var ServerTCP = function (vector, options) {
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-            modbusSerialDebug({action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length});
-            modbusSerialDebug(JSON.stringify({action: "receive", data: requestBuffer}));
+            modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
+            modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
 
             // if length is too short, ignore message
             if (requestBuffer.length < 8) {
@@ -388,8 +388,8 @@ var ServerTCP = function (vector, options) {
                 outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
                 responseBuffer.copy(outTcp, 6);
 
-                modbusSerialDebug({action: "send", data: responseBuffer});
-                modbusSerialDebug(JSON.stringify({action: "send string", data: responseBuffer}));
+                modbusSerialDebug({ action: "send", data: responseBuffer });
+                modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                 // write to port
                 sock.write(outTcp);
