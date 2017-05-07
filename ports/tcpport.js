@@ -119,10 +119,8 @@ TcpPort.prototype.write = function(data) {
     var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
 
     // remember current unit and command
-    this._id = data[0];
-    this._cmd = data[1];
-
-    // TODO: is it not interesting to have the expected length here as in all other ports?
+    var unitNumber = data[0];
+    var functionCode = data[1];
 
     // remove crc and add mbap
     var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
@@ -138,8 +136,8 @@ TcpPort.prototype.write = function(data) {
         action: "send tcp port",
         data: data,
         buffer: buffer,
-        unitid: this._id,
-        functionCode: this._cmd,
+        unitid: unitNumber,
+        functionCode: functionCode,
         transactionsId: transactionsId
     });
 
@@ -147,8 +145,8 @@ TcpPort.prototype.write = function(data) {
         action: "send tcp port strings",
         data: data,
         buffer: buffer,
-        unitid: this._id,
-        functionCode: this._cmd,
+        unitid: unitNumber,
+        functionCode: functionCode,
         transactionsId: transactionsId
     }));
 };
