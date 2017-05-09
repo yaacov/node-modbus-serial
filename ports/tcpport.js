@@ -26,7 +26,7 @@ var TcpPort = function(ip, options) {
     this.ip = ip;
     this.openFlag = false;
     this.callback = null;
-    this._transactionId = -1;
+    this.transactionsCounter = 1;
 
     // options
     if (typeof(options) === "undefined") options = {};
@@ -128,17 +128,15 @@ TcpPort.prototype.write = function(data) {
         return;
     }
 
-    // get next transaction id
-    var transactionsId = (this._transactionId + 1) % MAX_TRANSACTIONS;
-    var unitNumber = data[0];
-    var functionCode = data[1];
-
     // remove crc and add mbap
     var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
-    buffer.writeUInt16BE(transactionsId, 0);
+    buffer.writeUInt16BE(this.transactionsCounter, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
     data.copy(buffer, MIN_MBAP_LENGTH);
+
+    // set next transaction id
+    this.transactionsCounter = (this.transactionsCounter + 1) % MAX_TRANSACTIONS;
 
     // send buffer to slave
     this._client.write(buffer);
