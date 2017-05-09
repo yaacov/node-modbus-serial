@@ -135,7 +135,7 @@ function _readFC16(data, next) {
  * @private
  */
 function _writeBufferToPort(buffer) {
-    var transaction = this._transactions[this._transactionId];
+    var transaction = this._transactions[this._port._transactionId];
 
     this._port.write(buffer);
     if (transaction) {
@@ -182,7 +182,7 @@ var ModbusRTU = function(port) {
 
     // state variables
     this._transactions = {};
-    this._transactionId = 1;
+    this._port._transactionId = 1;
 
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
 
@@ -215,7 +215,7 @@ ModbusRTU.prototype.open = function(callback) {
              */
             modbus._port.on("data", function(data) {
                 // set locale helpers variables
-                var transaction = modbus._transactions[modbus._transactionId];
+                var transaction = modbus._transactions[modbus._port._transactionId];
 
                 // the _transactionId can be missing, ignore wrong transaction it's
                 if (!transaction) {
@@ -380,7 +380,7 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
     code = code || 2;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 3 + parseInt((length - 1) / 8 + 1) + 2,
@@ -433,7 +433,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
     code = code || 4;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 3 + 2 * length + 2,
@@ -473,7 +473,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     var code = 5;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 8,
@@ -518,7 +518,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     var code = 6;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 8,
@@ -560,7 +560,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     var i = 0;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 8,
@@ -615,7 +615,7 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     var code = 16;
 
     // set state variables
-    this._transactions[this._transactionId] = {
+    this._transactions[this._port._transactionId] = {
         nextAddress: address,
         nextCode: code,
         nextLength: 8,
