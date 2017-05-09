@@ -34,7 +34,7 @@ function connect() {
     }
 
     // if client closed, open a new connection
-    client.connectTCP("127.0.0.1", { port: 8502 })
+    client.connectTCP("lt.ddc.co.il", { port: 502 })
         .then(setClient)
         .then(function() {
             console.log("Connected"); })
