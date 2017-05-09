@@ -182,10 +182,7 @@ var ModbusRTU = function(port) {
 
     // state variables
     this._transactions = {};
-    this._port._transactionId = 1;
-
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
-
     this._unitID = 1;
 };
 
@@ -209,6 +206,9 @@ ModbusRTU.prototype.open = function(callback) {
             /* On serial port open OK call next function */
             if (callback)
                 callback(error);
+
+            /* init ports transaction id */
+            modbus._port._transactionId = 1;
 
             /* On serial port success
              * register the modbus parser functions
