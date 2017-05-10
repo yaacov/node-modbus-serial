@@ -172,7 +172,7 @@ describe("Modbus TCP RTU buffered port", function() {
     describe("#write", function() {
         it("should write a valid TCP RTU message to the port", function() {
             port.write(new Buffer("0103000500045408", "hex"));
-            expect(port._client._data.toString("hex")).to.equal("000400000006010300050004");
+            expect(port._client._data.toString("hex")).to.equal("000700000006010300050004");
         });
     });
 });

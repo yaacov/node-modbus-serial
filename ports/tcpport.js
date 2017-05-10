@@ -26,7 +26,7 @@ var TcpPort = function(ip, options) {
     this.ip = ip;
     this.openFlag = false;
     this.callback = null;
-    this.transactionsCounter = 1;
+    this._transactionIdWrite = 1;
 
     // options
     if (typeof(options) === "undefined") options = {};
@@ -57,7 +57,7 @@ var TcpPort = function(ip, options) {
         buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
         // update transaction id
-        modbus._transactionId = data.readUInt16BE(0);
+        modbus._transactionIdRead = data.readUInt16BE(0);
 
         modbusSerialDebug({ action: "receive tcp port", data: data, buffer: buffer });
         modbusSerialDebug(JSON.stringify({ action: "receive tcp port strings", data: data, buffer: buffer }));
@@ -130,13 +130,13 @@ TcpPort.prototype.write = function(data) {
 
     // remove crc and add mbap
     var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
-    buffer.writeUInt16BE(this.transactionsCounter, 0);
+    buffer.writeUInt16BE(this._transactionIdWrite, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
     data.copy(buffer, MIN_MBAP_LENGTH);
 
     // set next transaction id
-    this.transactionsCounter = (this.transactionsCounter + 1) % MAX_TRANSACTIONS;
+    this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
 
     // send buffer to slave
     this._client.write(buffer);
