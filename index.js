@@ -134,8 +134,8 @@ function _readFC16(data, next) {
  * @param {Buffer} buffer The data to send
  * @private
  */
-function _writeBufferToPort(buffer) {
-    var transaction = this._transactions[this._port._transactionIdWrite];
+function _writeBufferToPort(buffer, transactionId) {
+    var transaction = this._transactions[transactionId];
 
     this._port.write(buffer);
     if (transaction) {
@@ -400,7 +400,7 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 /**
@@ -453,7 +453,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 /**
@@ -498,7 +498,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 /**
@@ -539,7 +539,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 /**
@@ -595,7 +595,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 /**
@@ -640,7 +640,7 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
-    _writeBufferToPort.call(this, buf);
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
 // add the connection shorthand API
