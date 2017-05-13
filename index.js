@@ -319,7 +319,7 @@ ModbusRTU.prototype.open = function(callback) {
                 }
             });
 
-            /* On serial port open OK call next function */
+            /* On serial port open OK call next function with no error */
             if (callback)
                 callback(error);
         }
