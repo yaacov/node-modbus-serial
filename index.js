@@ -203,9 +203,6 @@ ModbusRTU.prototype.open = function(callback) {
             if (callback)
                 callback(error);
         } else {
-            /* On serial port open OK call next function */
-            if (callback)
-                callback(error);
 
             /* init ports transaction id and counter */
             modbus._port._transactionIdRead = 1;
@@ -321,6 +318,10 @@ ModbusRTU.prototype.open = function(callback) {
                         break;
                 }
             });
+
+            /* On serial port open OK call next function */
+            if (callback)
+                callback(error);
         }
     });
 };
