@@ -203,7 +203,6 @@ ModbusRTU.prototype.open = function(callback) {
             if (callback)
                 callback(error);
         } else {
-
             /* init ports transaction id and counter */
             modbus._port._transactionIdRead = 1;
             modbus._port._transactionIdWrite = 1;
