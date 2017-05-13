@@ -12,16 +12,18 @@ describe("Promise", function() {
 
     describe("Functions", function() {
         it("should bind promise functions on modbusRTU", function() {
-            var address = "23",
-                arg = "someArg";
+            var address = 1;
+            var arg = 1;
+            var value = 1;
 
+            modbusRTU.open();
             expect(modbusRTU.readCoils(address, arg)).to.be.instanceOf(Promise);
             expect(modbusRTU.readDiscreteInputs(address, arg)).to.be.instanceOf(Promise);
             expect(modbusRTU.readHoldingRegisters(address, arg)).to.be.instanceOf(Promise);
             expect(modbusRTU.readInputRegisters(address, arg)).to.be.instanceOf(Promise);
-            expect(modbusRTU.writeCoil(address, arg)).to.be.instanceOf(Promise);
-            expect(modbusRTU.writeRegister(address, arg)).to.be.instanceOf(Promise);
-            expect(modbusRTU.writeRegisters(address, arg)).to.be.instanceOf(Promise);
+            expect(modbusRTU.writeCoil(address, value)).to.be.instanceOf(Promise);
+            expect(modbusRTU.writeRegister(address, value)).to.be.instanceOf(Promise);
+            expect(modbusRTU.writeRegisters(address, [value])).to.be.instanceOf(Promise);
         });
     });
 
