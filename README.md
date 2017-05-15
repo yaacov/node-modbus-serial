@@ -15,6 +15,11 @@ This class makes ModbusRTU (and TCP) calls fun and easy.
 Modbus is a serial communications protocol, first used in 1979.
 Modbus is simple and robust, openly published, royalty-free and
 easy to deploy and maintain.
+--- 4.5.3 automatically remove 00 at the beginning
+--- 4.5.2 Add modbus rtu over tcp: use connectComOverTCP("ip:port",{},function(error){xxx}}  to connect tcp port
+    in this way, you can use serial-ethernet connector
+    It will reconnect to server at 10s interval on broken.
+
 
 ----
 

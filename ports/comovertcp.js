@@ -44,21 +44,16 @@ var ComOverTcpPort = function(ip_port, options) {
     this._client.on('data', function(data) {
         modbus.connecting = false;
         if( this.writeStarted){
-            var buffer = new Buffer(data.length);
-            /*
-             var crc;
-             // check data length
-             if (data.length < 6) return;
-             // cut 6 bytes of mbap, copy pdu and add crc
-             buffer = new Buffer(data.length - 6 + 2);
-             data.copy(buffer, 0, 6);
-             crc = crc16(buffer.slice(0, -2));
-             buffer.writeUInt16LE(crc, buffer.length - 2);
-
-             // update transaction id
-             modbus._transactionId = data.readUInt16BE(0)
-             */
-            data.copy(buffer,0,0, data.length);
+            let  firstNoZero = 0;
+            for(let i = 0; i < data.length; i++){
+                if(data.readUInt8(i) !== 0){
+                    firstNoZero = i;
+                    break;
+                }
+            }
+            var buffer = new Buffer(data.length-firstNoZero);
+            data.copy(buffer,0,firstNoZero, data.length-firstNoZero);
+            //console.log('data received:',buffer);
             // emit a data signal
             modbus.emit('data', buffer);
         }else{
