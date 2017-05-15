@@ -35,6 +35,7 @@ declare namespace ModbusRTU {
     readHoldingRegisters(dataAddress: number, length: number): Promise<ReadRegisterResult>;
     readInputRegisters(dataAddress: number, length: number): Promise<ReadRegisterResult>;
     writeCoil(dataAddress: number, state: boolean): Promise<WriteCoilResult>;
+    writeCoils(dataAddress: number, states: Array<boolean>): Promise<WriteMultipleResult>;
     writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
     writeRegisters(dataAddress: number, values: Array<number>): Promise<WriteMultipleResult>; // 16
   }
