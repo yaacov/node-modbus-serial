@@ -27,7 +27,7 @@ var ComOverTcpPort = function(ip_port, options) {
     this._client = new net.Socket();
     this.writeStarted = false;
     // options
-    if (typeof(options) == 'undefined') options = {};
+    this.options =  options  || {};
     
 
     // handle callback - call a callback function only once, for the first event
@@ -44,18 +44,23 @@ var ComOverTcpPort = function(ip_port, options) {
     this._client.on('data', function(data) {
         modbus.connecting = false;
         if( this.writeStarted){
-            let  firstNoZero = 0;
-            for(let i = 0; i < data.length; i++){
-                if(data.readUInt8(i) !== 0){
-                    firstNoZero = i;
-                    break;
+            if(this.options.parser){
+                this.options.parser(data)
+            }else{
+                let  firstNoZero = 0;
+                for(let i = 0; i < data.length; i++){
+                    if(data.readUInt8(i) !== 0){
+                        firstNoZero = i;
+                        break;
+                    }
                 }
+                var buffer = new Buffer(data.length-firstNoZero);
+                data.copy(buffer,0,firstNoZero, data.length-firstNoZero);
+                //console.log('data received:',buffer);
+                // emit a data signal
+                modbus.emit('data', buffer);
             }
-            var buffer = new Buffer(data.length-firstNoZero);
-            data.copy(buffer,0,firstNoZero, data.length-firstNoZero);
-            //console.log('data received:',buffer);
-            // emit a data signal
-            modbus.emit('data', buffer);
+
         }else{
             console.error('recv data before write!!',data);
         }
