@@ -1,6 +1,6 @@
 {
   "name": "qz-modbus-serial",
-  "version": "4.5.3",
+  "version": "4.5.6",
   "description": "[forked]A pure JavaScript implemetation of MODBUS-RTU (and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
