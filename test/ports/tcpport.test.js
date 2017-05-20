@@ -72,7 +72,7 @@ describe("Modbus TCP port", function() {
                 port.write(new Buffer("1103006B00037687", "hex"));
 
                 if (port._client._data.equals(new Buffer("0002000000061103006B0003", "hex"))) {
-                    port._client.receive(new Buffer("000200000005118304", "hex"));
+                    port._client.receive(new Buffer("000200000003118304", "hex"));
                 }
             });
         });

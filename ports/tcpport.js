@@ -42,24 +42,34 @@ var TcpPort = function(ip, options) {
     this._client.on("data", function(data) {
         var buffer;
         var crc;
+        var length;
+
+        // data recived
+        modbusSerialDebug({ action: "receive tcp port strings", data: data });
 
         // check data length
-        if (data.length < MIN_MBAP_LENGTH) return;
+        while (data.length > MIN_MBAP_LENGTH) {
+            // parse tcp header length
+            length = data.readUInt16BE(4);
 
-        // cut 6 bytes of mbap, copy pdu and add crc
-        buffer = new Buffer(data.length - MIN_MBAP_LENGTH + CRC_LENGTH);
-        data.copy(buffer, 0, MIN_MBAP_LENGTH);
-        crc = crc16(buffer.slice(0, -CRC_LENGTH));
-        buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
+            // cut 6 bytes of mbap and copy pdu
+            buffer = new Buffer(length + CRC_LENGTH);
+            data.copy(buffer, 0, MIN_MBAP_LENGTH);
 
-        // update transaction id
-        modbus._transactionIdRead = data.readUInt16BE(0);
+            // add crc to message
+            crc = crc16(buffer.slice(0, -CRC_LENGTH));
+            buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
-        modbusSerialDebug({ action: "receive tcp port", data: data, buffer: buffer });
-        modbusSerialDebug(JSON.stringify({ action: "receive tcp port strings", data: data, buffer: buffer }));
+            // update transaction id and emit data
+            modbus._transactionIdRead = data.readUInt16BE(0);
+            modbus.emit("data", buffer);
 
-        // emit a data signal
-        modbus.emit("data", buffer);
+            // debug
+            modbusSerialDebug({ action: "parsed tcp port", buffer: buffer });
+
+            // reset data
+            data = data.slice(length + MIN_MBAP_LENGTH);
+        }
     });
 
     this._client.on("connect", function() {
