@@ -29,174 +29,57 @@ require("../utils/buffer_bit")();
 var crc16 = require("../utils/crc16");
 
 /**
- * Parse a modbusRTU buffer and return an answer buffer
+ * Parse a ModbusRTU buffer and return an answer buffer.
+ *
+ * @param {Buffer} requestBuffer - request Buffer from client
+ * @param {object} vector - vector of functions for read and write
+ * @returns {Buffer} - on error it is undefined
+ * @private
  */
-function parseModbusBuffer(requestBuffer, vector) {
+function _parseModbusBuffer(requestBuffer, vector) {
     var responseBuffer = null;
     var unitID = requestBuffer[0];
     var functionCode = requestBuffer[1];
     var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
-    var address = null;
-    var length = null;
-    var value = null;
-    var i = null;
 
     // if crc is bad, ignore message
     if (crc !== crc16(requestBuffer.slice(0, -2))) {
+        modbusSerialDebug("wrong CRC of request Buffer");
         return;
     }
 
-    // function code 1 and 2
-    if (functionCode === 1 || functionCode === 2) {
-        address = requestBuffer.readUInt16BE(2);
-        length = requestBuffer.readUInt16BE(4);
+    modbusSerialDebug("request for function code " + functionCode);
 
-        // if length is bad, ignore message
-        if (requestBuffer.length !== 8) {
-            return;
-        }
-
-        // build answer
-        var dataBytes = parseInt((length - 1) / 8 + 1);
-        responseBuffer = new Buffer(3 + dataBytes + 2);
-        responseBuffer.writeUInt8(dataBytes, 2);
-
-        // read coils
-        if (vector.getCoil) {
-            for (i = 0; i < length; i++) {
-                responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
-            }
-        }
-    }
-
-    // function code 3
-    if (functionCode === 3) {
-        address = requestBuffer.readUInt16BE(2);
-        length = requestBuffer.readUInt16BE(4);
-
-        // if length is bad, ignore message
-        if (requestBuffer.length !== 8) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(3 + length * 2 + 2);
-        responseBuffer.writeUInt8(length * 2, 2);
-
-        // read registers
-        if (vector.getHoldingRegister) {
-            for (i = 0; i < length; i++) {
-                responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
-            }
-        }
-    }
-
-    // function code 4
-    if (functionCode === 4) {
-        address = requestBuffer.readUInt16BE(2);
-        length = requestBuffer.readUInt16BE(4);
-
-        // if length is bad, ignore message
-        if (requestBuffer.length !== 8) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(3 + length * 2 + 2);
-        responseBuffer.writeUInt8(length * 2, 2);
-
-        // read registers
-        if (vector.getInputRegister) {
-            for (i = 0; i < length; i++) {
-                responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
-            }
-        }
-    }
-
-    // function code 5
-    if (functionCode === 5) {
-        address = requestBuffer.readUInt16BE(2);
-        state = requestBuffer.readUInt16BE(4);
-
-        // if length is bad, ignore message
-        if (requestBuffer.length !== 8) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(8);
-        responseBuffer.writeUInt16BE(address, 2);
-        responseBuffer.writeUInt16BE(state, 4);
-
-        // write coil
-        if (vector.setCoil) {
-            vector.setCoil(address, state === 0xff00, unitID);
-        }
-    }
-
-    // function code 6
-    if (functionCode === 6) {
-        address = requestBuffer.readUInt16BE(2);
-        value = requestBuffer.readUInt16BE(4);
-        // if length is bad, ignore message
-        if (requestBuffer.length !== (6 + 2)) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(8);
-        responseBuffer.writeUInt16BE(address, 2);
-        responseBuffer.writeUInt16BE(value, 4);
-
-        if (vector.setRegister) vector.setRegister(address, value, unitID);
-    }
-
-    // function code 15
-    if (functionCode === 15) {
-        address = requestBuffer.readUInt16BE(2);
-        length = requestBuffer.readUInt16BE(4);
-
-        // if length is bad, ignore message
-        if (requestBuffer.length !== 7 + Math.ceil(length / 8) + 2) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(8);
-        responseBuffer.writeUInt16BE(address, 2);
-        responseBuffer.writeUInt16BE(length, 4);
-
-        // write coils
-        if (vector.setCoil) {
-            for (i = 0; i < length; i++) {
-                var state = requestBuffer.readBit(i, 7);
-                vector.setCoil(address + i, state !== 0, unitID);
-            }
-        }
-    }
-
-    // function code 16
-    if (functionCode === 16) {
-        address = requestBuffer.readUInt16BE(2);
-        length = requestBuffer.readUInt16BE(4);
-
-        // if length is bad, ignore message
-        if (requestBuffer.length !== (7 + length * 2 + 2)) {
-            return;
-        }
-
-        // build answer
-        responseBuffer = new Buffer(8);
-        responseBuffer.writeUInt16BE(address, 2);
-        responseBuffer.writeUInt16BE(length, 4);
-
-        // write registers
-        if (vector.setRegister) {
-            for (i = 0; i < length; i++) {
-                value = requestBuffer.readUInt16BE(7 + i * 2);
-                vector.setRegister(address + i, value, unitID);
-            }
-        }
+    switch (parseInt(functionCode)) {
+        case 1:
+        case 2:
+            responseBuffer = _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID);
+            break;
+        case 3:
+            responseBuffer = _handleReadMultipleRegisters(requestBuffer, vector, unitID);
+            break;
+        case 4:
+            responseBuffer = _handleReadInputRegisters(requestBuffer, vector, unitID);
+            break;
+        case 5:
+            responseBuffer = _handleWriteCoil(requestBuffer, vector, unitID);
+            break;
+        case 6:
+            responseBuffer = _handleWriteSingleRegister(requestBuffer, vector, unitID);
+            break;
+        case 15:
+            responseBuffer = _handleForceMultipleCoils(requestBuffer, vector, unitID);
+            break;
+        case 16:
+            responseBuffer = _handleWriteMultipleRegisters(requestBuffer, vector, unitID);
+            break;
+        default:
+            modbusSerialDebug({
+                error: "unknown function code",
+                functionCode: parseInt(functionCode),
+                responseBuffer: responseBuffer
+            });
+            break;
     }
 
     // add unit-id, function code and crc
@@ -210,13 +93,261 @@ function parseModbusBuffer(requestBuffer, vector) {
         responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
     }
 
+    modbusSerialDebug({
+        action: "server response",
+        unitID: unitID,
+        functionCode: functionCode,
+        responseBuffer: responseBuffer
+    });
+
     return responseBuffer;
 }
 
 /**
- * Class making ModbusTCP server
+ * Check the length of request Buffer for length of 8.
  *
- * @param {object} options the server options
+ * @param requestBuffer - request Buffer from client
+ * @returns {boolean} - if error it is true, otherwise false
+ * @private
+ */
+function _errorRequestBufferLength(requestBuffer) {
+
+    if (requestBuffer.length !== 8) {
+        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be >= 8");
+        return true;
+    }
+
+    return false; // length is okay - no error
+}
+
+/**
+ * Function to handle FC1 or FC2 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    var dataBytes = parseInt((length - 1) / 8 + 1);
+    var responseBuffer = new Buffer(3 + dataBytes + 2);
+    responseBuffer.writeUInt8(dataBytes, 2);
+
+    // read coils
+    if (vector.getCoil) {
+        for (var i = 0; i < length; i++) {
+            responseBuffer.writeBit(vector.getCoil(address + i, unitID), i % 8, 3 + parseInt(i / 8));
+        }
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC3 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleReadMultipleRegisters(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(3 + length * 2 + 2);
+    responseBuffer.writeUInt8(length * 2, 2);
+
+    // read registers
+    if (vector.getHoldingRegister) {
+        for (var i = 0; i < length; i++) {
+            responseBuffer.writeUInt16BE(vector.getHoldingRegister(address + i, unitID), 3 + i * 2);
+        }
+    }
+
+    modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC4 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleReadInputRegisters(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(3 + length * 2 + 2);
+    responseBuffer.writeUInt8(length * 2, 2);
+
+    if (vector.getInputRegister) {
+        for (var i = 0; i < length; i++) {
+            responseBuffer.writeUInt16BE(vector.getInputRegister(address + i, unitID), 3 + i * 2);
+        }
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC5 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleWriteCoil(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var state = requestBuffer.readUInt16BE(4);
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(8);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(state, 4);
+
+    if (vector.setCoil) {
+        vector.setCoil(address, state === 0xff00, unitID);
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC6 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleWriteSingleRegister(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var value = requestBuffer.readUInt16BE(4);
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(8);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(value, 4);
+
+    if (vector.setRegister) {
+        vector.setRegister(address, value, unitID);
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC15 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleForceMultipleCoils(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    // if length is bad, ignore message
+    if (requestBuffer.length !== 7 + Math.ceil(length / 8) + 2) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(8);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(length, 4);
+
+    if (vector.setCoil) {
+        var state;
+        for (var i = 0; i < length; i++) {
+            state = requestBuffer.readBit(i, 7);
+            vector.setCoil(address + i, state !== 0, unitID);
+        }
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Function to handle FC16 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @returns {Buffer} - on error it is undefined
+ * @private
+ */
+function _handleWriteMultipleRegisters(requestBuffer, vector, unitID) {
+    var address = requestBuffer.readUInt16BE(2);
+    var length = requestBuffer.readUInt16BE(4);
+
+    // if length is bad, ignore message
+    if (requestBuffer.length !== (7 + length * 2 + 2)) {
+        return;
+    }
+
+    // build answer
+    var responseBuffer = new Buffer(8);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(length, 4);
+
+    // write registers
+    if (vector.setRegister) {
+        var value;
+        for (var i = 0; i < length; i++) {
+            value = requestBuffer.readUInt16BE(7 + i * 2);
+            vector.setRegister(address + i, value, unitID);
+        }
+    }
+
+    return responseBuffer;
+}
+
+/**
+ * Class making ModbusTCP server.
+ *
+ * @param vector - vector of server functions (see examples/server.js)
+ * @param options - server options (host (IP), port, debug (true/false), unitID)
+ * @constructor
  */
 var ServerTCP = function(vector, options) {
     var modbus = this;
@@ -227,16 +358,23 @@ var ServerTCP = function(vector, options) {
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
     modbus._server.on("connection", function(sock) {
-        modbusSerialDebug({ action: "connected", data: null });
+        modbusSerialDebug({
+            action: "connected",
+            address: sock.address(),
+            remoteAddress: sock.remoteAddress,
+            remotePort: sock.remotePort
+        });
 
         sock.on("data", function(data) {
+            modbusSerialDebug({ action: "socket data", data: data });
+
             // remove mbap and add crc16
             var requestBuffer = new Buffer(data.length - 6 + 2);
             data.copy(requestBuffer, 0, 6);
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
-            modbusSerialDebug({ action: "receive", data: requestBuffer });
+            modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
             modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
 
             // if length is too short, ignore message
@@ -245,7 +383,7 @@ var ServerTCP = function(vector, options) {
             }
 
             // parse the modbusRTU buffer
-            var responseBuffer = parseModbusBuffer(requestBuffer, vector);
+            var responseBuffer = _parseModbusBuffer(requestBuffer, vector);
 
             // send data back
             if (responseBuffer) {
@@ -271,4 +409,8 @@ var ServerTCP = function(vector, options) {
 };
 util.inherits(ServerTCP, EventEmitter);
 
+/**
+ * ServerTCP interface export.
+ * @type {ServerTCP}
+ */
 module.exports = ServerTCP;
