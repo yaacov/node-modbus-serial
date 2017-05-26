@@ -3,12 +3,6 @@ var events = require("events");
 var EventEmitter = events.EventEmitter || events;
 var util = require("util");
 
-var Server = function() {
-    EventEmitter.call(this);
-};
-util.inherits(Server, EventEmitter);
-exports.Server = Server;
-
 var Socket = function() {
     EventEmitter.call(this);
 };
@@ -36,6 +30,29 @@ Socket.prototype.receive = function(buffer) {
 exports.Socket = Socket;
 
 
+
+var Server = function() {
+    EventEmitter.call(this);
+};
+util.inherits(Server, EventEmitter);
+
+Server.prototype.connect = function(socket) {
+    this.emit("connection", socket);
+};
+
+Server.prototype.listen = function() {
+    this.emit("listening");
+};
+
+Server.prototype.end = function() {
+    this.emit("close", false);
+};
+
+Server.prototype.receive = function(buffer) {
+    this.emit("data", buffer);
+};
+
+exports.Server = Server;
 
 exports.createServer = function(options, connectionListener) {
     return new Server(options, connectionListener);
