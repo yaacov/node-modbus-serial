@@ -74,12 +74,17 @@ function _parseModbusBuffer(requestBuffer, vector) {
             responseBuffer = _handleWriteMultipleRegisters(requestBuffer, vector, unitID);
             break;
         default:
+            var errorCode = 0x01; // illegal function
+
+            // set an error responce
+            functionCode = parseInt(functionCode) | 0x80;
+            responseBuffer = new Buffer(3 + 2);
+            responseBuffer.writeUInt8(errorCode, 2);
+
             modbusSerialDebug({
-                error: "unknown function code",
-                functionCode: parseInt(functionCode),
-                responseBuffer: responseBuffer
+                error: "Illegal function",
+                functionCode: functionCode
             });
-            break;
     }
 
     // add unit-id, function code and crc
@@ -97,7 +102,7 @@ function _parseModbusBuffer(requestBuffer, vector) {
         action: "server response",
         unitID: unitID,
         functionCode: functionCode,
-        responseBuffer: responseBuffer
+        responseBuffer: responseBuffer.toString("hex")
     });
 
     return responseBuffer;
