@@ -12,7 +12,8 @@ var crc16 = require("../utils/crc16");
 var MIN_DATA_LENGTH = 8;
 
 /**
- * Simulate a serial port with 4 modbus-rtu slaves connected
+ * Simulate a serial port with 4 modbus-rtu slaves connected.
+ *
  * 1 - a modbus slave working correctly
  * 2 - a modbus slave that answer short replays
  * 3 - a modbus slave that answer with bad crc
@@ -35,7 +36,9 @@ var TestPort = function() {
 util.inherits(TestPort, EventEmitter);
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 TestPort.prototype.open = function(callback) {
     if (callback)
@@ -43,7 +46,9 @@ TestPort.prototype.open = function(callback) {
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 TestPort.prototype.close = function(callback) {
     if (callback)
@@ -51,14 +56,18 @@ TestPort.prototype.close = function(callback) {
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 TestPort.prototype.isOpen = function() {
     return true;
 };
 
 /**
- * Simulate successful/failure port requests and replays
+ * Simulate successful/failure port requests and replays.
+ *
+ * @param {Buffer} data
  */
 TestPort.prototype.write = function(data) {
     var buffer = null;
@@ -269,9 +278,27 @@ TestPort.prototype.write = function(data) {
 
         this.emit("data", buffer);
 
-        modbusSerialDebug({ action: "send test port", data: data, buffer: buffer });
-        modbusSerialDebug(JSON.stringify({ action: "send test port strings", data: data, buffer: buffer }));
+        modbusSerialDebug({
+            action: "send test port",
+            data: data,
+            buffer: buffer,
+            unitid: unitNumber,
+            functionCode: functionCode
+        });
+
+        modbusSerialDebug(JSON.stringify({
+            action: "send test port strings",
+            data: data,
+            buffer: buffer,
+            unitid: unitNumber,
+            functionCode: functionCode
+        }));
     }
 };
 
+/**
+ * Test port for Modbus.
+ *
+ * @type {TestPort}
+ */
 module.exports = TestPort;

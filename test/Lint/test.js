@@ -4,7 +4,7 @@
 var lint = require("mocha-eslint");
 
 var paths = [
-    "index.js",
+    "./index.js",
     "ports/**/*.js",
     "servers/**/*.js",
     "apis/**/*.js",

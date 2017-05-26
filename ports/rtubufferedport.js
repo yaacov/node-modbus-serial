@@ -11,7 +11,11 @@ var MIN_DATA_LENGTH = 6;
 var MAX_BUFFER_LENGTH = 256;
 
 /**
- * Simulate a modbus-RTU port using buffered serial connection
+ * Simulate a modbus-RTU port using buffered serial connection.
+ *
+ * @param path
+ * @param options
+ * @constructor
  */
 var RTUBufferedPort = function(path, options) {
     var self = this;
@@ -79,8 +83,9 @@ util.inherits(RTUBufferedPort, EventEmitter);
 
 /**
  * Emit the received response, cut the buffer and reset the internal vars.
- * @param {number} start the start index of the response within the buffer
- * @param {number} length the length of the response
+ *
+ * @param {number} start The start index of the response within the buffer.
+ * @param {number} length The length of the response.
  * @private
  */
 RTUBufferedPort.prototype._emitData = function(start, length) {
@@ -94,28 +99,36 @@ RTUBufferedPort.prototype._emitData = function(start, length) {
 };
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 RTUBufferedPort.prototype.open = function(callback) {
     this._client.open(callback);
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 RTUBufferedPort.prototype.close = function(callback) {
     this._client.close(callback);
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 RTUBufferedPort.prototype.isOpen = function() {
     return this._client.isOpen();
 };
 
 /**
- * Send data to a modbus slave
+ * Send data to a modbus slave.
+ *
+ * @param {Buffer} data
  */
 RTUBufferedPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
@@ -156,8 +169,24 @@ RTUBufferedPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(data);
 
-    modbusSerialDebug({ action: "send serial rtu buffered", data: data });
-    modbusSerialDebug(JSON.stringify({ action: "send serial rtu buffered strings", data: data }));
+    modbusSerialDebug({
+        action: "send serial rtu buffered",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send serial rtu buffered strings",
+        data: data,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
+/**
+ * RTU buffered port for Modbus.
+ *
+ * @type {RTUBufferedPort}
+ */
 module.exports = RTUBufferedPort;

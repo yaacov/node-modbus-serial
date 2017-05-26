@@ -13,14 +13,14 @@ var MIN_DATA_LENGTH = 6;
 var C701_PORT = 0x7002;
 
 /**
- * check if a buffer chunk can be a modbus answer
- * or modbus exception
+ * Check if a buffer chunk can be a Modbus answer or modbus exception.
  *
- * @param {UdpPort} modbus
- * @param {Buffer} buf the buffer to check.
- * @return {boolean} if the buffer can be an answer
+ * @param modbus
+ * @param buf
+ * @returns {boolean}
+ * @private
  */
-function checkData(modbus, buf) {
+function _checkData(modbus, buf) {
     // check buffer size
     if (buf.length !== modbus._length && buf.length !== 5) return false;
 
@@ -34,7 +34,11 @@ function checkData(modbus, buf) {
 }
 
 /**
- * Simulate a modbus-RTU port using C701 UDP-to-Serial bridge
+ * Simulate a modbus-RTU port using C701 UDP-to-Serial bridge.
+ *
+ * @param ip
+ * @param options
+ * @constructor
  */
 var UdpPort = function(ip, options) {
     var modbus = this;
@@ -69,7 +73,7 @@ var UdpPort = function(ip, options) {
         modbusSerialDebug(JSON.stringify({ action: "receive c701 upd port strings", data: data, buffer: buffer }));
 
         // check the serial data
-        if (checkData(modbus, buffer)) {
+        if (_checkData(modbus, buffer)) {
             modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
             modbusSerialDebug(JSON.stringify({ action: "emit data serial rtu buffered port strings", buffer: buffer }));
 
@@ -80,7 +84,7 @@ var UdpPort = function(ip, options) {
             buffer = data.slice(data.length - 5);
 
             // check the serial data
-            if (checkData(modbus, buffer)) {
+            if (_checkData(modbus, buffer)) {
                 modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
                 modbusSerialDebug(JSON.stringify({
                     action: "emit data serial rtu buffered port strings",
@@ -105,7 +109,9 @@ var UdpPort = function(ip, options) {
 util.inherits(UdpPort, EventEmitter);
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 UdpPort.prototype.open = function(callback) {
     if (callback)
@@ -113,7 +119,9 @@ UdpPort.prototype.open = function(callback) {
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 UdpPort.prototype.close = function(callback) {
     this._client.close();
@@ -122,14 +130,18 @@ UdpPort.prototype.close = function(callback) {
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 UdpPort.prototype.isOpen = function() {
     return this.openFlag;
 };
 
 /**
- * Send data to a modbus-tcp slave
+ * Send data to a modbus-tcp slave.
+ *
+ * @param data
  */
 UdpPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
@@ -182,8 +194,26 @@ UdpPort.prototype.write = function(data) {
     // send buffer to C701 UDP to serial bridge
     this._client.send(buffer, 0, buffer.length, this.port, this.ip);
 
-    modbusSerialDebug({ action: "send c701 upd port", data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "send c701 upd port strings", data: data, buffer: buffer }));
+    modbusSerialDebug({
+        action: "send c701 upd port",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send c701 upd port strings",
+        data: data,
+        buffer: buffer,
+        unitid: this._id,
+        functionCode: this._cmd
+    }));
 };
 
+/**
+ * UDP port for Modbus.
+ *
+ * @type {UdpPort}
+ */
 module.exports = UdpPort;

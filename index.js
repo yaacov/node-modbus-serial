@@ -163,7 +163,8 @@ function _startTimeout(duration, next) {
 }
 
 /**
- * Cancel the given timeout
+ * Cancel the given timeout.
+ *
  * @param {number} timeoutHandle The handle of the timeout
  * @private
  */

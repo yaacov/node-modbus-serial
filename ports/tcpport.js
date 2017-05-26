@@ -15,7 +15,11 @@ var MIN_MBAP_LENGTH = 6;
 var CRC_LENGTH = 2;
 
 /**
- * Simulate a modbus-RTU port using modbus-TCP connection
+ * Simulate a modbus-RTU port using modbus-TCP connection.
+ *
+ * @param ip
+ * @param options
+ * @constructor
  */
 var TcpPort = function(ip, options) {
     var modbus = this;
@@ -95,7 +99,9 @@ var TcpPort = function(ip, options) {
 util.inherits(TcpPort, EventEmitter);
 
 /**
- * Simulate successful port open
+ * Simulate successful port open.
+ *
+ * @param callback
  */
 TcpPort.prototype.open = function(callback) {
     this.callback = callback;
@@ -103,7 +109,9 @@ TcpPort.prototype.open = function(callback) {
 };
 
 /**
- * Simulate successful close port
+ * Simulate successful close port.
+ *
+ * @param callback
  */
 TcpPort.prototype.close = function(callback) {
     this.callback = callback;
@@ -111,14 +119,18 @@ TcpPort.prototype.close = function(callback) {
 };
 
 /**
- * Check if port is open
+ * Check if port is open.
+ *
+ * @returns {boolean}
  */
 TcpPort.prototype.isOpen = function() {
     return this.openFlag;
 };
 
 /**
- * Send data to a modbus-tcp slave
+ * Send data to a modbus-tcp slave.
+ *
+ * @param data
  */
 TcpPort.prototype.write = function(data) {
     if(data.length < MIN_DATA_LENGTH) {
@@ -139,8 +151,28 @@ TcpPort.prototype.write = function(data) {
     // send buffer to slave
     this._client.write(buffer);
 
-    modbusSerialDebug({ action: "send tcp port", data: data, buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "send tcp port strings", data: data, buffer: buffer }));
+    modbusSerialDebug({
+        action: "send tcp port",
+        data: data,
+        buffer: buffer,
+        unitid: unitNumber,
+        functionCode: functionCode,
+        transactionsId: transactionsId
+    });
+
+    modbusSerialDebug(JSON.stringify({
+        action: "send tcp port strings",
+        data: data,
+        buffer: buffer,
+        unitid: unitNumber,
+        functionCode: functionCode,
+        transactionsId: transactionsId
+    }));
 };
 
+/**
+ * TCP port for Modbus.
+ *
+ * @type {TcpPort}
+ */
 module.exports = TcpPort;
