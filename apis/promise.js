@@ -20,8 +20,9 @@
  *
  * @param {Function} f the function to convert
  * @return a function that calls function "f" and return a promise.
+ * @private
  */
-var convert = function(f) {
+var _convert = function(f) {
     var converted = function(address, arg, next) {
         var client = this;
         var id = this._unitID;
@@ -55,7 +56,7 @@ var convert = function(f) {
 };
 
 /**
- * Adds promise API to a Modbus objext
+ * Adds promise API to a Modbus object.
  *
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
@@ -72,14 +73,19 @@ var addPromiseAPI = function(Modbus) {
     cl.getTimeout = function() {return this._timeout;};
 
     // convert functions to return promises
-    cl.readCoils = convert(cl.writeFC1);
-    cl.readDiscreteInputs = convert(cl.writeFC2);
-    cl.readHoldingRegisters = convert(cl.writeFC3);
-    cl.readInputRegisters = convert(cl.writeFC4);
-    cl.writeCoil = convert(cl.writeFC5);
-    cl.writeRegister = convert(cl.writeFC6);
-    cl.writeCoils = convert(cl.writeFC15);
-    cl.writeRegisters = convert(cl.writeFC16);
+    cl.readCoils = _convert(cl.writeFC1);
+    cl.readDiscreteInputs = _convert(cl.writeFC2);
+    cl.readHoldingRegisters = _convert(cl.writeFC3);
+    cl.readInputRegisters = _convert(cl.writeFC4);
+    cl.writeCoil = _convert(cl.writeFC5);
+    cl.writeRegister = _convert(cl.writeFC6);
+    cl.writeCoils = _convert(cl.writeFC15);
+    cl.writeRegisters = _convert(cl.writeFC16);
 };
 
+/**
+ * Promise API Modbus library.
+ *
+ * @type {addPromiseAPI}
+ */
 module.exports = addPromiseAPI;
