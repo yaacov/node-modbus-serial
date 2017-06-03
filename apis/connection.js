@@ -206,4 +206,9 @@ var addConnctionAPI = function(Modbus) {
     };
 };
 
+/**
+ * Connection API Modbus.
+ *
+ * @type {addConnctionAPI}
+ */
 module.exports = addConnctionAPI;
