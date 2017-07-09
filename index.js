@@ -24,11 +24,21 @@ var modbusSerialDebug = require("debug")("modbus-serial");
 var PORT_NOT_OPEN_MESSAGE = "Port Not Open";
 var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 
+var BAD_ADDRESS_MESSAGE = "Bad Client Address";
+var BAD_ADDRESS_ERRNO = "ECONNREFUSED";
+
 var PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = PORT_NOT_OPEN_MESSAGE;
     this.errno = PORT_NOT_OPEN_ERRNO;
+};
+
+var BadAddressError = function() {
+    Error.captureStackTrace(this, this.constructor);
+    this.name = this.constructor.name;
+    this.message = BAD_ADDRESS_MESSAGE;
+    this.errno = BAD_ADDRESS_ERRNO;
 };
 
 /**
@@ -378,6 +388,12 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
         return;
     }
 
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
+        return;
+    }
+
     // function code defaults to 2
     code = code || 2;
 
@@ -431,6 +447,12 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
         return;
     }
 
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
+        return;
+    }
+
     // function code defaults to 4
     code = code || 4;
 
@@ -469,6 +491,12 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     // check port is actually open before attempting write
     if (this.isOpen() !== true) {
         if (next) next(new PortNotOpenError());
+        return;
+    }
+
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
         return;
     }
 
@@ -517,6 +545,12 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
         return;
     }
 
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
+        return;
+    }
+
     var code = 6;
 
     // set state variables
@@ -555,6 +589,12 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
     if (this.isOpen() !== true) {
         if (next) next(new PortNotOpenError());
+        return;
+    }
+
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
         return;
     }
 
@@ -611,6 +651,12 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
     if (this.isOpen() !== true) {
         if (next) next(new PortNotOpenError());
+        return;
+    }
+
+    // sanity check
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+        if (next) next(new BadAddressError());
         return;
     }
 
