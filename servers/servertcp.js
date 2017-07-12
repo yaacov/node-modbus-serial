@@ -409,6 +409,12 @@ var ServerTCP = function(vector, options) {
                 sock.write(outTcp);
             }
         });
+		
+		sock.on('error', function(err) {
+			modbusSerialDebug(JSON.stringify({ action: "socket error", data: err }));
+			
+			modbus.emit('socketError', err);
+		});
     });
     EventEmitter.call(this);
 };
