@@ -45,7 +45,6 @@ var RTUBufferedPort = function(path, options) {
         var bufferLength = self._buffer.length;
 
         modbusSerialDebug({ action: "receive serial rtu buffered port", data: data, buffer: self._buffer });
-        modbusSerialDebug(JSON.stringify({ action: "receive serial rtu buffered port strings", data: data, buffer: self._buffer }));
 
         // check data length
         if (expectedLength < MIN_DATA_LENGTH || bufferLength < EXCEPTION_LENGTH) return;
@@ -53,6 +52,7 @@ var RTUBufferedPort = function(path, options) {
         // check buffer size for MAX_BUFFER_SIZE
         if (bufferLength > MAX_BUFFER_LENGTH) {
             self._buffer = self._buffer.slice(-MAX_BUFFER_LENGTH);
+            bufferLength = MAX_BUFFER_LENGTH;
         }
 
         // loop and check length-sized buffer chunks
@@ -92,7 +92,6 @@ RTUBufferedPort.prototype._emitData = function(start, length) {
     var buffer = this._buffer.slice(start, start + length);
 
     modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
-    modbusSerialDebug(JSON.stringify({ action: "emit data serial rtu buffered port strings", buffer: buffer }));
 
     this.emit("data", buffer);
     this._buffer = this._buffer.slice(start + length);
@@ -175,13 +174,6 @@ RTUBufferedPort.prototype.write = function(data) {
         unitid: this._id,
         functionCode: this._cmd
     });
-
-    modbusSerialDebug(JSON.stringify({
-        action: "send serial rtu buffered strings",
-        data: data,
-        unitid: this._id,
-        functionCode: this._cmd
-    }));
 };
 
 /**
