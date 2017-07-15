@@ -69,7 +69,7 @@ var TcpPort = function(ip, options) {
             modbus.emit("data", buffer);
 
             // debug
-            modbusSerialDebug({ action: "parsed tcp port", buffer: buffer });
+            modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: modbus._transactionIdRead });
 
             // reset data
             data = data.slice(length + MIN_MBAP_LENGTH);
@@ -149,12 +149,6 @@ TcpPort.prototype.write = function(data) {
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
     data.copy(buffer, MIN_MBAP_LENGTH);
 
-    // set next transaction id
-    this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
-
-    // send buffer to slave
-    this._client.write(buffer);
-
     modbusSerialDebug({
         action: "send tcp port",
         data: data,
@@ -164,14 +158,11 @@ TcpPort.prototype.write = function(data) {
         transactionsId: this._transactionIdWrite
     });
 
-    modbusSerialDebug(JSON.stringify({
-        action: "send tcp port strings",
-        data: data,
-        buffer: buffer,
-        unitid: this._id,
-        functionCode: this._cmd,
-        transactionsId: this._transactionIdWrite
-    }));
+    // send buffer to slave
+    this._client.write(buffer);
+
+    // set next transaction id
+    this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
 };
 
 /**
