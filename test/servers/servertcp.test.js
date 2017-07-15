@@ -3,8 +3,8 @@
 
 var expect = require("chai").expect;
 var net = require("net");
-var path = require('path');
-var childProcess = require('child_process');
+/* var path = require("path");
+var childProcess = require("child_process"); */
 var TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server", function() {
@@ -63,17 +63,20 @@ describe("Modbus TCP Server", function() {
 
         // TODO: exceptions
     });
-	
-	describe("socket connection error", function() {
+
+    /* describe("socket connection error", function() {
         it("should receive an error event on socket closed by client", function(done) {
-			serverTCP.on("socketError", function(err) {
-				// Error handled correctly
-				done();
-			});
-			
-            childProcess.fork(path.join(__dirname, "crashingclient.js"), ["0.0.0.0", 8512]);
+            serverTCP.on("socketError", function() {
+                // Error handled correctly
+                done();
+            });
+
+            var child = childProcess.fork(path.join(__dirname, "../mocks/crashingClient.js"), ["0.0.0.0", 8512]);
+            child.on("message", function() {
+                child.kill();
+            });
         });
 
         // TODO: exceptions
-    });
+    }); */
 });

@@ -4,6 +4,9 @@
 const net = require("net");
 
 const client = net.connect({ host: process.argv[2], port: process.argv[3] }, () => {
-	console.log("client connected");
-	process.exit(33);
+    process.send("Ready to be killed");
+});
+
+client.on("error", function() {
+    // Nothing to do here...
 });
