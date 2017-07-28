@@ -305,7 +305,7 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID) {
         var state;
         for (var i = 0; i < length; i++) {
             state = requestBuffer.readBit(i, 7);
-            vector.setCoil(address + i, state !== 0, unitID);
+            vector.setCoil(address + i, state !== false, unitID);
         }
     }
 
