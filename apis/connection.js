@@ -16,7 +16,7 @@
  */
 
 var MIN_MODBUSRTU_FRAMESZ = 5;
-var MIN_MODBUSASCII_FRAMESZ = 11;
+//var MIN_MODBUSASCII_FRAMESZ = 11;
 
 /**
  * Adds connection shorthand API to a Modbus objext
