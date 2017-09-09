@@ -6,7 +6,7 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // NPort Gateway 801D NetPort
-client.connectTcpRTUBuffered("127.0.0.1", { port: 8502 })
+client.connectTcpRTUBuffered("192.168.0.75", { port: 8888 })
     .then(setClient)
     .then(function() {
         console.log("Connected");
@@ -27,7 +27,7 @@ function setClient() {
 
 function run() {
     // read the 4 registers starting at address 5
-    client.readHoldingRegisters(5, 4)
+    client.readDiscreteInputs(0, 22)
         .then(function(d) {
             console.log("Receive:", d.data);
         })
