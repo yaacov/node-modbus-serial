@@ -184,6 +184,9 @@ var addConnctionAPI = function(Modbus) {
         var SerialPort = require("../ports/rtubufferedport");
         this._port = new SerialPort(path, options);
 
+        // set vmin to smallest modbus packet size
+        options.platformOptions =  { vmin: MIN_MODBUSRTU_FRAMESZ, vtime: 0 };
+
         // open and call next
         return open(this, next);
     };
