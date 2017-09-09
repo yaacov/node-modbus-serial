@@ -205,7 +205,7 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
         // set vmin to smallest modbus packet size
-        options.platformOptions =  { vmin: MIN_MODBUSASCII_FRAMESZ, vtime: 0 };
+        //options.platformOptions =  { vmin: MIN_MODBUSASCII_FRAMESZ, vtime: 0 };
 
         // create the ASCII SerialPort
         var SerialPortAscii = require("../ports/asciiport");
