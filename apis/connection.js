@@ -16,7 +16,6 @@
  */
 
 var MIN_MODBUSRTU_FRAMESZ = 5;
-// var MIN_MODBUSASCII_FRAMESZ = 11;
 
 /**
  * Adds connection shorthand API to a Modbus objext
@@ -204,8 +203,6 @@ var addConnctionAPI = function(Modbus) {
             next = options;
             options = {};
         }
-        // set vmin to smallest modbus packet size
-        // options.platformOptions = { vmin: MIN_MODBUSASCII_FRAMESZ, vtime: 0 };
 
         // create the ASCII SerialPort
         var SerialPortAscii = require("../ports/asciiport");
