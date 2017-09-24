@@ -96,14 +96,20 @@ function _parseModbusBuffer(requestBuffer, vector) {
         // add crc
         crc = crc16(responseBuffer.slice(0, -2));
         responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
-    }
 
-    modbusSerialDebug({
-        action: "server response",
-        unitID: unitID,
-        functionCode: functionCode,
-        responseBuffer: responseBuffer.toString("hex")
-    });
+        modbusSerialDebug({
+            action: "server response",
+            unitID: unitID,
+            functionCode: functionCode,
+            responseBuffer: responseBuffer.toString("hex")
+        });
+    } else {
+        modbusSerialDebug({
+            error: "no response buffer",
+            unitID: unitID,
+            functionCode: functionCode
+        });
+    }
 
     return responseBuffer;
 }
