@@ -427,6 +427,23 @@ var ServerTCP = function(vector, options) {
 util.inherits(ServerTCP, EventEmitter);
 
 /**
+ * Delegate the close server method to backend.
+ *
+ * @param callback
+ */
+ServerTCP.prototype.close = function(callback) {
+    // close the net port if exist
+    if (this._server) {
+        this._server.removeAllListeners("data");
+        this._server.close(callback);
+
+        modbusSerialDebug({ action: "close server" });
+    } else {
+        modbusSerialDebug({ action: "close server", warning: "server already closed" });
+    }
+};
+
+/**
  * ServerTCP interface export.
  * @type {ServerTCP}
  */

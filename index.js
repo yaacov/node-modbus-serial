@@ -345,8 +345,8 @@ ModbusRTU.prototype.open = function(callback) {
 ModbusRTU.prototype.close = function(callback) {
     // close the serial port if exist
     if (this._port) {
-        this._port.close(callback);
         this._port.removeAllListeners("data");
+        this._port.close(callback);
     }
 };
 
