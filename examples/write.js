@@ -36,9 +36,10 @@ function run() {
 
 function writeRegisters() {
     // write 3 registers statrting at register 101
-    client.writeRegisters(101, [10, 9, 8])
+    // negative values (< 0) have to add 65535 for Modbus registers
+    client.writeRegisters(101, [10, 9, 8, -20 + 65535, -10 + 65535])
         .then(function(d) {
-            console.log("Write 10, 9, 8 to registers 101, 102 and 103", d); })
+            console.log("Write 10, 9, 8, -20, -10 to registers 101 to 105", d); })
         .catch(function(e) {
             console.log(e.message); })
         .then(close);

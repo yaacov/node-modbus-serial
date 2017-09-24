@@ -17,4 +17,9 @@ var serverTCP = new ModbusRTU.ServerTCP(vector, { host: "0.0.0.0", port: 8502, d
 
 serverTCP.on("socketError", function(err) {
     console.error(err);
+    serverTCP.close(closed);
 });
+
+function closed() {
+    console.log("server closed");
+}
