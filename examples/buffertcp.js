@@ -27,7 +27,7 @@ function setClient() {
 
 function run() {
     // read the 4 registers starting at address 5
-    client.readHoldingRegisters(5, 4)
+    client.readDiscreteInputs(0, 22)
         .then(function(d) {
             console.log("Receive:", d.data);
         })

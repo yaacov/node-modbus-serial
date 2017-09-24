@@ -105,14 +105,10 @@ function _parseModbusBuffer(requestBuffer, vector) {
         });
     } else {
         modbusSerialDebug({
-            action: "server response error",
+            error: "no response buffer",
             unitID: unitID,
-            functionCode: functionCode,
-            responseBuffer: "none vaild response"
+            functionCode: functionCode
         });
-
-        // TODO: we should handle with care here to give feedback if possible or needed
-        // throw new Error("REQUEST WITH NONE VALID RESPONSE");
     }
 
     return responseBuffer;
