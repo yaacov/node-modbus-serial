@@ -96,14 +96,24 @@ function _parseModbusBuffer(requestBuffer, vector) {
         // add crc
         crc = crc16(responseBuffer.slice(0, -2));
         responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
-    }
 
-    modbusSerialDebug({
-        action: "server response",
-        unitID: unitID,
-        functionCode: functionCode,
-        responseBuffer: responseBuffer.toString("hex")
-    });
+        modbusSerialDebug({
+            action: "server response",
+            unitID: unitID,
+            functionCode: functionCode,
+            responseBuffer: responseBuffer.toString("hex")
+        });
+    } else {
+        modbusSerialDebug({
+            action: "server response error",
+            unitID: unitID,
+            functionCode: functionCode,
+            responseBuffer: "none vaild response"
+        });
+
+        // TODO: we should handle with care here to give feedback if possible or needed
+        // throw new Error("REQUEST WITH NONE VALID RESPONSE");
+    }
 
     return responseBuffer;
 }

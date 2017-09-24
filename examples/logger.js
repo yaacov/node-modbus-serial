@@ -4,7 +4,10 @@
 //var ModbusRTU = require("modbus-serial");
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
-var timeoutRunRef = null;
+var timeoutRunRefCoils = null;
+var timeoutRunRefDiscreteInputs = null;
+var timeoutRunRefInputs = null;
+var timeoutRunRefHoldings = null;
 var timeoutConnectRef = null;
 
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
@@ -47,7 +50,7 @@ function setClient() {
     // set the client's unit id
     // set a timout for requests default is null (no timeout)
     client.setID(1);
-    client.setTimeout(1000);
+    client.setTimeout(3000);
 
     // run program
     run();
@@ -55,17 +58,57 @@ function setClient() {
 
 function run() {
     // clear pending timeouts
-    clearTimeout(timeoutRunRef);
+    clearTimeout(timeoutRunRefCoils);
 
-    // read the 4 registers starting at address 5
-    client.readHoldingRegisters(5, 4)
+    client.readCoils(1, 5)
         .then(function(d) {
-            console.log("Receive:", d.data); })
+            console.log("Receive Coils:", d.data); })
         .then(function() {
-            timeoutRunRef = setTimeout(run, 1000); })
+            timeoutRunRefCoils = setTimeout(readDiscreteInputs, 1000);
+        })
         .catch(function(e) {
             checkError(e);
             console.log(e.message); });
+}
+
+function readDiscreteInputs() {
+    clearTimeout(timeoutRunRefDiscreteInputs);
+
+    client.readDiscreteInputs(10001, 5)
+        .then(function(d) {
+            console.log("Receive Discrete Inputs:", d.data); })
+        .then(function() {
+            timeoutRunRefDiscreteInputs = setTimeout(readInputRegisters, 1000); })
+        .catch(function(e) {
+            checkError(e);
+            console.log(e.message); });
+}
+
+function readInputRegisters() {
+    clearTimeout(timeoutRunRefInputs);
+
+    client.readInputRegisters(1, 5)
+        .then(function(d) {
+            console.log("Receive Inputs:", d.data); })
+        .then(function() {
+            timeoutRunRefInputs = setTimeout(readHoldingRegisters, 1000); })
+        .catch(function(e) {
+            checkError(e);
+            console.log(e.message); });
+}
+
+function readHoldingRegisters() {
+    clearTimeout(timeoutRunRefHoldings);
+
+    client.readHoldingRegisters(10001, 5)
+        .then(function(d) {
+            console.log("Receive Holding Registers:", d.data); })
+        .then(function() {
+            timeoutRunRefHoldings = setTimeout(run, 1000); })
+        .catch(function(e) {
+            checkError(e);
+            console.log(e.message);
+        });
 }
 
 // connect and start logging
