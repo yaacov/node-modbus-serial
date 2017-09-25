@@ -68,7 +68,7 @@ function writeRegisters() {
   // write 5 registers statrting at input registers
     client.writeRegisters(1, [100, 90, 80, -200 + 65535, -100 + 65535])
         .then(function(d) {
-            console.log("Write 10, 9, 8, -20, -10 to input registers", d); })
+            console.log("Write 100, 90, 80, -200, -100 to input registers", d); })
         .catch(function(e) {
             console.log(e.message); })
         .then(writeHoldingRegsiters);
