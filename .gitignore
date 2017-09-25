@@ -31,3 +31,5 @@ build/Release
 node_modules
 modbus-serial
 docs
+
+package-lock\.json
