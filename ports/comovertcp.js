@@ -5,11 +5,11 @@
 var util = require('util');
 var events = require('events');
 var EventEmitter = events.EventEmitter || events;
-var _ = require('underscore');
+var _ = require('lodash');
 var net = require('net');
 var MODBUS_PORT = 4001; // modbus port
 var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
-var ModbusRTU = require('modbus-serial');
+
 
 /**
  * Simulate a modbus-RTU port using modbus-TCP connection
