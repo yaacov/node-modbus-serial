@@ -77,8 +77,6 @@ var RTUBufferedPort = function(path, options) {
         }
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -90,6 +88,8 @@ var RTUBufferedPort = function(path, options) {
             return this._client.isOpen;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(RTUBufferedPort, EventEmitter);
 

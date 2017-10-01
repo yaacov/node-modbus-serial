@@ -169,8 +169,6 @@ var AsciiPort = function(path, options) {
         }
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -182,6 +180,8 @@ var AsciiPort = function(path, options) {
             return this._client.isOpen;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(AsciiPort, EventEmitter);
 

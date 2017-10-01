@@ -31,8 +31,6 @@ var TestPort = function() {
     // simulate 16 coils / digital inputs
     this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -44,6 +42,8 @@ var TestPort = function() {
             return true;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(TestPort, EventEmitter);
 
