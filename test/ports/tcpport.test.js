@@ -26,12 +26,12 @@ describe("Modbus TCP port", function() {
 
     describe("#isOpen", function() {
         it("should not be open before #open", function() {
-            expect(port.isOpen()).to.be.false;
+            expect(port.isOpen).to.be.false;
         });
 
         it("should be open after #open", function(done) {
             port.open(function() {
-                expect(port.isOpen()).to.be.true;
+                expect(port.isOpen).to.be.true;
                 done();
             });
         });
@@ -40,7 +40,7 @@ describe("Modbus TCP port", function() {
             port.open(function() {
                 port.close(function() {
                     setTimeout(function() {
-                        expect(port.isOpen()).to.be.false;
+                        expect(port.isOpen).to.be.false;
                         done();
                     });
                 });

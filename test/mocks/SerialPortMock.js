@@ -13,6 +13,13 @@ var SerialPortMock = function(path, options, callback) {
     if (callback) {
         callback(null);
     }
+
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this._openFlag;
+        }
+    });
 };
 util.inherits(SerialPortMock, EventEmitter);
 
@@ -22,10 +29,6 @@ SerialPortMock.prototype.open = function(callback) {
         callback(null);
     }
     this.emit("open");
-};
-
-SerialPortMock.prototype.isOpen = function() {
-    return this._openFlag;
 };
 
 SerialPortMock.prototype.write = function(buffer, callback) {

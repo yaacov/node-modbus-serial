@@ -32,7 +32,7 @@ function connect() {
     clearTimeout(timeoutConnectRef);
 
     // if client already open, just run
-    if (client.isOpen()) {
+    if (client.isOpen) {
         run();
     }
 

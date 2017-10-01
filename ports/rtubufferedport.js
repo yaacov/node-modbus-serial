@@ -78,6 +78,18 @@ var RTUBufferedPort = function(path, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this._client.isOpen;
+        }
+    });
 };
 util.inherits(RTUBufferedPort, EventEmitter);
 
@@ -113,15 +125,6 @@ RTUBufferedPort.prototype.open = function(callback) {
  */
 RTUBufferedPort.prototype.close = function(callback) {
     this._client.close(callback);
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-RTUBufferedPort.prototype.isOpen = function() {
-    return this._client.isOpen();
 };
 
 /**

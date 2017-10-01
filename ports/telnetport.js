@@ -100,6 +100,18 @@ var TelnetPort = function(ip, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this.openFlag;
+        }
+    });
 };
 util.inherits(TelnetPort, EventEmitter);
 
@@ -138,15 +150,6 @@ TelnetPort.prototype.open = function(callback) {
 TelnetPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-TelnetPort.prototype.isOpen = function() {
-    return this.openFlag;
 };
 
 /**

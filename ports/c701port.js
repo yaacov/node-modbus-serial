@@ -105,6 +105,18 @@ var UdpPort = function(ip, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this.openFlag;
+        }
+    });
 };
 util.inherits(UdpPort, EventEmitter);
 
@@ -127,15 +139,6 @@ UdpPort.prototype.close = function(callback) {
     this._client.close();
     if (callback)
         callback(null);
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-UdpPort.prototype.isOpen = function() {
-    return this.openFlag;
 };
 
 /**

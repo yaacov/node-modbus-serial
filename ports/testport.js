@@ -32,6 +32,18 @@ var TestPort = function() {
     this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return true;
+        }
+    });
 };
 util.inherits(TestPort, EventEmitter);
 
@@ -53,15 +65,6 @@ TestPort.prototype.open = function(callback) {
 TestPort.prototype.close = function(callback) {
     if (callback)
         callback(null);
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-TestPort.prototype.isOpen = function() {
-    return true;
 };
 
 /**

@@ -334,6 +334,20 @@ ModbusRTU.prototype.open = function(callback) {
                 callback(error);
         }
     });
+
+    /**
+     * Check if port is open
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            if (this._port) {
+                return this._port.isOpen;
+            }
+
+            return false;
+        }
+    });
 };
 
 /**
@@ -348,17 +362,6 @@ ModbusRTU.prototype.close = function(callback) {
         this._port.removeAllListeners("data");
         this._port.close(callback);
     }
-};
-
-/**
- * Check if port is open
- */
-ModbusRTU.prototype.isOpen = function() {
-    if (this._port) {
-        return this._port.isOpen();
-    }
-
-    return false;
 };
 
 /**
@@ -383,7 +386,7 @@ ModbusRTU.prototype.writeFC1 = function(address, dataAddress, length, next) {
  */
 ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -442,7 +445,7 @@ ModbusRTU.prototype.writeFC3 = function(address, dataAddress, length, next) {
  */
 ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -489,7 +492,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
  */
 ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -540,7 +543,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
  */
 ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -587,7 +590,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
  */
 ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -649,7 +652,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
  */
 ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
-    if (this.isOpen() !== true) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
