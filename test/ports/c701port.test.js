@@ -26,13 +26,13 @@ describe("Modbus UDP port", function() {
 
     describe("#isOpen", function() {
         it("should not be open before #open", function() {
-            expect(port.isOpen()).to.be.false;
+            expect(port.isOpen).to.be.false;
         });
 
         it("should be open after onListening", function(done) {
             port._client.listen();
             setTimeout(function() {
-                expect(port.isOpen()).to.be.true;
+                expect(port.isOpen).to.be.true;
                 done();
             });
         });
@@ -41,7 +41,7 @@ describe("Modbus UDP port", function() {
             port._client.listen();
             setTimeout(function() {
                 port.close(function() {
-                    expect(port.isOpen()).to.be.false;
+                    expect(port.isOpen).to.be.false;
                     done();
                 });
             });

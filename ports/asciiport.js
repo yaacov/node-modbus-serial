@@ -170,6 +170,18 @@ var AsciiPort = function(path, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this._client.isOpen;
+        }
+    });
 };
 util.inherits(AsciiPort, EventEmitter);
 
@@ -189,15 +201,6 @@ AsciiPort.prototype.open = function(callback) {
  */
 AsciiPort.prototype.close = function(callback) {
     this._client.close(callback);
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-AsciiPort.prototype.isOpen = function() {
-    return this._client.isOpen();
 };
 
 /**

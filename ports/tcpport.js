@@ -95,6 +95,18 @@ var TcpPort = function(ip, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this.openFlag;
+        }
+    });
 };
 util.inherits(TcpPort, EventEmitter);
 
@@ -116,15 +128,6 @@ TcpPort.prototype.open = function(callback) {
 TcpPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-TcpPort.prototype.isOpen = function() {
-    return this.openFlag;
 };
 
 /**

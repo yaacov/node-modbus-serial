@@ -112,6 +112,18 @@ var TcpRTUBufferedPort = function(ip, options) {
     });
 
     EventEmitter.call(this);
+
+    /**
+     * Check if port is open.
+     *
+     * @returns {boolean}
+     */
+    Object.defineProperty(this, "isOpen", {
+        enumerable: true,
+        get: function() {
+            return this.openFlag;
+        }
+    });
 };
 util.inherits(TcpRTUBufferedPort, EventEmitter);
 
@@ -164,15 +176,6 @@ TcpRTUBufferedPort.prototype.open = function(callback) {
 TcpRTUBufferedPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
-};
-
-/**
- * Check if port is open.
- *
- * @returns {boolean}
- */
-TcpRTUBufferedPort.prototype.isOpen = function() {
-    return this.openFlag;
 };
 
 /**

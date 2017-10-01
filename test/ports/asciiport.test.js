@@ -31,12 +31,12 @@ describe("Modbus Ascii port", function() {
 
     describe("#isOpen", function() {
         it("should not be open before #open", function() {
-            expect(port.isOpen()).to.be.false;
+            expect(port.isOpen).to.be.false;
         });
 
         it("should be open after #open", function(done) {
             port.open(function() {
-                expect(port.isOpen()).to.be.true;
+                expect(port.isOpen).to.be.true;
                 done();
             });
         });
@@ -44,7 +44,7 @@ describe("Modbus Ascii port", function() {
         it("should not be open after #close", function(done) {
             port.open(function() {
                 port.close(function() {
-                    expect(port.isOpen()).to.be.false;
+                    expect(port.isOpen).to.be.false;
                     done();
                 });
             });
