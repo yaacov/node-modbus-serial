@@ -111,8 +111,6 @@ var TcpRTUBufferedPort = function(ip, options) {
         handleCallback(had_error);
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -124,6 +122,8 @@ var TcpRTUBufferedPort = function(ip, options) {
             return this.openFlag;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(TcpRTUBufferedPort, EventEmitter);
 

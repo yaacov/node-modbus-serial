@@ -104,8 +104,6 @@ var UdpPort = function(ip, options) {
         modbus.openFlag = false;
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -117,6 +115,8 @@ var UdpPort = function(ip, options) {
             return this.openFlag;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(UdpPort, EventEmitter);
 

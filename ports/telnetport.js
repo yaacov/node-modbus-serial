@@ -99,8 +99,6 @@ var TelnetPort = function(ip, options) {
         handleCallback(had_error);
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -112,6 +110,8 @@ var TelnetPort = function(ip, options) {
             return this.openFlag;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(TelnetPort, EventEmitter);
 

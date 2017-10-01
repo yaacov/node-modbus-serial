@@ -94,8 +94,6 @@ var TcpPort = function(ip, options) {
         handleCallback(had_error);
     });
 
-    EventEmitter.call(this);
-
     /**
      * Check if port is open.
      *
@@ -107,6 +105,8 @@ var TcpPort = function(ip, options) {
             return this.openFlag;
         }
     });
+
+    EventEmitter.call(this);
 };
 util.inherits(TcpPort, EventEmitter);
 
