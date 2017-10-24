@@ -109,6 +109,62 @@ function read() {
 }
 ```
 ----
+###### Read on multiple slaves
+``` javascript
+const ModbusRTU = require("modbus-serial");
+// create an empty modbus client
+const modClient = new ModbusRTU();
+// open connection to a serial port
+modClient.connectRTUBuffered("/dev/ttyS0", { baudRate: 9600 });
+// set timeout, if slave did not reply back
+modClient.setTimeout(500);
+
+// list of meter's id
+const metersIdList = [10, 11, 12, 13, 14];
+
+const getMetersValue = async (meters) => {
+	try{
+		// get value of all meters
+		for(let meter of meters) {
+			// output value to console
+			console.log(await getMeterValue(meter));
+			// wait 100ms before get another device
+			await sleep(100);
+		}
+	} catch(e){
+		// if error, handle them here (it should not)
+		console.log(e)
+	} finally {
+		// after get all data from salve repeate it again
+		setImmediate(() => {
+			getMetersValue(_config.meters.devices);
+		})
+	}
+}
+
+const getMeterValue = async (id) => {
+	try {	
+		// set ID of slave
+		await modClient.setID(id);
+		// read the 1 registers starting at address 0 (first register)
+		let val =  await modClient.readInputRegisters(0, 1);
+		// return the value
+		return val.data[0];
+	} catch(e){
+		// if error return -1
+		return -1
+	} 
+}
+
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// start get value
+getMetersValue(metersIdList);
+
+```
+----
 ###### Logger Serial
 ``` javascript
 // create an empty modbus client
@@ -148,9 +204,7 @@ setInterval(function() {
 ```
 ----
 ###### ModbusTCP Server
-``` javascript
-// create an empty modbus client
-var ModbusRTU = require("modbus-serial");
+``` javascript = require("modbus-serial");
 var vector = {
     getInputRegister: function(addr, unitID) { return addr; },
     getHoldingRegister: function(addr, unitID) { return addr + 8000; },
