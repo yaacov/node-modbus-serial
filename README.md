@@ -130,14 +130,14 @@ const getMetersValue = async (meters) => {
             console.log(await getMeterValue(meter));
             // wait 100ms before get another device
             await sleep(100);
-		}
-        } catch(e){
+	}
+    } catch(e){
         // if error, handle them here (it should not)
-            console.log(e)
-        } finally {
-            // after get all data from salve repeate it again
-            setImmediate(() => {
-            getMetersValue(_config.meters.devices);
+        console.log(e)
+    } finally {
+        // after get all data from salve repeate it again
+        setImmediate(() => {
+            getMetersValue(metersIdList);
         })
     }
 }
