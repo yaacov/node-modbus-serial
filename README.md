@@ -205,7 +205,7 @@ setInterval(function() {
 ###### ModbusTCP Server
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");= require("modbus-serial");
+var ModbusRTU = require("modbus-serial");
 var vector = {
     getInputRegister: function(addr, unitID) { return addr; },
     getHoldingRegister: function(addr, unitID) { return addr + 8000; },
