@@ -52,7 +52,10 @@ Node Modbus-WebSocket bridge:
 
 #### Compatibility
 
-###### This classes are implemented:
+###### Version of NodeJS:
+This module has not been tested on every single version of NodeJS. For best results you should stick to LTS versions, which are denoted by even major version numbers e.g. 4.x, 6.x, 8.x.
+
+###### These classes are implemented:
 
 * FC1 "Read Coil Status"
 * FC2 "Read Input Status"
