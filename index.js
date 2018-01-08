@@ -149,7 +149,8 @@ function _writeBufferToPort(buffer, transactionId) {
 
     this._port.write(buffer);
     if (transaction) {
-        transaction._timeoutHandle = _startTimeout(this._timeout, transaction.next);
+        transaction._timeoutFired = false;
+        transaction._timeoutHandle = _startTimeout(this._timeout, transaction);
     }
 }
 
@@ -161,13 +162,14 @@ function _writeBufferToPort(buffer, transactionId) {
  * @return {number} The handle of the timeout
  * @private
  */
-function _startTimeout(duration, next) {
+function _startTimeout(duration, transaction) {
     if (!duration) {
         return undefined;
     }
     return setTimeout(function() {
-        if (next) {
-            next(new Error("Timed out"));
+        transaction._timeoutFired = true;
+        if (transaction.next) {
+            transaction.next(new Error("Timed out"));
         }
     }, duration);
 }
@@ -233,6 +235,12 @@ ModbusRTU.prototype.open = function(callback) {
                 /* cancel the timeout */
                 _cancelTimeout(transaction._timeoutHandle);
                 transaction._timeoutHandle = undefined;
+
+                /* check if the timeout fired */
+                if (transaction._timeoutFired === true) {
+                    // we have already called back with an error, so don't generate a new callback
+                    return;
+                }
 
                 /* check incoming data
                  */
