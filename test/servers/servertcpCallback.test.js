@@ -5,7 +5,7 @@ var expect = require("chai").expect;
 var net = require("net");
 var TcpServer = require("./../../servers/servertcp");
 
-describe("Modbus TCP Server Callbacks", function() {
+describe("Modbus TCP Server Callback", function() {
     var serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
