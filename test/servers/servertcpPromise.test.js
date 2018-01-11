@@ -12,28 +12,28 @@ describe("Modbus TCP Server Promise", function() {
         var vector = {
             getInputRegister: function(addr) {
                 return new Promise(function(resolve) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         resolve(addr);
                     }, 50);
                 });
             },
             getHoldingRegister: function(addr) {
                 return new Promise(function(resolve) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         resolve(addr + 8000);
                     }, 50);
                 });
             },
             getCoil: function(addr) {
                 return new Promise(function(resolve) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         resolve((addr % 2) === 0);
                     }, 50);
                 });
             },
             setRegister: function(addr, value) {
                 return new Promise(function(resolve) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         console.log("set register", addr, value);
                         resolve();
                     }, 50);
@@ -41,7 +41,7 @@ describe("Modbus TCP Server Promise", function() {
             },
             setCoil: function(addr, value) {
                 return new Promise(function(resolve) {
-                    setTimeout(function () {
+                    setTimeout(function() {
                         console.log("set coil", addr, value);
                         resolve();
                     }, 50);
