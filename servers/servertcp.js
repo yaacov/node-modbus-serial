@@ -99,7 +99,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
 
             // set an error responce
             functionCode = parseInt(functionCode) | 0x80;
-            var responseBuffer = new Buffer(3 + 2);
+            var responseBuffer = Buffer.alloc(3 + 2);
             responseBuffer.writeUInt8(errorCode, 2);
 
             modbusSerialDebug({
@@ -147,7 +147,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
 
     // build answer
     var dataBytes = parseInt((length - 1) / 8 + 1);
-    var responseBuffer = new Buffer(3 + dataBytes + 2);
+    var responseBuffer = Buffer.alloc(3 + dataBytes + 2);
     responseBuffer.writeUInt8(dataBytes, 2);
 
     // read coils
@@ -195,7 +195,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = new Buffer(3 + length * 2 + 2);
+    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     responseBuffer.writeUInt8(length * 2, 2);
 
     // read registers
@@ -249,7 +249,7 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = new Buffer(3 + length * 2 + 2);
+    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     responseBuffer.writeUInt8(length * 2, 2);
 
     if (vector.getInputRegister) {
@@ -298,7 +298,7 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = new Buffer(8);
+    var responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(state, 4);
 
@@ -340,7 +340,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = new Buffer(8);
+    var responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(value, 4);
 
@@ -383,7 +383,7 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = new Buffer(8);
+    var responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(length, 4);
 
@@ -431,7 +431,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
     }
 
     // build answer
-    var responseBuffer = new Buffer(8);
+    var responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(length, 4);
 
@@ -489,7 +489,7 @@ var ServerTCP = function(vector, options) {
             modbusSerialDebug({ action: "socket data", data: data });
 
             // remove mbap and add crc16
-            var requestBuffer = new Buffer(data.length - 6 + 2);
+            var requestBuffer = Buffer.alloc(data.length - 6 + 2);
             data.copy(requestBuffer, 0, 6);
             var crc = crc16(requestBuffer.slice(0, -2));
             requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
@@ -509,7 +509,7 @@ var ServerTCP = function(vector, options) {
                     var transactionsId = data.readUInt16BE(0);
 
                     // remove crc and add mbap
-                    var outTcp = new Buffer(responseBuffer.length + 6 - 2);
+                    var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
                     outTcp.writeUInt16BE(transactionsId, 0);
                     outTcp.writeUInt16BE(0, 2);
                     outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
