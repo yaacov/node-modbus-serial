@@ -5,7 +5,7 @@ var expect = require("chai").expect;
 var net = require("net");
 var TcpServer = require("./../../servers/servertcp");
 
-describe("Modbus TCP Server", function() {
+describe("Modbus TCP Server Callbacks", function() {
     var serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
@@ -37,12 +37,12 @@ describe("Modbus TCP Server", function() {
                 }, 50);
             }
         };
-        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true, unitID: 1 });
+        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8513, debug: true, unitID: 1 });
     });
 
     describe("function code handler", function() {
         it("should receive a valid Modbus TCP message", function(done) {
-            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
                 // FC05 - force single coil, to on 0xff00
                 client.write(new Buffer("00010000000601050005ff00", "hex"));
             });
@@ -59,7 +59,7 @@ describe("Modbus TCP Server", function() {
 
     describe("modbus exception handler", function() {
         it("should receive a valid Modbus TCP message", function(done) {
-            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
                 // FC07 - unhandled function
                 client.write(new Buffer("000100000006010700000000", "hex"));
             });
@@ -76,7 +76,7 @@ describe("Modbus TCP Server", function() {
 
     describe("socket connection error", function() {
         it("should receive an error event on socket closed by client", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            var client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
                 client.destroy();
 
                 serverTCP.emit("socketError");
