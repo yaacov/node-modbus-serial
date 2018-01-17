@@ -217,7 +217,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
         var countCallbackCalls = 0;
         var buildCb = function(i) {
             return function(value) {
-                countCallbackCalls++;
+                countCallbackCalls = countCallbackCalls +1;
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
                 if (countCallbackCalls === length) {
