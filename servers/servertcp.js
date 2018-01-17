@@ -215,8 +215,8 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     // read registers
     if (vector.getHoldingRegister) {
         var countCallbackCalls = 0;
-        var buildCb = function (i) {
-            return function (value) {
+        var buildCb = function(i) {
+            return function(value) {
                 countCallbackCalls++;
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
