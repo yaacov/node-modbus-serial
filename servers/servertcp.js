@@ -169,23 +169,26 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         var buildCb = function(i) {
             return function(value) {
                 responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
-                callback(responseBuffer);
+
+                if (i === length) {
+                    modbusSerialDebug({ action: "FC1/2 response", responseBuffer: responseBuffer });
+
+                    callback(responseBuffer);
+                }
             };
         };
 
         for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
             if (vector.getCoil.length === 3) {
-                vector.getCoil(address + i, unitID, buildCb(i));
+                vector.getCoil(address + i, unitID, cb);
             }
             else {
                 var value = vector.getCoil(address + i, unitID);
-                if (value && value.then) {
-                    value.then(buildCb(i));
-                }
-                else {
-                    responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
-                    callback(responseBuffer);
-                }
+                if (value && value.then && typeof value.then === "function")
+                    value.then(cb);
+                else
+                    cb(value);
             }
         }
     }
@@ -214,13 +217,11 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     // read registers
     if (vector.getHoldingRegister) {
-        var countCallbackCalls = 0;
         var buildCb = function(i) {
             return function(value) {
-                countCallbackCalls = countCallbackCalls + 1;
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
-                if (countCallbackCalls === length) {
+                if (i === length) {
                     modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
@@ -229,21 +230,16 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
         };
 
         for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
             if (vector.getHoldingRegister.length === 3) {
-                vector.getHoldingRegister(address + i, unitID, buildCb(i));
+                vector.getHoldingRegister(address + i, unitID, cb);
             }
             else {
                 var value = vector.getHoldingRegister(address + i, unitID);
-                if (value && value.then) {
-                    value.then(buildCb(i));
-                }
-                else {
-                    responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                    modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
-
-                    callback(responseBuffer);
-                }
+                if (value && value.then && typeof value.then === "function")
+                    value.then(cb);
+                else
+                    cb(value);
             }
         }
     }
@@ -275,24 +271,25 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
             return function(value) {
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
-                callback(responseBuffer);
+                if (i === length) {
+                    modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
+
+                    callback(responseBuffer);
+                }
             };
         };
 
         for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
             if (vector.getInputRegister.length === 3) {
-                vector.getInputRegister(address + i, unitID, buildCb(i));
+                vector.getInputRegister(address + i, unitID, cb);
             }
             else {
                 var value = vector.getInputRegister(address + i, unitID);
-                if (value && value.then) {
-                    value.then(buildCb(i));
-                }
-                else {
-                    responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                    callback(responseBuffer);
-                }
+                if (value && value.then && typeof value.then === "function")
+                    value.then(cb);
+                else
+                    cb(value);
             }
         }
     }
@@ -321,21 +318,21 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt16BE(state, 4);
 
     if (vector.setCoil) {
+        var cb = function() {
+            modbusSerialDebug({ action: "FC5 response", responseBuffer: responseBuffer });
+
+            callback(responseBuffer);
+        };
+
         if (vector.setCoil.length === 4) {
-            vector.setCoil(address, state === 0xff00, unitID, function() {
-                callback(responseBuffer);
-            });
+            vector.setCoil(address, state === 0xff00, unitID, cb);
         }
         else {
             var promise = vector.setCoil(address, state === 0xff00, unitID);
-            if (promise && promise.then) {
-                promise.then(function() {
-                    callback(responseBuffer);
-                });
-            }
-            else {
-                callback(responseBuffer);
-            }
+            if (promise && promise.then && typeof promise.then === "function")
+                promise.then(cb);
+            else
+                cb();
         }
     }
 }
@@ -363,21 +360,21 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt16BE(value, 4);
 
     if (vector.setRegister) {
+        var cb = function() {
+            modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
+
+            callback(responseBuffer);
+        };
+
         if (vector.setRegister.length === 4) {
-            vector.setRegister(address, value, unitID, function() {
-                callback(responseBuffer);
-            });
+            vector.setRegister(address, value, unitID, cb);
         }
         else {
             var promise = vector.setRegister(address, value, unitID);
-            if (promise && promise.then) {
-                promise.then(function() {
-                    callback(responseBuffer);
-                });
-            }
-            else {
-                callback(responseBuffer);
-            }
+            if (promise && promise.then && typeof promise.then === "function")
+                promise.then(cb);
+            else
+                cb();
         }
     }
 }
@@ -406,25 +403,31 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt16BE(length, 4);
 
     if (vector.setCoil) {
+        var buildCb = function(i) {
+            return function() {
+                if (i === length) {
+                    modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
+
+                    callback(responseBuffer);
+                }
+            };
+        };
+
         var state;
+
         for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
             state = requestBuffer.readBit(i, 7);
 
             if (vector.setCoil.length === 4) {
-                vector.setCoil(address + i, state !== false, unitID, function() {
-                    callback(responseBuffer);
-                });
+                vector.setCoil(address + i, state !== false, unitID, cb);
             }
             else {
                 var promise = vector.setCoil(address + i, state !== false, unitID);
-                if (promise && promise.then) {
-                    promise.then(function() {
-                        callback(responseBuffer);
-                    });
-                }
-                else {
-                    callback(responseBuffer);
-                }
+                if (promise && promise.then && typeof promise.then === "function")
+                    promise.then(cb);
+                else
+                    cb();
             }
         }
     }
@@ -455,26 +458,31 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 
     // write registers
     if (vector.setRegister) {
+        var buildCb = function(i) {
+            return function() {
+                if (i === length) {
+                    modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
+
+                    callback(responseBuffer);
+                }
+            };
+        };
+
         var value;
 
         for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
             value = requestBuffer.readUInt16BE(7 + i * 2);
 
             if (vector.setRegister.length === 4) {
-                vector.setRegister(address + i, value, unitID, function() {
-                    callback(responseBuffer);
-                });
+                vector.setRegister(address + i, value, unitID, cb);
             }
             else {
                 var promise = vector.setRegister(address + i, value, unitID);
-                if (promise && promise.then) {
-                    promise.then(function() {
-                        callback(responseBuffer);
-                    });
-                }
-                else {
-                    callback(responseBuffer);
-                }
+                if (promise && promise.then && typeof promise.then === "function")
+                    promise.then(cb);
+                else
+                    cb();
             }
         }
     }
