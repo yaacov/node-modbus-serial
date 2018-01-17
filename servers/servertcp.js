@@ -214,13 +214,17 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     // read registers
     if (vector.getHoldingRegister) {
-        var buildCb = function(i) {
-            return function(value) {
+        var countCallbackCalls = 0;
+        var buildCb = function (i) {
+            return function (value) {
+                countCallbackCalls++;
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
-                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
+                if (countCallbackCalls === length) {
+                    modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
 
-                callback(responseBuffer);
+                    callback(responseBuffer);
+                }
             };
         };
 
