@@ -59,6 +59,20 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
             // add crc
             crc = crc16(responseBuffer.slice(0, -2));
             responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
+
+            modbusSerialDebug({
+                action: "server response",
+                unitID: unitID,
+                functionCode: functionCode,
+                responseBuffer: responseBuffer.toString("hex")
+            });
+        }
+        else {
+            modbusSerialDebug({
+                error: "no response buffer",
+                unitID: unitID,
+                functionCode: functionCode
+            });
         }
 
         modbusSerialDebug({
@@ -393,12 +407,12 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             state = requestBuffer.readBit(i, 7);
 
             if (vector.setCoil.length === 4) {
-                vector.setCoil(address + i, state !== 0, unitID, function() {
+                vector.setCoil(address + i, state !== false, unitID, function() {
                     callback(responseBuffer);
                 });
             }
             else {
-                var promise = vector.setCoil(address + i, state !== 0, unitID);
+                var promise = vector.setCoil(address + i, state !== false, unitID);
                 if (promise && promise.then) {
                     promise.then(function() {
                         callback(responseBuffer);
@@ -526,10 +540,33 @@ var ServerTCP = function(vector, options) {
             // parse the modbusRTU buffer
             _parseModbusBuffer(requestBuffer, vector, cb);
         });
+
+        sock.on("error", function(err) {
+            modbusSerialDebug(JSON.stringify({ action: "socket error", data: err }));
+
+            modbus.emit("socketError", err);
+        });
     });
     EventEmitter.call(this);
 };
 util.inherits(ServerTCP, EventEmitter);
+
+/**
+* Delegate the close server method to backend.
+*
+* @param callback
+*/
+ServerTCP.prototype.close = function(callback) {
+    // close the net port if exist
+    if (this._server) {
+        this._server.removeAllListeners("data");
+        this._server.close(callback);
+
+        modbusSerialDebug({ action: "close server" });
+    } else {
+        modbusSerialDebug({ action: "close server", warning: "server already closed" });
+    }
+};
 
 /**
  * ServerTCP interface export.
