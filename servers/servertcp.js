@@ -166,11 +166,14 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
 
     // read coils
     if (vector.getCoil) {
+        var cbCount = 0;
         var buildCb = function(i) {
             return function(value) {
+                cbCount = cbCount + 1;
+
                 responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
 
-                if (i === length) {
+                if (cbCount === length) {
                     modbusSerialDebug({ action: "FC1/2 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
@@ -217,11 +220,14 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     // read registers
     if (vector.getHoldingRegister) {
+        var cbCount = 0;
         var buildCb = function(i) {
             return function(value) {
+                cbCount = cbCount + 1;
+
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
-                if (i === length) {
+                if (cbCount === length) {
                     modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
@@ -267,11 +273,14 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt8(length * 2, 2);
 
     if (vector.getInputRegister) {
+        var cbCount = 0;
         var buildCb = function(i) {
             return function(value) {
+                cbCount = cbCount + 1;
+
                 responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
-                if (i === length) {
+                if (cbCount === length) {
                     modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
@@ -403,9 +412,12 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt16BE(length, 4);
 
     if (vector.setCoil) {
-        var buildCb = function(i) {
+        var cbCount = 0;
+        var buildCb = function(/* i - not used at the moment */) {
             return function() {
-                if (i === length) {
+                cbCount = cbCount + 1;
+
+                if (cbCount === length) {
                     modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
@@ -458,9 +470,12 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 
     // write registers
     if (vector.setRegister) {
-        var buildCb = function(i) {
+        var cbCount = 0;
+        var buildCb = function(/* i - not used at the moment */) {
             return function() {
-                if (i === length) {
+                cbCount = cbCount + 1;
+
+                if (cbCount === length) {
                     modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
 
                     callback(responseBuffer);
