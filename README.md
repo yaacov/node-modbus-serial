@@ -217,26 +217,26 @@ var vector = {
     getHoldingRegister: function(addr, unitID, callback) {
         // Asynchronous handling (with callback)
         setTimeout(function() {
-	    callback(addr + 8000);
-	}, 10);
+            callback(addr + 8000);
+        }, 10);
     },
     getCoil: function(addr, unitID) {
         // Asynchronous handling (with Promises, async/await supported)
         return new Promise(function(resolve) {
-	    setTimeout(function() {
-	        resolve((addr % 2) === 0);
-	    }, 10);
-	});
+            setTimeout(function() {
+                resolve((addr % 2) === 0);
+            }, 10);
+        });
     },
     setRegister: function(addr, value, unitID) {
         // Asynchronous handling supported also here
         console.log("set register", addr, value, unitID);
-	return;
+        return;
     },
     setCoil: function(addr, value, unitID) {
         // Asynchronous handling supported also here
         console.log("set coil", addr, value, unitID);
-	return;
+        return;
     }
 };
 
