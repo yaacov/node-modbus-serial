@@ -33,7 +33,8 @@ var crc16 = require("../utils/crc16");
  *
  * @param {Buffer} requestBuffer - request Buffer from client
  * @param {object} vector - vector of functions for read and write
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _parseModbusBuffer(requestBuffer, vector, callback) {
@@ -162,6 +163,14 @@ function _errorRequestBufferLength(requestBuffer) {
     return false; // length is okay - no error
 }
 
+/**
+ * Handle the callback invocation for Promises or synchronous values
+ *
+ * @param promiseOrValue - the Promise to be resolved or value to be returned
+ * @param cb - the callback to be invoked
+ * @returns undefined
+ * @private
+ */
 function _handlePromiseOrValue(promiseOrValue, cb) {
     if (promiseOrValue && promiseOrValue.then && typeof promiseOrValue.then === "function") {
         promiseOrValue.then(function(value) {
@@ -185,7 +194,8 @@ function _handlePromiseOrValue(promiseOrValue, cb) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callback) {
@@ -259,7 +269,8 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
@@ -332,7 +343,8 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
@@ -404,7 +416,8 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
@@ -461,7 +474,8 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
@@ -517,7 +531,8 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
@@ -593,7 +608,8 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
- * @returns {Buffer} - on error it is undefined
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
  * @private
  */
 function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) {
