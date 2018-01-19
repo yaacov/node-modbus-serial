@@ -129,7 +129,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
         default:
             var errorCode = 0x01; // illegal function
 
-            // set an error responce
+            // set an error response
             functionCode = parseInt(functionCode) | 0x80;
             var responseBuffer = Buffer.alloc(3 + 2);
             responseBuffer.writeUInt8(errorCode, 2);
@@ -227,6 +227,9 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
             };
         };
 
+        if (length === 0)
+            buildCb(-1)("Invalid length");
+
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
             try {
@@ -294,6 +297,9 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
             };
         };
 
+        if (length === 0)
+            buildCb(-1)("Invalid length");
+
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
             try {
@@ -359,6 +365,9 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 }
             };
         };
+
+        if (length === 0)
+            buildCb(-1)("Invalid length");
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -539,6 +548,9 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             };
         };
 
+        if (length === 0)
+            buildCb()("Invalid length");
+
         var state;
 
         for (var i = 0; i < length; i++) {
@@ -609,6 +621,9 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
                 }
             };
         };
+
+        if (length === 0)
+            buildCb()("Invalid length");
 
         var value;
 
