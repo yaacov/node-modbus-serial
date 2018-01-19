@@ -58,6 +58,8 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
             });
 
             var errorCode = 0x04; // slave device failure
+            if (!isNaN(err.modbusErrorCode))
+                errorCode = err.modbusErrorCode;
 
             // set an error response
             functionCode = parseInt(functionCode) | 0x80;
@@ -228,7 +230,10 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         };
 
         if (length === 0)
-            buildCb(-1)("Invalid length");
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -298,7 +303,10 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
         };
 
         if (length === 0)
-            buildCb(-1)("Invalid length");
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -367,7 +375,10 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
         };
 
         if (length === 0)
-            buildCb(-1)("Invalid length");
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -549,7 +560,10 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
         };
 
         if (length === 0)
-            buildCb()("Invalid length");
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
         var state;
 
@@ -623,7 +637,10 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
         };
 
         if (length === 0)
-            buildCb()("Invalid length");
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
         var value;
 
