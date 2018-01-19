@@ -210,11 +210,34 @@ setInterval(function() {
 // create an empty modbus client
 var ModbusRTU = require("modbus-serial");
 var vector = {
-    getInputRegister: function(addr, unitID) { return addr; },
-    getHoldingRegister: function(addr, unitID) { return addr + 8000; },
-    getCoil: function(addr, unitID) { return (addr % 2) === 0; },
-    setRegister: function(addr, value, unitID) { console.log("set register", addr, value, unitID); return; },
-    setCoil: function(addr, value, unitID) { console.log("set coil", addr, value, unitID); return; }
+    getInputRegister: function(addr, unitID) {
+        // Synchronous handling
+        return addr;
+    },
+    getHoldingRegister: function(addr, unitID, callback) {
+        // Asynchronous handling (with callback)
+        setTimeout(function() {
+	    callback(addr + 8000);
+	}, 10);
+    },
+    getCoil: function(addr, unitID) {
+        // Asynchronous handling (with Promises, async/await supported)
+        return new Promise(function(resolve) {
+	    setTimeout(function() {
+	        resolve((addr % 2) === 0);
+	    }, 10);
+	});
+    },
+    setRegister: function(addr, value, unitID) {
+        // Asynchronous handling supported also here
+        console.log("set register", addr, value, unitID);
+	return;
+    },
+    setCoil: function(addr, value, unitID) {
+        // Asynchronous handling supported also here
+        console.log("set coil", addr, value, unitID);
+	return;
+    }
 };
 
 // set the server to answer for modbus requests
