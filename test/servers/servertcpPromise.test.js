@@ -18,8 +18,11 @@ describe("Modbus TCP Server Promise", function() {
                 });
             },
             getHoldingRegister: function(addr) {
-                return new Promise(function(resolve) {
+                return new Promise(function(resolve, reject) {
                     setTimeout(function() {
+                        if (addr === 62)
+                            return reject(new Error());
+
                         resolve(addr + 8000);
                     }, 50);
                 });
@@ -78,6 +81,19 @@ describe("Modbus TCP Server Promise", function() {
             client.once("data", function(data) {
                 // A valid error message, code 0x01 - Illegal fanction
                 expect(data.toString("hex")).to.equal("000100000003018701");
+                done();
+            });
+        });
+
+        it("should receive a valid slave failure Modbus TCP message", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                // FC03 to error triggering address
+                client.write(new Buffer("0001000000060103003E0001", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018304");
                 done();
             });
         });

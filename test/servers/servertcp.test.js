@@ -10,11 +10,29 @@ describe("Modbus TCP Server", function() {
 
     before(function() {
         var vector = {
-            getInputRegister: function(addr) { return addr; },
-            getHoldingRegister: function(addr) { return addr + 8000; },
-            getCoil: function(addr) { return (addr % 2) === 0; },
-            setRegister: function(addr, value) { console.log("set register", addr, value); return; },
-            setCoil: function(addr, value) { console.log("set coil", addr, value); return; }
+            getInputRegister: function(addr) {
+                return addr;
+            },
+            getHoldingRegister: function(addr) {
+                if (addr === 62)
+                    throw new Error();
+
+                console.log("Holding register: ", addr);
+
+                return addr + 8000;
+            },
+            getCoil: function(addr) {
+                console.log("Holding register: ", addr);
+                return (addr % 2) === 0;
+            },
+            setRegister: function(addr, value) {
+                console.log("set register", addr, value);
+                return;
+            },
+            setCoil: function(addr, value) {
+                console.log("set coil", addr, value);
+                return;
+            }
         };
         serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true, unitID: 1 });
     });
@@ -37,7 +55,7 @@ describe("Modbus TCP Server", function() {
     });
 
     describe("modbus exception handler", function() {
-        it("should receive a valid Modbus TCP message", function(done) {
+        it("should receive a valid unhandled function Modbus TCP message", function(done) {
             const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // FC07 - unhandled function
                 client.write(new Buffer("000100000006010700000000", "hex"));
@@ -46,6 +64,19 @@ describe("Modbus TCP Server", function() {
             client.once("data", function(data) {
                 // A valid error message, code 0x01 - Illegal fanction
                 expect(data.toString("hex")).to.equal("000100000003018701");
+                done();
+            });
+        });
+
+        it("should receive a valid slave failure Modbus TCP message", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                // FC03 to error triggering address
+                client.write(new Buffer("0001000000060103003E0001", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018304");
                 done();
             });
         });

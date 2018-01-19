@@ -12,28 +12,31 @@ describe("Modbus TCP Server Callback", function() {
         var vector = {
             getInputRegister: function(addr, callback) {
                 setTimeout(function() {
-                    callback(addr);
+                    callback(null, addr);
                 }, 50);
             },
             getHoldingRegister: function(addr, callback) {
                 setTimeout(function() {
-                    callback(addr + 8000);
+                    if (addr === 62)
+                        return callback(new Error());
+
+                    callback(null, addr + 8000);
                 }, 50);
             },
             getCoil: function(addr, callback) {
                 setTimeout(function() {
-                    callback((addr % 2) === 0);
+                    callback(null, (addr % 2) === 0);
                 }, 50);
             },
             setRegister: function(addr, value, unit, callback) {
                 setTimeout(function() {
                     console.log("set register", addr, value);
-                    callback();
+                    callback(null);
                 }, 50);
             },
             setCoil: function(addr, value, unit, callback) {
                 setTimeout(function() {console.log("set coil", addr, value);
-                    callback();
+                    callback(null);
                 }, 50);
             }
         };
@@ -67,6 +70,19 @@ describe("Modbus TCP Server Callback", function() {
             client.once("data", function(data) {
                 // A valid error message, code 0x01 - Illegal fanction
                 expect(data.toString("hex")).to.equal("000100000003018701");
+                done();
+            });
+        });
+
+        it("should receive a valid slave failure Modbus TCP message", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                // FC03 to error triggering address
+                client.write(new Buffer("0001000000060103003E0001", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018304");
                 done();
             });
         });
