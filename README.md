@@ -146,7 +146,7 @@ const getMetersValue = async (meters) => {
 }
 
 const getMeterValue = async (id) => {
-    try {	
+    try {
         // set ID of slave
         await client.setID(id);
         // read the 1 registers starting at address 0 (first register)
@@ -156,7 +156,7 @@ const getMeterValue = async (id) => {
     } catch(e){
         // if error return -1
         return -1
-    } 
+    }
 }
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
@@ -217,7 +217,8 @@ var vector = {
     getHoldingRegister: function(addr, unitID, callback) {
         // Asynchronous handling (with callback)
         setTimeout(function() {
-            callback(addr + 8000);
+            // callback = function(err, value)
+            callback(null, addr + 8000);
         }, 10);
     },
     getCoil: function(addr, unitID) {
