@@ -10,7 +10,7 @@ var timeoutRunRefInputs = null;
 var timeoutRunRefHoldings = null;
 var timeoutConnectRef = null;
 
-var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
+var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
 
 // check error, and reconnect if needed
 function checkError(e) {

@@ -5,7 +5,7 @@
 var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
-var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED"];
+var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
 
 // open connection to a serial port
 client.connectRTU("/dev/ttyUSB0", { baudRate: 115200 })
