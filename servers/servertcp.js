@@ -507,7 +507,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
                 modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
 
                 callbackInvoked = true;
-                callback(responseBuffer);
+                callback(null, responseBuffer);
             }
         };
 
