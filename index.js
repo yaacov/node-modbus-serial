@@ -342,21 +342,23 @@ ModbusRTU.prototype.open = function(callback) {
                 callback(error);
         }
     });
-
-    /**
-     * Check if port is open
-     */
-    Object.defineProperty(this, "isOpen", {
-        enumerable: true,
-        get: function() {
-            if (this._port) {
-                return this._port.isOpen;
-            }
-
-            return false;
-        }
-    });
 };
+
+
+/**
+ * Check if port is open
+ */
+Object.defineProperty(ModbusRTU.prototype, "isOpen", {
+    enumerable: true,
+    get: function() {
+        if (this._port) {
+            return this._port.isOpen;
+        }
+
+        return false;
+    }
+});
+
 
 /**
  * Close the serial port
