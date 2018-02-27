@@ -272,7 +272,7 @@ ModbusRTU.prototype.open = function(callback) {
 
                 /* check for modbus exception
                  */
-                if (data.length === 5 &&
+                if (data.length >= 5 &&
                     code === (0x80 | transaction.nextCode)) {
                     error = "Modbus exception " + data.readUInt8(2);
                     if (transaction.next)
