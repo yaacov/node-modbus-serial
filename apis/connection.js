@@ -115,6 +115,7 @@ var addConnctionAPI = function(Modbus) {
         }
 
         var TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
+        if (this._timeout) { options.timeout = this._timeout; }
         this._port = new TcpRTUBufferedPort(ip, options);
 
         // open and call next
