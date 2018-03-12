@@ -23,7 +23,6 @@ var MIN_MODBUSRTU_FRAMESZ = 5;
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
 var addConnctionAPI = function(Modbus) {
-
     var cl = Modbus.prototype;
 
     var open = function(obj, next) {
@@ -61,7 +60,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTU = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
@@ -87,13 +86,16 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTCP = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
 
         // create the TcpPort
         var TcpPort = require("../ports/tcpport");
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
         this._port = new TcpPort(ip, options);
 
         // open and call next
@@ -109,13 +111,15 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTcpRTUBuffered = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
 
         var TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
-        if (this._timeout) { options.timeout = this._timeout; }
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
         this._port = new TcpRTUBufferedPort(ip, options);
 
         // open and call next
@@ -131,13 +135,16 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectTelnet = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
 
         // create the TcpPort
         var TelnetPort = require("../ports/telnetport");
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
         this._port = new TelnetPort(ip, options);
 
         // open and call next
@@ -153,7 +160,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectC701 = function(ip, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
@@ -175,7 +182,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectRTUBuffered = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
@@ -200,7 +207,7 @@ var addConnctionAPI = function(Modbus) {
      */
     cl.connectAsciiSerial = function(path, options, next) {
         // check if we have options
-        if (typeof(next) === "undefined" && typeof(options) === "function") {
+        if (typeof next === "undefined" && typeof options === "function") {
             next = options;
             options = {};
         }
