@@ -33,7 +33,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     modbus._transactionIdWrite = 1;
 
     // options
-    if (typeof(options) === "undefined") options = {};
+    if (typeof options === "undefined") options = {};
     modbus.port = options.port || MODBUS_PORT;
 
     // internal buffer
@@ -50,13 +50,18 @@ var TcpRTUBufferedPort = function(ip, options) {
 
     // create a socket
     modbus._client = new net.Socket();
+    if (options.timeout) this._client.setTimeout(options.timeout);
 
     // register the port data event
     modbus._client.on("data", function onData(data) {
         // add data to buffer
         modbus._buffer = Buffer.concat([modbus._buffer, data]);
 
-        modbusSerialDebug({ action: "receive tcp rtu buffered port", data: data, buffer: modbus._buffer });
+        modbusSerialDebug({
+            action: "receive tcp rtu buffered port",
+            data: data,
+            buffer: modbus._buffer
+        });
 
         // check if buffer include a complete modbus answer
         var bufferLength = modbus._buffer.length;
@@ -71,7 +76,7 @@ var TcpRTUBufferedPort = function(ip, options) {
         }
 
         // check data length
-        if (bufferLength < (MIN_MBAP_LENGTH + EXCEPTION_LENGTH)) return;
+        if (bufferLength < MIN_MBAP_LENGTH + EXCEPTION_LENGTH) return;
 
         // loop and check length-sized buffer chunks
         var maxOffset = bufferLength - MIN_MBAP_LENGTH;
@@ -81,16 +86,21 @@ var TcpRTUBufferedPort = function(ip, options) {
             var msgLength = modbus._buffer.readUInt16BE(i + 4);
             var cmd = modbus._buffer[i + 7];
 
-            modbusSerialDebug(
-              { protocolID: protocolID, msgLength: msgLength, bufferLength: bufferLength, cmd: cmd });
+            modbusSerialDebug({
+                protocolID: protocolID,
+                msgLength: msgLength,
+                bufferLength: bufferLength,
+                cmd: cmd
+            });
 
-            if (protocolID === 0 &&
+            if (
+                protocolID === 0 &&
                 cmd !== 0 &&
                 msgLength >= EXCEPTION_LENGTH &&
-                (i + MIN_MBAP_LENGTH + msgLength) <= bufferLength) {
-
+                i + MIN_MBAP_LENGTH + msgLength <= bufferLength
+            ) {
                 // add crc and emit
-                modbus._emitData((i + MIN_MBAP_LENGTH), msgLength);
+                modbus._emitData(i + MIN_MBAP_LENGTH, msgLength);
                 return;
             }
         }
@@ -109,6 +119,12 @@ var TcpRTUBufferedPort = function(ip, options) {
     this._client.on("error", function(had_error) {
         modbus.openFlag = false;
         handleCallback(had_error);
+    });
+
+    this._client.on("timeout", function() {
+        modbus.openFlag = false;
+        modbusSerialDebug("TcpRTUBufferedPort port: TimedOut");
+        handleCallback(new Error("TcpRTUBufferedPort Connection Timed Out."));
     });
 
     /**
@@ -152,7 +168,11 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
         modbus.emit("data", buffer);
 
         // debug
-        modbusSerialDebug({ action: "parsed tcp buffered port", buffer: buffer, transactionId: modbus._transactionIdRead });
+        modbusSerialDebug({
+            action: "parsed tcp buffered port",
+            buffer: buffer,
+            transactionId: modbus._transactionIdRead
+        });
     } else {
         modbusSerialDebug({ action: "emit data to short", data: data });
     }
@@ -185,7 +205,10 @@ TcpRTUBufferedPort.prototype.close = function(callback) {
  */
 TcpRTUBufferedPort.prototype.write = function(data) {
     if (data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
+        modbusSerialDebug(
+            "expected length of data is to small - minimum is " +
+                MIN_DATA_LENGTH
+        );
         return;
     }
 
@@ -204,7 +227,8 @@ TcpRTUBufferedPort.prototype.write = function(data) {
     });
 
     // get next transaction id
-    this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
+    this._transactionIdWrite =
+        (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
 
     // send buffer to slave
     this._client.write(buffer);

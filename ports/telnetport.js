@@ -25,7 +25,7 @@ var TelnetPort = function(ip, options) {
     this.callback = null;
 
     // options
-    if (typeof(options) === "undefined") options = {};
+    if (typeof options === "undefined") options = {};
     this.port = options.port || TELNET_PORT; // telnet server port
 
     // internal buffer
@@ -45,6 +45,7 @@ var TelnetPort = function(ip, options) {
 
     // create a socket
     this._client = new net.Socket();
+    if (options.timeout) this._client.setTimeout(options.timeout);
 
     // register the port data event
     this._client.on("data", function onData(data) {
@@ -54,10 +55,25 @@ var TelnetPort = function(ip, options) {
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
         var bufferLength = self._buffer.length;
-        modbusSerialDebug("on data expected length:" + expectedLength + " buffer length:" + bufferLength);
+        modbusSerialDebug(
+            "on data expected length:" +
+                expectedLength +
+                " buffer length:" +
+                bufferLength
+        );
 
-        modbusSerialDebug({ action: "receive tcp telnet port", data: data, buffer: self._buffer });
-        modbusSerialDebug(JSON.stringify({ action: "receive tcp telnet port strings", data: data, buffer: self._buffer }));
+        modbusSerialDebug({
+            action: "receive tcp telnet port",
+            data: data,
+            buffer: self._buffer
+        });
+        modbusSerialDebug(
+            JSON.stringify({
+                action: "receive tcp telnet port strings",
+                data: data,
+                buffer: self._buffer
+            })
+        );
 
         // check data length
         if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
@@ -70,11 +86,17 @@ var TelnetPort = function(ip, options) {
 
             if (unitId !== self._id) continue;
 
-            if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
+            if (
+                functionCode === self._cmd &&
+                i + expectedLength <= bufferLength
+            ) {
                 self._emitData(i, expectedLength);
                 return;
             }
-            if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
+            if (
+                functionCode === (0x80 | self._cmd) &&
+                i + EXCEPTION_LENGTH <= bufferLength
+            ) {
                 self._emitData(i, EXCEPTION_LENGTH);
                 return;
             }
@@ -97,6 +119,12 @@ var TelnetPort = function(ip, options) {
     this._client.on("error", function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
+    });
+
+    this._client.on("timeout", function() {
+        self.openFlag = false;
+        modbusSerialDebug("TelnetPort port: TimedOut");
+        handleCallback(new Error("TelnetPort Connection Timed Out."));
     });
 
     /**
@@ -158,8 +186,11 @@ TelnetPort.prototype.close = function(callback) {
  * @param {Buffer} data
  */
 TelnetPort.prototype.write = function(data) {
-    if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
+    if (data.length < MIN_DATA_LENGTH) {
+        modbusSerialDebug(
+            "expected length of data is to small - minimum is " +
+                MIN_DATA_LENGTH
+        );
         return;
     }
 
@@ -203,12 +234,14 @@ TelnetPort.prototype.write = function(data) {
         functionCode: this._cmd
     });
 
-    modbusSerialDebug(JSON.stringify({
-        action: "send tcp telnet port strings",
-        data: data,
-        unitid: this._id,
-        functionCode: this._cmd
-    }));
+    modbusSerialDebug(
+        JSON.stringify({
+            action: "send tcp telnet port strings",
+            data: data,
+            unitid: this._id,
+            functionCode: this._cmd
+        })
+    );
 };
 
 /**
