@@ -43,6 +43,7 @@ var TcpPort = function(ip, options) {
 
     // create a socket
     this._client = new net.Socket();
+    if (options.timeout) this._client.setTimeout(options.timeout);
     this._client.on("data", function(data) {
         var buffer;
         var crc;
@@ -92,6 +93,12 @@ var TcpPort = function(ip, options) {
         modbus.openFlag = false;
         modbusSerialDebug("TCP port: signal error: " + had_error);
         handleCallback(had_error);
+    });
+
+    this._client.on("timeout", function() {
+        modbus.openFlag = false;
+        modbusSerialDebug("TCP port: TimedOut");
+        handleCallback(new Error("TCP Connection Timed Out."));
     });
 
     /**
