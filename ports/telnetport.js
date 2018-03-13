@@ -181,6 +181,18 @@ TelnetPort.prototype.close = function(callback) {
 };
 
 /**
+ * Simulate successful destroy port.
+ *
+ * @param callback
+ */
+TelnetPort.prototype.destroy = function(callback) {
+    this.callback = callback;
+    if (!this._client.destroyed) {
+        this._client.destroy();
+    }
+};
+
+/**
  * Send data to a modbus slave via telnet server.
  *
  * @param {Buffer} data

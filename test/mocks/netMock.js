@@ -5,6 +5,7 @@ var util = require("util");
 
 var Socket = function() {
     EventEmitter.call(this);
+    this.destroyed = false;
 };
 util.inherits(Socket, EventEmitter);
 
@@ -25,6 +26,11 @@ Socket.prototype.write = function(data) {
 
 Socket.prototype.receive = function(buffer) {
     this.emit("data", buffer);
+};
+
+Socket.prototype.destroy = function() {
+    this.emit("close", true);
+    this.destroyed = true;
 };
 
 exports.Socket = Socket;

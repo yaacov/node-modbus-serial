@@ -138,6 +138,18 @@ TcpPort.prototype.close = function(callback) {
 };
 
 /**
+ * Simulate successful destroy port.
+ *
+ * @param callback
+ */
+TcpPort.prototype.destroy = function(callback) {
+    this.callback = callback;
+    if (!this._client.destroyed) {
+        this._client.destroy();
+    }
+};
+
+/**
  * Send data to a modbus-tcp slave.
  *
  * @param data

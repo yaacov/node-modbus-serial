@@ -49,6 +49,16 @@ describe("Modbus TCP RTU buffered port", function() {
                 });
             });
         });
+        it("should be able to be destoryed after opening", function(done) {
+            port.open(function() {
+                port.destroy(function() {
+                    setTimeout(function() {
+                        expect(port.isOpen).to.be.false;
+                        done();
+                    });
+                });
+            });
+        });
     });
 
     describe("data handler", function() {

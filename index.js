@@ -375,6 +375,20 @@ ModbusRTU.prototype.close = function(callback) {
 };
 
 /**
+ * Destory the serial port
+ *
+ * @param {Function} callback the function to call next on close success
+ *      or failure.
+ */
+ModbusRTU.prototype.destroy = function(callback) {
+    // close the serial port if exist and it has a destroy function
+    if (this._port && this._port.destroy) {
+        this._port.removeAllListeners("data");
+        this._port.destroy(callback);
+    }
+};
+
+/**
  * Write a Modbus "Read Coil Status" (FC=01) to serial port.
  *
  * @param {number} address the slave unit address.
