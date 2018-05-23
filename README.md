@@ -252,3 +252,13 @@ serverTCP.on("socketError", function(err){
 ```
 
 to get more see [Examples](https://github.com/yaacov/node-modbus-serial/wiki)
+
+###### Serial connection
+
+node-modbus-serial use node-serialport for serial communication, for serial port options settings
+it passes to serial port the [openOptions](https://node-serialport.github.io/node-serialport/global.html#openOptions) object,
+default serial port settings are 9600,8,n,1.
+
+``` javascript
+client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600, parity: 'even' });
+```
