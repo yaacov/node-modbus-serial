@@ -105,7 +105,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(3 + parseInt((length - 1) / 8 + 1) + 2);
+        buffer = Buffer.alloc(3 + parseInt((length - 1) / 8 + 1) + 2);
         buffer.writeUInt8(parseInt((length - 1) / 8 + 1), 2);
 
         // read coils
@@ -123,7 +123,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(3 + length * 2 + 2);
+        buffer = Buffer.alloc(3 + length * 2 + 2);
         buffer.writeUInt8(length * 2, 2);
 
         // read registers
@@ -143,7 +143,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(3 + length * 2 + 2);
+        buffer = Buffer.alloc(3 + length * 2 + 2);
         buffer.writeUInt8(length * 2, 2);
 
         // read registers
@@ -163,7 +163,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(8);
+        buffer = Buffer.alloc(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(state, 4);
 
@@ -185,7 +185,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(8);
+        buffer = Buffer.alloc(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(value, 4);
 
@@ -203,7 +203,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(8);
+        buffer = Buffer.alloc(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(length, 4);
 
@@ -230,7 +230,7 @@ TestPort.prototype.write = function(data) {
         }
 
         // build answer
-        buffer = new Buffer(8);
+        buffer = Buffer.alloc(8);
         buffer.writeUInt16BE(address, 2);
         buffer.writeUInt16BE(length, 4);
 

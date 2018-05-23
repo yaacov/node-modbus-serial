@@ -183,7 +183,7 @@ UdpPort.prototype.write = function(data) {
     }
 
     // build C701 header
-    var buffer = new Buffer(data.length + 116);
+    var buffer = Buffer.alloc(data.length + 116);
     buffer.fill(0);
     buffer.writeUInt16LE(600, 2);           // C701 magic for serial bridge
     buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)

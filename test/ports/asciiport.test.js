@@ -58,20 +58,20 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer(":", "ascii"));
-                    port._client.receive(new Buffer("11", "ascii"));
-                    port._client.receive(new Buffer("03", "ascii"));
-                    port._client.receive(new Buffer("06", "ascii"));
-                    port._client.receive(new Buffer("AE", "ascii"));
-                    port._client.receive(new Buffer("41", "ascii"));
-                    port._client.receive(new Buffer("56", "ascii"));
-                    port._client.receive(new Buffer("52", "ascii"));
-                    port._client.receive(new Buffer("43", "ascii"));
-                    port._client.receive(new Buffer("40", "ascii"));
-                    port._client.receive(new Buffer("CC", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
+                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from("11", "ascii"));
+                    port._client.receive(Buffer.from("03", "ascii"));
+                    port._client.receive(Buffer.from("06", "ascii"));
+                    port._client.receive(Buffer.from("AE", "ascii"));
+                    port._client.receive(Buffer.from("41", "ascii"));
+                    port._client.receive(Buffer.from("56", "ascii"));
+                    port._client.receive(Buffer.from("52", "ascii"));
+                    port._client.receive(Buffer.from("43", "ascii"));
+                    port._client.receive(Buffer.from("40", "ascii"));
+                    port._client.receive(Buffer.from("CC", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
                 });
             });
         });
@@ -82,14 +82,14 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer(":", "ascii"));
-                    port._client.receive(new Buffer("11", "ascii"));
-                    port._client.receive(new Buffer("83", "ascii"));
-                    port._client.receive(new Buffer("04", "ascii"));
-                    port._client.receive(new Buffer("68", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
+                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from("11", "ascii"));
+                    port._client.receive(Buffer.from("83", "ascii"));
+                    port._client.receive(Buffer.from("04", "ascii"));
+                    port._client.receive(Buffer.from("68", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
                 });
             });
         });
@@ -100,14 +100,14 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("010300000040443A", "hex"));
+                port.write(Buffer.from("010300000040443A", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer(":", "ascii"));
+                    port._client.receive(Buffer.from(":", "ascii"));
                     for (var i = 0; i < (LONG_MSG.length - 4); i += 2) {
-                        port._client.receive(new Buffer(LONG_MSG.slice(i, i + 2), "ascii"));
+                        port._client.receive(Buffer.from(LONG_MSG.slice(i, i + 2), "ascii"));
                     }
-                    port._client.receive(new Buffer("7C", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
+                    port._client.receive(Buffer.from("7C", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
                 });
             });
         });
@@ -118,24 +118,24 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("20", "ascii")); // illegal char
-                    port._client.receive(new Buffer("54", "ascii")); // illegal char
-                    port._client.receive(new Buffer("54", "ascii")); // illegal char
-                    port._client.receive(new Buffer("FF", "ascii")); // illegal char
-                    port._client.receive(new Buffer(":", "ascii"));
-                    port._client.receive(new Buffer("11", "ascii"));
-                    port._client.receive(new Buffer("03", "ascii"));
-                    port._client.receive(new Buffer("06", "ascii"));
-                    port._client.receive(new Buffer("AE", "ascii"));
-                    port._client.receive(new Buffer("41", "ascii"));
-                    port._client.receive(new Buffer("56", "ascii"));
-                    port._client.receive(new Buffer("52", "ascii"));
-                    port._client.receive(new Buffer("43", "ascii"));
-                    port._client.receive(new Buffer("40", "ascii"));
-                    port._client.receive(new Buffer("CC", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
+                    port._client.receive(Buffer.from("20", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("54", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("54", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("FF", "ascii")); // illegal char
+                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from("11", "ascii"));
+                    port._client.receive(Buffer.from("03", "ascii"));
+                    port._client.receive(Buffer.from("06", "ascii"));
+                    port._client.receive(Buffer.from("AE", "ascii"));
+                    port._client.receive(Buffer.from("41", "ascii"));
+                    port._client.receive(Buffer.from("56", "ascii"));
+                    port._client.receive(Buffer.from("52", "ascii"));
+                    port._client.receive(Buffer.from("43", "ascii"));
+                    port._client.receive(Buffer.from("40", "ascii"));
+                    port._client.receive(Buffer.from("CC", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
                 });
             });
         });
@@ -146,24 +146,24 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer(":", "ascii"));
-                    port._client.receive(new Buffer("11", "ascii"));
-                    port._client.receive(new Buffer("03", "ascii"));
-                    port._client.receive(new Buffer("06", "ascii"));
-                    port._client.receive(new Buffer("AE", "ascii"));
-                    port._client.receive(new Buffer("41", "ascii"));
-                    port._client.receive(new Buffer("56", "ascii"));
-                    port._client.receive(new Buffer("52", "ascii"));
-                    port._client.receive(new Buffer("43", "ascii"));
-                    port._client.receive(new Buffer("40", "ascii"));
-                    port._client.receive(new Buffer("CC", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
-                    port._client.receive(new Buffer("20", "ascii")); // illegal char
-                    port._client.receive(new Buffer("54", "ascii")); // illegal char
-                    port._client.receive(new Buffer("54", "ascii")); // illegal char
-                    port._client.receive(new Buffer("FF", "ascii")); // illegal char
+                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from("11", "ascii"));
+                    port._client.receive(Buffer.from("03", "ascii"));
+                    port._client.receive(Buffer.from("06", "ascii"));
+                    port._client.receive(Buffer.from("AE", "ascii"));
+                    port._client.receive(Buffer.from("41", "ascii"));
+                    port._client.receive(Buffer.from("56", "ascii"));
+                    port._client.receive(Buffer.from("52", "ascii"));
+                    port._client.receive(Buffer.from("43", "ascii"));
+                    port._client.receive(Buffer.from("40", "ascii"));
+                    port._client.receive(Buffer.from("CC", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
+                    port._client.receive(Buffer.from("20", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("54", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("54", "ascii")); // illegal char
+                    port._client.receive(Buffer.from("FF", "ascii")); // illegal char
                 });
             });
         });
@@ -174,20 +174,20 @@ describe("Modbus Ascii port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer(":", "ascii"));
-                    port._client.receive(new Buffer("11", "ascii"));
-                    port._client.receive(new Buffer("03", "ascii"));
-                    port._client.receive(new Buffer("06", "ascii"));
-                    port._client.receive(new Buffer("AE", "ascii"));
-                    port._client.receive(new Buffer("41", "ascii"));
-                    port._client.receive(new Buffer("56", "ascii"));
-                    port._client.receive(new Buffer("52", "ascii"));
-                    port._client.receive(new Buffer("43", "ascii"));
-                    port._client.receive(new Buffer("40", "ascii"));
-                    port._client.receive(new Buffer("CC", "ascii"));
-                    port._client.receive(new Buffer("\r\n", "ascii"));
+                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from("11", "ascii"));
+                    port._client.receive(Buffer.from("03", "ascii"));
+                    port._client.receive(Buffer.from("06", "ascii"));
+                    port._client.receive(Buffer.from("AE", "ascii"));
+                    port._client.receive(Buffer.from("41", "ascii"));
+                    port._client.receive(Buffer.from("56", "ascii"));
+                    port._client.receive(Buffer.from("52", "ascii"));
+                    port._client.receive(Buffer.from("43", "ascii"));
+                    port._client.receive(Buffer.from("40", "ascii"));
+                    port._client.receive(Buffer.from("CC", "ascii"));
+                    port._client.receive(Buffer.from("\r\n", "ascii"));
                 });
             });
         });
@@ -195,7 +195,7 @@ describe("Modbus Ascii port", function() {
 
     describe("#write", function() {
         it("should write a valid RTU message to the port", function() {
-            port.write(new Buffer("1103006B00037687", "hex"));
+            port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.toString("ascii")).to.equal(":1103006B00037E\r\n");
         });
     });

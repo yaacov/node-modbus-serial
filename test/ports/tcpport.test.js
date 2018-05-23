@@ -65,10 +65,10 @@ describe("Modbus TCP port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
 
-                if (port._client._data.equals(new Buffer("0001000000061103006B0003", "hex"))) {
-                    port._client.receive(new Buffer("000100000006110366778899", "hex"));
+                if (port._client._data.equals(Buffer.from("0001000000061103006B0003", "hex"))) {
+                    port._client.receive(Buffer.from("000100000006110366778899", "hex"));
                 }
             });
         });
@@ -79,10 +79,10 @@ describe("Modbus TCP port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
 
-                if (port._client._data.equals(new Buffer("0002000000061103006B0003", "hex"))) {
-                    port._client.receive(new Buffer("000200000003118304", "hex"));
+                if (port._client._data.equals(Buffer.from("0002000000061103006B0003", "hex"))) {
+                    port._client.receive(Buffer.from("000200000003118304", "hex"));
                 }
             });
         });
@@ -90,7 +90,7 @@ describe("Modbus TCP port", function() {
 
     describe("#write", function() {
         it("should write a valid TCP message to the port", function() {
-            port.write(new Buffer("1103006B00037687", "hex"));
+            port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.toString("hex")).to.equal("0003000000061103006b0003");
         });
     });

@@ -433,7 +433,7 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -492,7 +492,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -538,7 +538,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -589,7 +589,7 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     };
 
     var codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -638,7 +638,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
 
     var dataBytes = Math.ceil(array.length / 8);
     var codeLength = 7 + dataBytes;
-    var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2);  // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -698,7 +698,7 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     };
 
     var codeLength = 7 + 2 * array.length;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
