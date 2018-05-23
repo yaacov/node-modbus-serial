@@ -64,6 +64,12 @@ var addConnctionAPI = function(Modbus) {
             next = options;
             options = {};
         }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
         // disable auto open, as we handle the open
         options.autoOpen = false;
         // set vmin to smallest modbus packet size
@@ -88,6 +94,11 @@ var addConnctionAPI = function(Modbus) {
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
             options = {};
         }
 
@@ -116,6 +127,11 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
 
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
         var TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
         if (this._timeout) {
             options.timeout = this._timeout;
@@ -137,6 +153,11 @@ var addConnctionAPI = function(Modbus) {
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
             options = {};
         }
 
@@ -165,6 +186,11 @@ var addConnctionAPI = function(Modbus) {
             options = {};
         }
 
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
         // create the TcpPort
         var C701Port = require("../ports/c701port");
         this._port = new C701Port(ip, options);
@@ -184,6 +210,11 @@ var addConnctionAPI = function(Modbus) {
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
             options = {};
         }
 
@@ -209,6 +240,11 @@ var addConnctionAPI = function(Modbus) {
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
             options = {};
         }
 
