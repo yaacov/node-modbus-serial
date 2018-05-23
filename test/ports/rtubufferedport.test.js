@@ -58,19 +58,19 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("11", "hex"));
-                    port._client.receive(new Buffer("03", "hex"));
-                    port._client.receive(new Buffer("06", "hex"));
-                    port._client.receive(new Buffer("ae", "hex"));
-                    port._client.receive(new Buffer("41", "hex"));
-                    port._client.receive(new Buffer("56", "hex"));
-                    port._client.receive(new Buffer("52", "hex"));
-                    port._client.receive(new Buffer("43", "hex"));
-                    port._client.receive(new Buffer("40", "hex"));
-                    port._client.receive(new Buffer("49", "hex"));
-                    port._client.receive(new Buffer("ad", "hex"));
+                    port._client.receive(Buffer.from("11", "hex"));
+                    port._client.receive(Buffer.from("03", "hex"));
+                    port._client.receive(Buffer.from("06", "hex"));
+                    port._client.receive(Buffer.from("ae", "hex"));
+                    port._client.receive(Buffer.from("41", "hex"));
+                    port._client.receive(Buffer.from("56", "hex"));
+                    port._client.receive(Buffer.from("52", "hex"));
+                    port._client.receive(Buffer.from("43", "hex"));
+                    port._client.receive(Buffer.from("40", "hex"));
+                    port._client.receive(Buffer.from("49", "hex"));
+                    port._client.receive(Buffer.from("ad", "hex"));
                 });
             });
         });
@@ -81,13 +81,13 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("11", "hex"));
-                    port._client.receive(new Buffer("83", "hex"));
-                    port._client.receive(new Buffer("04", "hex"));
-                    port._client.receive(new Buffer("41", "hex"));
-                    port._client.receive(new Buffer("36", "hex"));
+                    port._client.receive(Buffer.from("11", "hex"));
+                    port._client.receive(Buffer.from("83", "hex"));
+                    port._client.receive(Buffer.from("04", "hex"));
+                    port._client.receive(Buffer.from("41", "hex"));
+                    port._client.receive(Buffer.from("36", "hex"));
                 });
             });
         });
@@ -98,10 +98,10 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("010300000040443A", "hex"));
+                port.write(Buffer.from("010300000040443A", "hex"));
                 setTimeout(function() {
                     for (var i = 0; i < LONG_MSG.length; i += 2) {
-                        port._client.receive(new Buffer(LONG_MSG.slice(i, i + 2), "hex"));
+                        port._client.receive(Buffer.from(LONG_MSG.slice(i, i + 2), "hex"));
                     }
                 });
             });
@@ -113,23 +113,23 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("20", "hex")); // illegal char
-                    port._client.receive(new Buffer("54", "hex")); // illegal char
-                    port._client.receive(new Buffer("54", "hex")); // illegal char
-                    port._client.receive(new Buffer("ff", "hex")); // illegal char
-                    port._client.receive(new Buffer("11", "hex"));
-                    port._client.receive(new Buffer("03", "hex"));
-                    port._client.receive(new Buffer("06", "hex"));
-                    port._client.receive(new Buffer("ae", "hex"));
-                    port._client.receive(new Buffer("41", "hex"));
-                    port._client.receive(new Buffer("56", "hex"));
-                    port._client.receive(new Buffer("52", "hex"));
-                    port._client.receive(new Buffer("43", "hex"));
-                    port._client.receive(new Buffer("40", "hex"));
-                    port._client.receive(new Buffer("49", "hex"));
-                    port._client.receive(new Buffer("ad", "hex"));
+                    port._client.receive(Buffer.from("20", "hex")); // illegal char
+                    port._client.receive(Buffer.from("54", "hex")); // illegal char
+                    port._client.receive(Buffer.from("54", "hex")); // illegal char
+                    port._client.receive(Buffer.from("ff", "hex")); // illegal char
+                    port._client.receive(Buffer.from("11", "hex"));
+                    port._client.receive(Buffer.from("03", "hex"));
+                    port._client.receive(Buffer.from("06", "hex"));
+                    port._client.receive(Buffer.from("ae", "hex"));
+                    port._client.receive(Buffer.from("41", "hex"));
+                    port._client.receive(Buffer.from("56", "hex"));
+                    port._client.receive(Buffer.from("52", "hex"));
+                    port._client.receive(Buffer.from("43", "hex"));
+                    port._client.receive(Buffer.from("40", "hex"));
+                    port._client.receive(Buffer.from("49", "hex"));
+                    port._client.receive(Buffer.from("ad", "hex"));
                 });
             });
         });
@@ -140,23 +140,23 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("11", "hex"));
-                    port._client.receive(new Buffer("03", "hex"));
-                    port._client.receive(new Buffer("06", "hex"));
-                    port._client.receive(new Buffer("ae", "hex"));
-                    port._client.receive(new Buffer("41", "hex"));
-                    port._client.receive(new Buffer("56", "hex"));
-                    port._client.receive(new Buffer("52", "hex"));
-                    port._client.receive(new Buffer("43", "hex"));
-                    port._client.receive(new Buffer("40", "hex"));
-                    port._client.receive(new Buffer("49", "hex"));
-                    port._client.receive(new Buffer("ad", "hex"));
-                    port._client.receive(new Buffer("20", "hex")); // illegal char
-                    port._client.receive(new Buffer("54", "hex")); // illegal char
-                    port._client.receive(new Buffer("54", "hex")); // illegal char
-                    port._client.receive(new Buffer("ff", "hex")); // illegal char
+                    port._client.receive(Buffer.from("11", "hex"));
+                    port._client.receive(Buffer.from("03", "hex"));
+                    port._client.receive(Buffer.from("06", "hex"));
+                    port._client.receive(Buffer.from("ae", "hex"));
+                    port._client.receive(Buffer.from("41", "hex"));
+                    port._client.receive(Buffer.from("56", "hex"));
+                    port._client.receive(Buffer.from("52", "hex"));
+                    port._client.receive(Buffer.from("43", "hex"));
+                    port._client.receive(Buffer.from("40", "hex"));
+                    port._client.receive(Buffer.from("49", "hex"));
+                    port._client.receive(Buffer.from("ad", "hex"));
+                    port._client.receive(Buffer.from("20", "hex")); // illegal char
+                    port._client.receive(Buffer.from("54", "hex")); // illegal char
+                    port._client.receive(Buffer.from("54", "hex")); // illegal char
+                    port._client.receive(Buffer.from("ff", "hex")); // illegal char
                 });
             });
         });
@@ -167,19 +167,19 @@ describe("Modbus RTU buffered port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(new Buffer("11", "hex"));
-                    port._client.receive(new Buffer("03", "hex"));
-                    port._client.receive(new Buffer("06", "hex"));
-                    port._client.receive(new Buffer("ae", "hex"));
-                    port._client.receive(new Buffer("41", "hex"));
-                    port._client.receive(new Buffer("56", "hex"));
-                    port._client.receive(new Buffer("52", "hex"));
-                    port._client.receive(new Buffer("43", "hex"));
-                    port._client.receive(new Buffer("40", "hex"));
-                    port._client.receive(new Buffer("49", "hex"));
-                    port._client.receive(new Buffer("ad", "hex"));
+                    port._client.receive(Buffer.from("11", "hex"));
+                    port._client.receive(Buffer.from("03", "hex"));
+                    port._client.receive(Buffer.from("06", "hex"));
+                    port._client.receive(Buffer.from("ae", "hex"));
+                    port._client.receive(Buffer.from("41", "hex"));
+                    port._client.receive(Buffer.from("56", "hex"));
+                    port._client.receive(Buffer.from("52", "hex"));
+                    port._client.receive(Buffer.from("43", "hex"));
+                    port._client.receive(Buffer.from("40", "hex"));
+                    port._client.receive(Buffer.from("49", "hex"));
+                    port._client.receive(Buffer.from("ad", "hex"));
                 });
             });
         });
@@ -187,7 +187,7 @@ describe("Modbus RTU buffered port", function() {
 
     describe("#write", function() {
         it("should write a valid RTU message to the port", function() {
-            port.write(new Buffer("1103006B00037687", "hex"));
+            port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.toString("hex")).to.equal("1103006b00037687");
         });
     });

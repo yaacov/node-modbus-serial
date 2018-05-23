@@ -67,7 +67,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(new Buffer("000100000006110366778899", "hex"));
+            send(Buffer.from("000100000006110366778899", "hex"));
         });
 
         it("should return a valid Modbus TCP RTU message", function(done) {
@@ -75,9 +75,9 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(new Buffer("0002000000", "hex"));
-            send(new Buffer("0611036677", "hex"));
-            send(new Buffer("8899", "hex"));
+            send(Buffer.from("0002000000", "hex"));
+            send(Buffer.from("0611036677", "hex"));
+            send(Buffer.from("8899", "hex"));
         });
 
         it("should return a valid Modbus TCP exception", function(done) {
@@ -85,7 +85,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1183044136");
                 done();
             });
-            send(new Buffer("000300000003118304", "hex"));
+            send(Buffer.from("000300000003118304", "hex"));
         });
 
         it("Illegal start chars, should synchronize to valid Modbus TCP RTU message", function(done) {
@@ -93,7 +93,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(new Buffer("3456000400000006110366778899", "hex"));
+            send(Buffer.from("3456000400000006110366778899", "hex"));
         });
 
         it("Illegal end chars, should return a valid Modbus TCP RTU message", function(done) {
@@ -101,13 +101,13 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(new Buffer("0005000000061103667788993456", "hex"));
+            send(Buffer.from("0005000000061103667788993456", "hex"));
         });
     });
 
     describe("#write", function() {
         it("should write a valid TCP RTU message to the port", function() {
-            port.write(new Buffer("0103000500045408", "hex"));
+            port.write(Buffer.from("0103000500045408", "hex"));
             expect(port._client._data.toString("hex")).to.equal("000100000006010300050004");
         });
     });

@@ -41,7 +41,7 @@ describe("Modbus TCP Server", function() {
         it("should receive a valid Modbus TCP message", function(done) {
             const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // FC05 - force single coil, to on 0xff00
-                client.write(new Buffer("00010000000601050005ff00", "hex"));
+                client.write(Buffer.from("00010000000601050005ff00", "hex"));
             });
 
             client.once("data", function(data) {
@@ -58,7 +58,7 @@ describe("Modbus TCP Server", function() {
         it("should receive a valid unhandled function Modbus TCP message", function(done) {
             const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // FC07 - unhandled function
-                client.write(new Buffer("000100000006010700000000", "hex"));
+                client.write(Buffer.from("000100000006010700000000", "hex"));
             });
 
             client.once("data", function(data) {
@@ -71,7 +71,7 @@ describe("Modbus TCP Server", function() {
         it("should receive a valid slave failure Modbus TCP message", function(done) {
             const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // FC03 to error triggering address
-                client.write(new Buffer("0001000000060103003E0001", "hex"));
+                client.write(Buffer.from("0001000000060103003E0001", "hex"));
             });
 
             client.once("data", function(data) {

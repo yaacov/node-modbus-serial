@@ -58,7 +58,7 @@ var TcpPort = function(ip, options) {
             length = data.readUInt16BE(4);
 
             // cut 6 bytes of mbap and copy pdu
-            buffer = new Buffer(length + CRC_LENGTH);
+            buffer = Buffer.alloc(length + CRC_LENGTH);
             data.copy(buffer, 0, MIN_MBAP_LENGTH);
 
             // add crc to message
@@ -165,7 +165,7 @@ TcpPort.prototype.write = function(data) {
     this._cmd = data[1];
 
     // remove crc and add mbap
-    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+    var buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(this._transactionIdWrite, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);

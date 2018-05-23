@@ -37,7 +37,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     modbus.port = options.port || MODBUS_PORT;
 
     // internal buffer
-    modbus._buffer = new Buffer(0);
+    modbus._buffer = Buffer.alloc(0);
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
@@ -225,7 +225,7 @@ TcpRTUBufferedPort.prototype.write = function(data) {
     }
 
     // remove crc and add mbap
-    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+    var buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(this._transactionIdWrite, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
