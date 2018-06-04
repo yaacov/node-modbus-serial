@@ -106,6 +106,8 @@ var addConnctionAPI = function(Modbus) {
         var TcpPort = require("../ports/tcpport");
         if (this._timeout) {
             options.timeout = this._timeout;
+        } else if (options.timeout) {
+            this._timeout = options.timeout;
         }
         this._port = new TcpPort(ip, options);
 
@@ -135,6 +137,8 @@ var addConnctionAPI = function(Modbus) {
         var TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
         if (this._timeout) {
             options.timeout = this._timeout;
+        } else if (options.timeout) {
+            this._timeout = options.timeout;
         }
         this._port = new TcpRTUBufferedPort(ip, options);
 
@@ -165,6 +169,8 @@ var addConnctionAPI = function(Modbus) {
         var TelnetPort = require("../ports/telnetport");
         if (this._timeout) {
             options.timeout = this._timeout;
+        } else if (options.timeout) {
+            this._timeout = options.timeout;
         }
         this._port = new TelnetPort(ip, options);
 
