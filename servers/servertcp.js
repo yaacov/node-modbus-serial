@@ -322,7 +322,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
         if(vector.getMultipleHoldingRegisters.length===4){
             vector.getMultipleHoldingRegisters(address,length,unitID,function(err,values){
-                if(values.length!=length){
+                if(!err && values.length!=length){
                     var error=new Error("Requested address length and response length do not match");
                     callback(error);
                     throw error;
@@ -436,7 +436,7 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
 
         if(vector.getMultipleInputRegisters.length===4){
             vector.getMultipleInputRegisters(address,length,unitID,function(err,values){
-                if(values.length!=length){
+                if(!err && values.length!=length){
                     var error=new Error("Requested address length and response length do not match");
                     callback(error);
                     throw error;
