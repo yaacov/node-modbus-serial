@@ -6,14 +6,14 @@ var ModbusRTU = require("../index");
 var vector = {
     getInputRegister: function(addr) { return addr; },
     getHoldingRegister: function(addr) { return addr + 8000; },
-    getMultipleInputRegisters: function (startAddr, length) {
+    getMultipleInputRegisters: function(startAddr, length) {
         var values = [];
         for (var i = 0; i < length; i++) {
             values[i] = startAddr + i;
         }
         return values;
     },
-    getMultipleHoldingRegisters: function (startAddr, length) {
+    getMultipleHoldingRegisters: function(startAddr, length) {
         var values = [];
         for (var i = 0; i < length; i++) {
             values[i] = startAddr + i + 8000;
