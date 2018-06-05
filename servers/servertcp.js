@@ -285,39 +285,86 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     responseBuffer.writeUInt8(length * 2, 2);
 
-    // read registers
-    if (vector.getHoldingRegister) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
-            return function(err, value) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
-
+    var callbackInvoked = false;
+    var cbCount = 0;
+    var buildCb = function(i) {
+        return function(err, value) {
+            if (err) {
+                if (!callbackInvoked) {
                     callbackInvoked = true;
-                    callback(null, responseBuffer);
+                    callback(err);
                 }
-            };
-        };
 
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
+                return;
+            }
+
+            cbCount = cbCount + 1;
+
+            responseBuffer.writeUInt16BE(value, 3 + i * 2);
+
+            if (cbCount === length && !callbackInvoked) {
+                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
+
+                callbackInvoked = true;
+                callback(null, responseBuffer);
+            }
+        };
+    };
+
+    if (length === 0)
+        callback({
+            modbusErrorCode: 0x02, // Illegal address
+            msg: "Invalid length"
+        });
+
+    // read registers
+    function tryAndHandlePromiseOrValue(i, values) {
+        var cb = buildCb(i);
+        try {
+            var promiseOrValue = values[i];
+            _handlePromiseOrValue(promiseOrValue, cb);
+        }
+        catch (err) {
+            cb(err);
+        }
+    }
+
+    if (vector.getMultipleHoldingRegisters && length > 1) {
+
+        if (vector.getMultipleHoldingRegisters.length === 4) {
+            vector.getMultipleHoldingRegisters(address, length, unitID, function(err, values) {
+                if (!err && values.length !== length) {
+                    var error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                    throw error;
+                } else {
+                    for (var i = 0; i < length; i++) {
+                        var cb = buildCb(i);
+                        try {
+                            cb(err, values[i]);
+                        }
+                        catch (ex) {
+                            cb(ex);
+                        }
+                    }
+                }
             });
+        } else {
+            var values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            if (values.length === length) {
+                for (i = 0; i < length; i++) {
+                    tryAndHandlePromiseOrValue(i, values);
+                }
+            } else {
+
+                var error = new Error("Requested address length and response length do not match");
+                callback(error);
+                throw error;
+            }
+        }
+
+    }
+    else if (vector.getHoldingRegister) {
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -330,11 +377,13 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
-            catch(err) {
+            catch (err) {
                 cb(err);
             }
         }
     }
+
+
 }
 
 /**
@@ -359,40 +408,86 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
     var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     responseBuffer.writeUInt8(length * 2, 2);
 
-    if (vector.getInputRegister) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
-            return function(err, value) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
-
+    var callbackInvoked = false;
+    var cbCount = 0;
+    var buildCb = function(i) {
+        return function(err, value) {
+            if (err) {
+                if (!callbackInvoked) {
                     callbackInvoked = true;
-                    callback(null, responseBuffer);
+                    callback(err);
                 }
-            };
+
+                return;
+            }
+
+            cbCount = cbCount + 1;
+
+            responseBuffer.writeUInt16BE(value, 3 + i * 2);
+
+            if (cbCount === length && !callbackInvoked) {
+                modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
+
+                callbackInvoked = true;
+                callback(null, responseBuffer);
+            }
         };
+    };
 
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
+    if (length === 0)
+        callback({
+            modbusErrorCode: 0x02, // Illegal address
+            msg: "Invalid length"
+        });
+
+    function tryAndHandlePromiseOrValues(i, values) {
+        var cb = buildCb(i);
+        try {
+            var promiseOrValue = values[i];
+            _handlePromiseOrValue(promiseOrValue, cb);
+        }
+        catch (err) {
+            cb(err);
+        }
+    }
+
+    if (vector.getMultipleInputRegisters && length > 1) {
+
+        if (vector.getMultipleInputRegisters.length === 4) {
+            vector.getMultipleInputRegisters(address, length, unitID, function(err, values) {
+                if (!err && values.length !== length) {
+                    var error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                    throw error;
+                } else {
+                    for (var i = 0; i < length; i++) {
+                        var cb = buildCb(i);
+                        try {
+                            cb(err, values[i]);
+                        }
+                        catch (ex) {
+                            cb(ex);
+                        }
+                    }
+                }
             });
+        } else {
+            var values = vector.getMultipleInputRegisters(address, length, unitID);
+            if (values.length === length) {
+                for (var i = 0; i < length; i++) {
+                    tryAndHandlePromiseOrValues(i, values);
+                }
+            } else {
+                var error = new Error("Requested address length and response length do not match");
+                callback(error);
+                throw error;
+            }
+        }
 
-        for (var i = 0; i < length; i++) {
+    }
+    else if (vector.getInputRegister) {
+
+        for (i = 0; i < length; i++) {
             var cb = buildCb(i);
             try {
                 if (vector.getInputRegister.length === 3) {
@@ -403,8 +498,8 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
-            catch(err) {
-                cb(err);
+            catch (ex) {
+                cb(ex);
             }
         }
     }
