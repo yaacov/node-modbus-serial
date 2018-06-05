@@ -287,8 +287,8 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     var callbackInvoked = false;
     var cbCount = 0;
-    var buildCb = function(i) {
-        return function(err, value) {
+    var buildCb = function (i) {
+        return function (err, value) {
             if (err) {
                 if (!callbackInvoked) {
                     callbackInvoked = true;
@@ -303,7 +303,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
             responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
+                modbusSerialDebug({action: "FC3 response", responseBuffer: responseBuffer});
 
                 callbackInvoked = true;
                 callback(null, responseBuffer);
@@ -320,38 +320,38 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     // read registers
     if (vector.getMultipleHoldingRegisters && length > 1) {
 
-        if(vector.getMultipleHoldingRegisters.length===4){
-            vector.getMultipleHoldingRegisters(address,length,unitID,function(err,values){
-                if(!err && values.length!=length){
-                    var error=new Error("Requested address length and response length do not match");
+        if (vector.getMultipleHoldingRegisters.length === 4) {
+            vector.getMultipleHoldingRegisters(address, length, unitID, function (err, values) {
+                if (!err && values.length != length) {
+                    var error = new Error("Requested address length and response length do not match");
                     callback(error);
                     throw error;
-                }else{
+                } else {
                     for (var i = 0; i < length; i++) {
                         var cb = buildCb(i);
                         try {
                             cb(err, values[i]);
                         }
-                        catch(err) {
+                        catch (err) {
                             cb(err);
                         }
                     }
                 }
             })
-        }else{
-            var values=vector.getMultipleHoldingRegisters(address,length,unitID);
-            if(values.length!=length){
-                var error=new Error("Requested address length and response length do not match");
+        } else {
+            var values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            if (values.length != length) {
+                var error = new Error("Requested address length and response length do not match");
                 callback(error);
                 throw error;
-            }else{
+            } else {
                 for (var i = 0; i < length; i++) {
                     var cb = buildCb(i);
                     try {
                         var promiseOrValue = values[i];
                         _handlePromiseOrValue(promiseOrValue, cb);
                     }
-                    catch(err) {
+                    catch (err) {
                         cb(err);
                     }
                 }
@@ -372,7 +372,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
-            catch(err) {
+            catch (err) {
                 cb(err);
             }
         }
@@ -403,8 +403,8 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
 
     var callbackInvoked = false;
     var cbCount = 0;
-    var buildCb = function(i) {
-        return function(err, value) {
+    var buildCb = function (i) {
+        return function (err, value) {
             if (err) {
                 if (!callbackInvoked) {
                     callbackInvoked = true;
@@ -419,7 +419,7 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
             responseBuffer.writeUInt16BE(value, 3 + i * 2);
 
             if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
+                modbusSerialDebug({action: "FC4 response", responseBuffer: responseBuffer});
 
                 callbackInvoked = true;
                 callback(null, responseBuffer);
@@ -434,38 +434,38 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
         });
     if (vector.getMultipleInputRegisters && length > 1) {
 
-        if(vector.getMultipleInputRegisters.length===4){
-            vector.getMultipleInputRegisters(address,length,unitID,function(err,values){
-                if(!err && values.length!=length){
-                    var error=new Error("Requested address length and response length do not match");
+        if (vector.getMultipleInputRegisters.length === 4) {
+            vector.getMultipleInputRegisters(address, length, unitID, function (err, values) {
+                if (!err && values.length != length) {
+                    var error = new Error("Requested address length and response length do not match");
                     callback(error);
                     throw error;
-                }else{
+                } else {
                     for (var i = 0; i < length; i++) {
                         var cb = buildCb(i);
                         try {
                             cb(err, values[i]);
                         }
-                        catch(err) {
+                        catch (err) {
                             cb(err);
                         }
                     }
                 }
             })
-        }else{
-            var values=vector.getMultipleInputRegisters(address,length,unitID);
-            if(values.length!=length){
-                var error=new Error("Requested address length and response length do not match");
+        } else {
+            var values = vector.getMultipleInputRegisters(address, length, unitID);
+            if (values.length != length) {
+                var error = new Error("Requested address length and response length do not match");
                 callback(error);
                 throw error;
-            }else{
+            } else {
                 for (var i = 0; i < length; i++) {
                     var cb = buildCb(i);
                     try {
                         var promiseOrValue = values[i];
                         _handlePromiseOrValue(promiseOrValue, cb);
                     }
-                    catch(err) {
+                    catch (err) {
                         cb(err);
                     }
                 }
@@ -486,7 +486,7 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
-            catch(err) {
+            catch (err) {
                 cb(err);
             }
         }
