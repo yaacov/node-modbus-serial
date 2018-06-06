@@ -109,7 +109,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
     switch (parseInt(functionCode)) {
         case 1:
         case 2:
-            _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, cb);
+            _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, cb, functionCode);
             break;
         case 3:
             _handleReadMultipleRegisters(requestBuffer, vector, unitID, cb);
@@ -198,7 +198,7 @@ function _handlePromiseOrValue(promiseOrValue, cb) {
  * @returns undefined
  * @private
  */
-function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callback) {
+function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callback, fc) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
@@ -211,8 +211,14 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
     var responseBuffer = Buffer.alloc(3 + dataBytes + 2);
     responseBuffer.writeUInt8(dataBytes, 2);
 
+    var vectorCB;
+    if(fc === 1)
+        vectorCB = vector.getCoil;
+    else if (fc === 2)
+        vectorCB = vector.getDiscreteInput;
+
     // read coils
-    if (vector.getCoil) {
+    if (vectorCB) {
         var callbackInvoked = false;
         var cbCount = 0;
         var buildCb = function(i) {
@@ -231,7 +237,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
 
                 if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC1/2 response", responseBuffer: responseBuffer });
+                    modbusSerialDebug({ action: "FC" + fc + " response", responseBuffer: responseBuffer });
 
                     callbackInvoked = true;
                     callback(null, responseBuffer);
@@ -248,11 +254,11 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
             try {
-                if (vector.getCoil.length === 3) {
-                    vector.getCoil(address + i, unitID, cb);
+                if (vectorCB.length === 3) {
+                    vectorCB(address + i, unitID, cb);
                 }
                 else {
-                    var promiseOrValue = vector.getCoil(address + i, unitID);
+                    var promiseOrValue = vectorCB(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }

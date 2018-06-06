@@ -23,6 +23,14 @@ var vector = {
             }, 10);
         });
     },
+    getDiscreteInput: function(addr, unitID) {
+        // Asynchronous handling (with Promises, async/await supported)
+        return new Promise(function(resolve) {
+            setTimeout(function() {
+                resolve(addr % 2 === 0);
+            }, 10);
+        });
+    },
     setRegister: function(addr, value, unitID) {
         // Asynchronous handling supported also here
         console.log("set register", addr, value, unitID);
