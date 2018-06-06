@@ -212,9 +212,9 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
     responseBuffer.writeUInt8(dataBytes, 2);
 
     var vectorCB;
-    if(fc == 1)
+    if(fc === 1)
         vectorCB = vector.getCoil;
-    else if (fc == 2)
+    else if (fc === 2)
         vectorCB = vector.getDiscreteInput;
 
     // read coils
