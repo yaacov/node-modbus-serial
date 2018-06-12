@@ -16,13 +16,20 @@ declare namespace ModbusRTU {
     writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
 
     // Connection shorthand API
-    connectRTU(path: string, options: SerialPortOptions, next: Function): Promise<void>;
-    connectTCP(ip: string, options: TcpPortOptions, next: Function): Promise<void>;
-    connectTcpRTUBuffered(ip: string, options: TcpRTUPortOptions, next: Function): Promise<void>;
-    connectTelnet(ip: string, options: TelnetPortOptions, next: Function): Promise<void>;
-    connectC701(ip: string, options: C701PortOptions, next: Function): Promise<void>;
-    connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): Promise<void>;
-    connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): Promise<void>;
+    connectRTU(path: string, options: SerialPortOptions, next: Function): void;
+    connectRTU(path: string, options: SerialPortOptions): Promise<void>;
+    connectTCP(ip: string, options: TcpPortOptions, next: Function): void;
+    connectTCP(ip: string, options: TcpPortOptions): Promise<void>;
+    connectTcpRTUBuffered(ip: string, options: TcpRTUPortOptions, next: Function): void;
+    connectTcpRTUBuffered(ip: string, options: TcpRTUPortOptions): Promise<void>;
+    connectTelnet(ip: string, options: TelnetPortOptions, next: Function): void;
+    connectTelnet(ip: string, options: TelnetPortOptions): Promise<void>;
+    connectC701(ip: string, options: C701PortOptions, next: Function): void;
+    connectC701(ip: string, options: C701PortOptions): Promise<void>;
+    connectRTUBuffered(path: string, options: SerialPortOptions, next: Function): void;
+    connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
+    connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
+    connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
 
     // Promise API
     setID(id: number): void;
