@@ -31,6 +31,84 @@ require("../utils/buffer_bit")();
 var crc16 = require("../utils/crc16");
 
 /**
+ * Helper function for sending debug objects.
+ *
+ * @param {string} text - text of message, an error or an action
+ * @param {int} unitID - Id of the requesting unit
+ * @param {int} functionCode - a modbus function code.
+ * @param {Buffer} requestBuffer - request Buffer from client
+ * @returns undefined
+ * @private
+ */
+function _serverDebug(text, unitID, functionCode, responseBuffer) {
+    // If no responseBuffer, then assume this is an error
+    // o/w assume an action
+    if (typeof responseBuffer === "undefined") {
+        modbusSerialDebug({
+            error: text,
+            unitID: unitID,
+            functionCode: functionCode
+        });
+
+    } else {
+        modbusSerialDebug({
+            action: text,
+            unitID: unitID,
+            functionCode: functionCode,
+            responseBuffer: responseBuffer.toString("hex")
+        });
+    }
+}
+
+/**
+ * Helper function for creating callback functions.
+ *
+ * @param {int} unitID - Id of the requesting unit
+ * @param {int} functionCode - a modbus function code
+ * @param {function} callback -the callback function
+ * @returns {function} - a callback function
+ * @private
+ */
+function _callbackFactory(unitID, functionCode, callback) {
+    return function cb(err, responseBuffer) {
+        var crc;
+
+        // If we have an error.
+        if (err) {
+            var errorCode = 0x04; // slave device failure
+            if (!isNaN(err.modbusErrorCode)) {
+                errorCode = err.modbusErrorCode;
+            }
+
+            // Set an error response
+            functionCode = parseInt(functionCode) | 0x80;
+            responseBuffer = Buffer.alloc(3 + 2);
+            responseBuffer.writeUInt8(errorCode, 2);
+
+            _serverDebug("error processing response", unitID, functionCode);
+        }
+
+        // If we do not have a responseBuffer
+        if (!responseBuffer) {
+            _serverDebug("no response buffer", unitID, functionCode);
+            return callback(null, responseBuffer);
+        }
+
+        // add unit number and function code
+        responseBuffer.writeUInt8(unitID, 0);
+        responseBuffer.writeUInt8(functionCode, 1);
+
+        // Add crc
+        crc = crc16(responseBuffer.slice(0, -2));
+        responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
+
+        // Call callback function
+        _serverDebug("server response", unitID, functionCode, responseBuffer);
+        return callback(null, responseBuffer);
+    };
+}
+
+/**
  * Parse a ModbusRTU buffer and return an answer buffer.
  *
  * @param {Buffer} requestBuffer - request Buffer from client
@@ -40,6 +118,14 @@ var crc16 = require("../utils/crc16");
  * @private
  */
 function _parseModbusBuffer(requestBuffer, vector, callback) {
+    var cb;
+
+    // Check requestBuffer length
+    if (!requestBuffer || requestBuffer.length < MBAP_LEN) {
+        modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
+        return;
+    }
+
     var unitID = requestBuffer[0];
     var functionCode = requestBuffer[1];
     var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
@@ -51,62 +137,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
     }
 
     modbusSerialDebug("request for function code " + functionCode);
-
-    var cb = function(err, responseBuffer) {
-        if (err) {
-            modbusSerialDebug({
-                error: "error processing response",
-                unitID: unitID,
-                functionCode: functionCode
-            });
-
-            var errorCode = 0x04; // slave device failure
-            if (!isNaN(err.modbusErrorCode))
-                errorCode = err.modbusErrorCode;
-
-            // set an error response
-            functionCode = parseInt(functionCode) | 0x80;
-            responseBuffer = Buffer.alloc(3 + 2);
-            responseBuffer.writeUInt8(errorCode, 2);
-
-            cb(null, responseBuffer);
-            return;
-        }
-
-        // add unit-id, function code and crc
-        if (responseBuffer) {
-            // add unit number and function code
-            responseBuffer.writeUInt8(unitID, 0);
-            responseBuffer.writeUInt8(functionCode, 1);
-
-            // add crc
-            crc = crc16(responseBuffer.slice(0, -2));
-            responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
-
-            modbusSerialDebug({
-                action: "server response",
-                unitID: unitID,
-                functionCode: functionCode,
-                responseBuffer: responseBuffer.toString("hex")
-            });
-        }
-        else {
-            modbusSerialDebug({
-                error: "no response buffer",
-                unitID: unitID,
-                functionCode: functionCode
-            });
-        }
-
-        modbusSerialDebug({
-            action: "server response",
-            unitID: unitID,
-            functionCode: functionCode,
-            responseBuffer: responseBuffer.toString("hex")
-        });
-
-        callback(null, responseBuffer);
-    };
+    cb = _callbackFactory(unitID, functionCode, callback);
 
     switch (parseInt(functionCode)) {
         case 1:
@@ -144,7 +175,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
                 functionCode: functionCode
             });
 
-            cb(null, responseBuffer);
+            cb({ modbusErrorCode: errorCode }, responseBuffer);
     }
 }
 
