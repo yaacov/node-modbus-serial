@@ -69,11 +69,11 @@ function _serverDebug(text, unitID, functionCode, responseBuffer) {
  *
  * @param {int} unitID - Id of the requesting unit
  * @param {int} functionCode - a modbus function code
- * @param {function} callback -the callback function
+ * @param {function} sockWriter - write buffer (or error) to tcp socket
  * @returns {function} - a callback function
  * @private
  */
-function _callbackFactory(unitID, functionCode, callback) {
+function _callbackFactory(unitID, functionCode, sockWriter) {
     return function cb(err, responseBuffer) {
         var crc;
 
@@ -95,7 +95,7 @@ function _callbackFactory(unitID, functionCode, callback) {
         // If we do not have a responseBuffer
         if (!responseBuffer) {
             _serverDebug("no response buffer", unitID, functionCode);
-            return callback(null, responseBuffer);
+            return sockWriter(null, responseBuffer);
         }
 
         // add unit number and function code
@@ -108,7 +108,7 @@ function _callbackFactory(unitID, functionCode, callback) {
 
         // Call callback function
         _serverDebug("server response", unitID, functionCode, responseBuffer);
-        return callback(null, responseBuffer);
+        return sockWriter(null, responseBuffer);
     };
 }
 
@@ -121,7 +121,7 @@ function _callbackFactory(unitID, functionCode, callback) {
  * @returns undefined
  * @private
  */
-function _parseModbusBuffer(requestBuffer, vector, callback) {
+function _parseModbusBuffer(requestBuffer, vector, sockWriter) {
     var cb;
 
     // Check requestBuffer length
@@ -141,7 +141,7 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
     }
 
     modbusSerialDebug("request for function code " + functionCode);
-    cb = _callbackFactory(unitID, functionCode, callback);
+    cb = _callbackFactory(unitID, functionCode, sockWriter);
 
     switch (parseInt(functionCode)) {
         case 1:
@@ -231,7 +231,7 @@ var ServerTCP = function(vector, options) {
                 modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
                 modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
 
-                var cb = function(err, responseBuffer) {
+                var sockWriter = function(err, responseBuffer) {
                     if (err) {
                         modbus.emit("error", err);
                         return;
@@ -255,7 +255,7 @@ var ServerTCP = function(vector, options) {
                 };
 
                 // parse the modbusRTU buffer
-                setTimeout(_parseModbusBuffer.bind(this, requestBuffer, vector, cb), 0);
+                setTimeout(_parseModbusBuffer.bind(this, requestBuffer, vector, sockWriter), 0);
             }
         });
 
