@@ -54,6 +54,10 @@ describe("Modbus TCP Server Promise", function() {
         serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8514, debug: true, unitID: 1 });
     });
 
+    after(function() {
+        serverTCP.close();
+    });
+
     describe("function code handler", function() {
         it("should receive a valid Modbus TCP message", function(done) {
             const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
@@ -86,7 +90,7 @@ describe("Modbus TCP Server Promise", function() {
         });
 
         it("should receive a valid slave failure Modbus TCP message", function(done) {
-            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
                 // FC03 to error triggering address
                 client.write(Buffer.from("0001000000060103003E0001", "hex"));
             });

@@ -5,7 +5,7 @@ var expect = require("chai").expect;
 var net = require("net");
 var TcpServer = require("./../../servers/servertcp");
 
-describe("Modbus TCP Server", function() {
+describe("Modbus TCP Server (no serverID)", function() {
     var serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
@@ -34,7 +34,11 @@ describe("Modbus TCP Server", function() {
                 return;
             }
         };
-        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true, unitID: 1 });
+        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true });
+    });
+
+    after(function() {
+        serverTCP.close();
     });
 
     describe("function code handler", function() {
@@ -99,5 +103,77 @@ describe("Modbus TCP Server", function() {
         });
 
         // TODO: exceptions
+    });
+});
+
+describe("Modbus TCP Server (serverID = requestID)", function() {
+    var serverTCP; // eslint-disable-line no-unused-vars
+
+    before(function() {
+        var vector = {
+            setCoil: function(addr, value) {
+                console.log("set coil", addr, value);
+                return;
+            }
+        };
+        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true, unitID: 0x04 });
+    });
+
+    after(function() {
+        serverTCP.close();
+    });
+
+    describe("function code handler", function() {
+        it("should receive a valid Modbus TCP message", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                // FC05 - force single coil, to on 0xff00
+                client.write(Buffer.from("00010000000604050005ff00", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // FC05 - valid responce
+                expect(data.toString("hex")).to.equal("00010000000604050005ff00");
+                done();
+            });
+        });
+    });
+});
+
+describe("Modbus TCP Server (serverID != requestID)", function() {
+    var serverTCP; // eslint-disable-line no-unused-vars
+
+    before(function() {
+        var vector = {
+            setCoil: function(addr, value) {
+                console.log("set coil", addr, value);
+                return;
+            }
+        };
+        serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8512, debug: true, unitID: 0x04 });
+    });
+
+    after(function() {
+        serverTCP.close();
+    });
+
+    describe("function code handler", function() {
+        it("should receive a no Modbus TCP message for wrong unitID", function(done) {
+            var timeout;
+            this.timeout(1000 + 100);
+
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                // FC05 - force single coil, to on 0xff00
+                client.write(Buffer.from("00010000000603050005ff00", "hex"));
+                timeout = setTimeout(done, 1000);
+            });
+
+            client.once("data", function(data) {
+                clearTimeout(timeout);
+
+                // FC05 - we expect no data for wrong unitID
+                expect(data.toString("hex")).to.equal("NO DATA");
+                done();
+            });
+        });
     });
 });
