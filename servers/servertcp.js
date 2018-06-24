@@ -21,6 +21,7 @@ var net = require("net");
 var modbusSerialDebug = require("debug")("modbus-serial");
 
 var HOST = "127.0.0.1";
+var UNIT_ID = 255; // listen to all adresses
 var MODBUS_PORT = 502;
  // Not really its official length, but we parse UnitID as part of PDU
 const MBAP_LEN = 6;
@@ -121,7 +122,7 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
  * @returns undefined
  * @private
  */
-function _parseModbusBuffer(requestBuffer, vector, sockWriter) {
+function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
     var cb;
 
     // Check requestBuffer length
@@ -137,6 +138,12 @@ function _parseModbusBuffer(requestBuffer, vector, sockWriter) {
     // if crc is bad, ignore message
     if (crc !== crc16(requestBuffer.slice(0, -2))) {
         modbusSerialDebug("wrong CRC of request Buffer");
+        return;
+    }
+
+    // if crc is bad, ignore message
+    if (serverUnitID !== 255 && serverUnitID !== unitID) {
+        modbusSerialDebug("wrong unitID");
         return;
     }
 
@@ -198,6 +205,9 @@ var ServerTCP = function(vector, options) {
     modbus._server = net.createServer();
     modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
 
+    // create a server unit id
+    var serverUnitID = options.unitID || UNIT_ID;
+
     modbus._server.on("connection", function(sock) {
         modbusSerialDebug({
             action: "connected",
@@ -255,7 +265,15 @@ var ServerTCP = function(vector, options) {
                 };
 
                 // parse the modbusRTU buffer
-                setTimeout(_parseModbusBuffer.bind(this, requestBuffer, vector, sockWriter), 0);
+                setTimeout(
+                    _parseModbusBuffer.bind(this,
+                        requestBuffer,
+                        vector,
+                        serverUnitID,
+                        sockWriter
+                    ),
+                    0
+                );
             }
         });
 
