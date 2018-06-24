@@ -233,7 +233,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                     tryAndHandlePromiseOrValue(i, values);
                 }
             } else {
-
                 var error = new Error("Requested address length and response length do not match");
                 callback(error);
                 throw error;
@@ -242,14 +241,12 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     }
     else if (vector.getHoldingRegister) {
-
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
             try {
                 if (vector.getHoldingRegister.length === 3) {
                     vector.getHoldingRegister(address + i, unitID, cb);
-                }
-                else {
+                } else {
                     var promiseOrValue = vector.getHoldingRegister(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }

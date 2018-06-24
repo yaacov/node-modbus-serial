@@ -10,20 +10,22 @@ describe("Modbus TCP Server Callback", function() {
 
     before(function() {
         var vector = {
-            getInputRegister: function(addr, callback) {
+            getInputRegister: function(addr, unit, callback) {
                 setTimeout(function() {
                     callback(null, addr);
                 }, 50);
             },
-            getHoldingRegister: function(addr, callback) {
+            getHoldingRegister: function(addr, unit, callback) {
                 setTimeout(function() {
-                    if (addr === 62)
-                        return callback(new Error());
+                    if (addr === 0x003E) {
+                        callback(new Error());
+                        return;
+                    }
 
                     callback(null, addr + 8000);
                 }, 50);
             },
-            getCoil: function(addr, callback) {
+            getCoil: function(addr, unit, callback) {
                 setTimeout(function() {
                     callback(null, (addr % 2) === 0);
                 }, 50);
@@ -41,6 +43,10 @@ describe("Modbus TCP Server Callback", function() {
             }
         };
         serverTCP = new TcpServer(vector, { host: "0.0.0.0", port: 8513, debug: true, unitID: 1 });
+    });
+
+    after(function() {
+        serverTCP.close();
     });
 
     describe("function code handler", function() {
@@ -75,7 +81,7 @@ describe("Modbus TCP Server Callback", function() {
         });
 
         it("should receive a valid slave failure Modbus TCP message", function(done) {
-            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
                 // FC03 to error triggering address
                 client.write(Buffer.from("0001000000060103003E0001", "hex"));
             });
