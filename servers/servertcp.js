@@ -22,6 +22,8 @@ var modbusSerialDebug = require("debug")("modbus-serial");
 
 var HOST = "127.0.0.1";
 var MODBUS_PORT = 502;
+ // Not really its official length, but we parse UnitID as part of PDU
+const MBAP_LEN = 6;
 
 /* Add bit operation functions to Buffer
  */
@@ -791,6 +793,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 var ServerTCP = function(vector, options) {
     var modbus = this;
     options = options || {};
+    var recvBuffer = Buffer.from([]);
 
     // create a tcp server
     modbus._server = net.createServer();
@@ -806,49 +809,55 @@ var ServerTCP = function(vector, options) {
 
         sock.on("data", function(data) {
             modbusSerialDebug({ action: "socket data", data: data });
+            recvBuffer = Buffer.concat([recvBuffer, data], recvBuffer.length + data.length);
 
-            // remove mbap and add crc16
-            var requestBuffer = Buffer.alloc(data.length - 6 + 2);
-            data.copy(requestBuffer, 0, 6);
-            var crc = crc16(requestBuffer.slice(0, -2));
-            requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
+            while(recvBuffer.length > MBAP_LEN) {
+                const transactionsId = recvBuffer.readUInt16BE(0);
+                var pduLen = recvBuffer.readUInt16BE(4);
 
-            modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
-            modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
+                // Check the presence of the full request (MBAP + PDU)
+                if(recvBuffer.length - MBAP_LEN < pduLen)
+                    break;
 
-            // if length is too short, ignore message
-            if (requestBuffer.length < 8) {
-                return;
+                // remove mbap and add crc16
+                var requestBuffer = Buffer.alloc(pduLen + 2);
+                recvBuffer.copy(requestBuffer, 0, MBAP_LEN, MBAP_LEN + pduLen);
+
+                // Move receive buffer on
+                recvBuffer = recvBuffer.slice(MBAP_LEN + pduLen);
+
+                var crc = crc16(requestBuffer.slice(0, -2));
+                requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
+
+                modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
+                modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
+
+                var cb = function(err, responseBuffer) {
+                    if (err) {
+                        modbus.emit("error", err);
+                        return;
+                    }
+
+                    // send data back
+                    if (responseBuffer) {
+                        // remove crc and add mbap
+                        var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
+                        outTcp.writeUInt16BE(transactionsId, 0);
+                        outTcp.writeUInt16BE(0, 2);
+                        outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
+                        responseBuffer.copy(outTcp, 6);
+
+                        modbusSerialDebug({ action: "send", data: responseBuffer });
+                        modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
+
+                        // write to port
+                        sock.write(outTcp);
+                    }
+                };
+
+                // parse the modbusRTU buffer
+                setTimeout(_parseModbusBuffer.bind(this, requestBuffer, vector, cb), 0);
             }
-
-            var cb = function(err, responseBuffer) {
-                if (err) {
-                    modbus.emit("error", err);
-                    return;
-                }
-
-                // send data back
-                if (responseBuffer) {
-                    // get transaction id
-                    var transactionsId = data.readUInt16BE(0);
-
-                    // remove crc and add mbap
-                    var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
-                    outTcp.writeUInt16BE(transactionsId, 0);
-                    outTcp.writeUInt16BE(0, 2);
-                    outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
-                    responseBuffer.copy(outTcp, 6);
-
-                    modbusSerialDebug({ action: "send", data: responseBuffer });
-                    modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
-
-                    // write to port
-                    sock.write(outTcp);
-                }
-            };
-
-            // parse the modbusRTU buffer
-            _parseModbusBuffer(requestBuffer, vector, cb);
         });
 
         sock.on("error", function(err) {
