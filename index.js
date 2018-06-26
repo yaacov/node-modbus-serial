@@ -27,6 +27,9 @@ var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 var BAD_ADDRESS_MESSAGE = "Bad Client Address";
 var BAD_ADDRESS_ERRNO = "ECONNREFUSED";
 
+var TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
+var TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
+
 var PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
@@ -39,6 +42,12 @@ var BadAddressError = function() {
     this.name = this.constructor.name;
     this.message = BAD_ADDRESS_MESSAGE;
     this.errno = BAD_ADDRESS_ERRNO;
+};
+
+var TransactionTimedOutError = function() {
+    this.name = this.constructor.name;
+    this.message = TRANSACTION_TIMED_OUT_MESSAGE;
+    this.errno = TRANSACTION_TIMED_OUT_ERRNO;
 };
 
 /**
@@ -169,7 +178,7 @@ function _startTimeout(duration, transaction) {
     return setTimeout(function() {
         transaction._timeoutFired = true;
         if (transaction.next) {
-            transaction.next(new Error("Timed out"));
+            transaction.next(new TransactionTimedOutError());
         }
     }, duration);
 }
