@@ -67,6 +67,9 @@ function _asciiDecodeResponseBuffer(bufAscii) {
         return null;
     }
 
+    // Halve character count to become byte count
+	bufDecoded[2] /= 2;
+    
     // replace the 1 byte lrc with a two byte crc16
     bufDecoded.writeUInt16LE(crc16(bufDecoded.slice(0, -2)), bufDecoded.length - 2);
 
