@@ -734,6 +734,7 @@ require("./apis/promise")(ModbusRTU);
 
 // exports
 module.exports = ModbusRTU;
+module.exports.default = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
 try {
     module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
