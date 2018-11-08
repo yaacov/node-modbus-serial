@@ -80,7 +80,13 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
     // build answer
     var dataBytes = parseInt((length - 1) / 8 + 1);
     var responseBuffer = Buffer.alloc(3 + dataBytes + 2);
-    responseBuffer.writeUInt8(dataBytes, 2);
+    try {
+        responseBuffer.writeUInt8(dataBytes, 2);
+    }
+    catch (err) {
+        callback(err);
+        return;
+    }
 
     var vectorCB;
     if(fc === 1)
@@ -160,7 +166,13 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     // build answer
     var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
-    responseBuffer.writeUInt8(length * 2, 2);
+    try {
+        responseBuffer.writeUInt8(length * 2, 2);
+    }
+    catch (err) {
+        callback(err);
+        return;
+    }
 
     var callbackInvoked = false;
     var cbCount = 0;
@@ -280,7 +292,13 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
 
     // build answer
     var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
-    responseBuffer.writeUInt8(length * 2, 2);
+    try {
+        responseBuffer.writeUInt8(length * 2, 2);
+    }
+    catch (err) {
+        callback(err);
+        return;
+    }
 
     var callbackInvoked = false;
     var cbCount = 0;

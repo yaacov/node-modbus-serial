@@ -112,4 +112,45 @@ describe("Modbus TCP Server Callback", function() {
 
         // TODO: exceptions
     });
+
+    describe("large client request", function() {
+        it("should handle a large request without crash successfully (FC1)", function(done) {
+            var client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
+                // request 65535 registers at once
+                client.write(Buffer.from("0001000000060101003EFFFF", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018104");
+                done();
+            });
+        });
+
+        it("should handle a large request without crash successfully (FC3)", function(done) {
+            var client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
+                // request 65535 registers at once
+                client.write(Buffer.from("0001000000060103003EFFFF", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018304");
+                done();
+            });
+        });
+
+        it("should handle a large request without crash successfully (FC4)", function(done) {
+            var client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
+                // request 65535 registers at once
+                client.write(Buffer.from("0001000000060104003EFFFF", "hex"));
+            });
+
+            client.once("data", function(data) {
+                // A valid error message, code 0x04 - Slave failure
+                expect(data.toString("hex")).to.equal("000100000003018404");
+                done();
+            });
+        });
+    });
 });
