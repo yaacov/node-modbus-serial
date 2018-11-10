@@ -1,4 +1,4 @@
-import events from 'events'
+import * as events from 'events';
 
 export class ServerTCP extends events.EventEmitter {
     constructor(vector: IServiceVector, options: IServerOptions);
