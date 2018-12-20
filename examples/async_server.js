@@ -40,6 +40,20 @@ var vector = {
         // Asynchronous handling supported also here
         console.log("set coil", addr, value, unitID);
         return;
+    },
+    readDeviceIdentification: function(addr) {
+        return new Promise(function(resolve) {
+            setTimeout(function() {
+                resolve({
+                    0x00: "MyVendorName",
+                    0x01: "MyProductCode",
+                    0x02: "MyMajorMinorRevision",
+                    0x05: "MyModelName",
+                    0x97: "MyExtendedObject1",
+                    0xAB: "MyExtendedObject2"
+                });
+            }, 10);
+        });
     }
 };
 

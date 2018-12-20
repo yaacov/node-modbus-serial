@@ -22,7 +22,17 @@ var vector = {
     },
     getCoil: function(addr) { return (addr % 2) === 0; },
     setRegister: function(addr, value) { console.log("set register", addr, value); return; },
-    setCoil: function(addr, value) { console.log("set coil", addr, value); return; }
+    setCoil: function(addr, value) { console.log("set coil", addr, value); return; },
+    readDeviceIdentification: function(addr) {
+        return {
+            0x00: "MyVendorName",
+            0x01: "MyProductCode",
+            0x02: "MyMajorMinorRevision",
+            0x05: "MyModelName",
+            0x97: "MyExtendedObject1",
+            0xAB: "MyExtendedObject2"
+        };
+    }
 };
 
 // set the server to answer for modbus requests

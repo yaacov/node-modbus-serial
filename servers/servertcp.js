@@ -173,6 +173,9 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
         case 16:
             handlers.writeMultipleRegisters(requestBuffer, vector, unitID, cb);
             break;
+        case 43:
+            handlers.handleMEI(requestBuffer, vector, unitID, cb);
+            break;
         default:
             var errorCode = 0x01; // illegal function
 
