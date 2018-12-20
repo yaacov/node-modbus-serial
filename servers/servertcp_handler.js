@@ -773,7 +773,11 @@ async function _handleReadDeviceIdentification(requestBuffer, vector, unitID, ca
         return;
     }
 
-    Object.assign(objects, userObjects);
+    for(var o of Object.keys(userObjects)) {
+        const i = parseInt(o);
+        if(!isNaN(i) && i >= 0 && i <= 255)
+            objects[i] = userObjects[o];
+    }
 
     // Checking the existence of the requested objectID
     if(!objects[objectID]) {
