@@ -23,7 +23,8 @@ var modbusSerialDebug = require("debug")("modbus-serial");
 var HOST = "127.0.0.1";
 var UNIT_ID = 255; // listen to all adresses
 var MODBUS_PORT = 502;
- // Not really its official length, but we parse UnitID as part of PDU
+
+// Not really its official length, but we parse UnitID as part of PDU
 const MBAP_LEN = 6;
 
 /* Get Handlers
@@ -211,12 +212,24 @@ var ServerTCP = function(vector, options) {
     // create a server unit id
     var serverUnitID = options.unitID || UNIT_ID;
 
+    // remember open sockets
+    modbus.socks = new Map();
+
     modbus._server.on("connection", function(sock) {
+        modbus.socks.set(sock, 0);
+
         modbusSerialDebug({
             action: "connected",
             address: sock.address(),
             remoteAddress: sock.remoteAddress,
-            remotePort: sock.remotePort
+            localPort: sock.localPort
+        });
+
+        sock.once("close", function() {
+            modbusSerialDebug({
+                action: "closed"
+            });
+            modbus.socks.delete(sock);
         });
 
         sock.on("data", function(data) {
@@ -296,10 +309,16 @@ util.inherits(ServerTCP, EventEmitter);
 * @param callback
 */
 ServerTCP.prototype.close = function(callback) {
+    const modbus = this;
+
     // close the net port if exist
-    if (this._server) {
-        this._server.removeAllListeners("data");
-        this._server.close(callback);
+    if (modbus._server) {
+        modbus._server.removeAllListeners("data");
+        modbus._server.close(callback);
+
+        modbus.socks.forEach(function(e, sock) {
+            sock.destroy();
+        });
 
         modbusSerialDebug({ action: "close server" });
     } else {

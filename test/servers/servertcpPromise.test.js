@@ -37,7 +37,7 @@ describe("Modbus TCP Server Promise", function() {
             setRegister: function(addr, value) {
                 return new Promise(function(resolve) {
                     setTimeout(function() {
-                        console.log("set register", addr, value);
+                        console.log("\tset register", addr, value);
                         resolve();
                     }, 50);
                 });
@@ -45,7 +45,7 @@ describe("Modbus TCP Server Promise", function() {
             setCoil: function(addr, value) {
                 return new Promise(function(resolve) {
                     setTimeout(function() {
-                        console.log("set coil", addr, value);
+                        console.log("\tset coil", addr, value);
                         resolve();
                     }, 50);
                 });

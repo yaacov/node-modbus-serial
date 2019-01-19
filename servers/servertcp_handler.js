@@ -44,16 +44,14 @@ function _errorRequestBufferLength(requestBuffer) {
  */
 function _handlePromiseOrValue(promiseOrValue, cb) {
     if (promiseOrValue && promiseOrValue.then && typeof promiseOrValue.then === "function") {
-        promiseOrValue.then(function(value) {
-            cb(null, value);
-        });
-        if (promiseOrValue.catch && typeof promiseOrValue.catch === "function") {
-            promiseOrValue.catch(function(err) {
+        promiseOrValue
+            .then(function(value) {
+                cb(null, value);
+            })
+            .catch(function(err) {
                 cb(err);
             });
-        }
-    }
-    else {
+    }  else {
         cb(null, promiseOrValue);
     }
 }

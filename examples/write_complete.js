@@ -15,17 +15,17 @@ client.connectTCP("127.0.0.1", { port: 8502 })
         console.log(e.message); });
 
 function setClient() {
-  // set the client's unit id
-  // set a timout for requests default is null (no timeout)
+    // set the client's unit id
+    // set a timout for requests default is null (no timeout)
     client.setID(1);
     client.setTimeout(2000);
 
-  // run program
+    // run program
     run();
 }
 
 function run() {
-  // write to coil
+    // write to coil
     client.writeCoils(1, [true, false, true, false, true, true, false, true])
         .then(function(d) {
             console.log("Write to coils", d); })
@@ -65,7 +65,7 @@ function writeDiscreteCoils() {
 }
 
 function writeRegisters() {
-  // write 5 registers statrting at input registers
+    // write 5 registers statrting at input registers
     client.writeRegisters(1, [100, 90, 80, -200 + 65535, -100 + 65535])
         .then(function(d) {
             console.log("Write 100, 90, 80, -200, -100 to input registers", d); })

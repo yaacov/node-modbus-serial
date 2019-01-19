@@ -37,7 +37,7 @@ describe("Modbus TCP Server Callback", function() {
                 }, 50);
             },
             setCoil: function(addr, value, unit, callback) {
-                setTimeout(function() {console.log("set coil", addr, value);
+                setTimeout(function() {console.log("\tset coil", addr, value);
                     callback(null);
                 }, 50);
             }
