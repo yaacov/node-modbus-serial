@@ -96,9 +96,11 @@ var TcpPort = function(ip, options) {
     });
 
     this._client.on("timeout", function() {
-        modbus.openFlag = false;
+        // modbus.openFlag is left in its current state as it reflects two types of timeouts, 
+        // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
+        // (this allows to continue Modbus request re-tries without reconnecting TCP).
         modbusSerialDebug("TCP port: TimedOut");
-        handleCallback(new Error("TCP Connection Timed Out."));
+        handleCallback(new Error("TCP Connection Timed Out"));
     });
 
     /**
