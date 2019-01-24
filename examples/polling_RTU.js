@@ -1,7 +1,7 @@
 /* eslint-disable no-console, spaced-comment */
 
 //==============================================================
-// This is an example of polling (reading) Holding Registers
+// This is example of polling (reading) Holding Registers
 // on a regular scan interval with timeouts enabled.
 // For robust behaviour, the next action is not activated
 // until the previous action is completed (callback served).
