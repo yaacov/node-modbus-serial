@@ -60,7 +60,7 @@ var connectClient = function()
             mbsStatus = e.message;
             console.log(e);
         });
-        
+
 }
 
 
@@ -89,7 +89,7 @@ var readModbusData = function()
 var runModbus = function()
 {
     var nextAction;
-    
+
     switch (mbsState)
     {
         case MBS_STATE_INIT:
@@ -125,12 +125,12 @@ var runModbus = function()
     console.log(nextAction);
 
     // execute "next action" function if defined
-    if (nextAction != undefined) 
-    { 
+    if (nextAction != undefined)
+    {
         nextAction();
-        mbsState = MBS_STATE_IDLE; 
+        mbsState = MBS_STATE_IDLE;
     }
-    
+
     // set for next run
     setTimeout (runModbus, mbsScan);
 }
