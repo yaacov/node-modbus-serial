@@ -1,4 +1,4 @@
-/* eslint-disable no-console, spaced-comment */
+/* eslint-disable no-console, spaced-comment, func-call-spacing, no-spaced-func */
 
 //==============================================================
 // This is an example of polling (reading) Holding Registers
@@ -7,30 +7,29 @@
 // until the previous action is completed (callback served).
 //==============================================================
 
-"use strict"
+"use strict";
 
 //==============================================================
 // create an empty modbus client
-var ModbusRTU   = require ('modbus-serial');
+var ModbusRTU   = require ("modbus-serial");
 var client      = new ModbusRTU();
 
-var mbsStatus   = 'Initializing...';    // holds a status of Modbus
+var mbsStatus   = "Initializing...";    // holds a status of Modbus
 
 // Modbus 'state' constants
-var MBS_STATE_INIT          = 'State init';
-var MBS_STATE_IDLE          = 'State idle';
-var MBS_STATE_NEXT          = 'State next';
-var MBS_STATE_GOOD_READ     = 'State good (read)';
-var MBS_STATE_FAIL_READ     = 'State fail (read)';
-var MBS_STATE_GOOD_CONNECT  = 'State good (port)';
-var MBS_STATE_FAIL_CONNECT  = 'State fail (port)';
+var MBS_STATE_INIT          = "State init";
+var MBS_STATE_IDLE          = "State idle";
+var MBS_STATE_NEXT          = "State next";
+var MBS_STATE_GOOD_READ     = "State good (read)";
+var MBS_STATE_FAIL_READ     = "State fail (read)";
+var MBS_STATE_GOOD_CONNECT  = "State good (port)";
+var MBS_STATE_FAIL_CONNECT  = "State fail (port)";
 
 // Modbus configuration values
 var mbsId       = 1;
 var mbsScan     = 1000;
 var mbsTimeout  = 5000;
 var mbsState    = MBS_STATE_INIT;
-var mbsBufData;
 
 
 //==============================================================
@@ -41,11 +40,11 @@ var connectClient = function()
     client.setTimeout (mbsTimeout);
 
     // try to connect
-    client.connectRTUBuffered ("COM9", { baudRate: 9600, parity: 'even', dataBits:8, stopBits:1 })
+    client.connectRTUBuffered ("COM9", { baudRate: 9600, parity: "even", dataBits: 8, stopBits: 1 })
         .then(function()
         {
             mbsState  = MBS_STATE_GOOD_CONNECT;
-            mbsStatus = 'Connected, wait for reading...';
+            mbsStatus = "Connected, wait for reading...";
             console.log(mbsStatus);
         })
         .catch(function(e)
@@ -54,7 +53,7 @@ var connectClient = function()
             mbsStatus = e.message;
             console.log(e);
         });
-}
+};
 
 
 //==============================================================
@@ -65,8 +64,7 @@ var readModbusData = function()
         .then(function(data)
         {
             mbsState   = MBS_STATE_GOOD_READ;
-            mbsStatus  = 'success';
-            mbsBufData = data.buffer.swap16();
+            mbsStatus  = "success";
             console.log(data.buffer);
         })
         .catch(function(e)
@@ -75,7 +73,7 @@ var readModbusData = function()
             mbsStatus = e.message;
             console.log(e);
         });
-}
+};
 
 
 //==============================================================
@@ -118,7 +116,7 @@ var runModbus = function()
     console.log(nextAction);
 
     // execute "next action" function if defined
-    if (nextAction != undefined)
+    if (nextAction !== undefined)
     {
         nextAction();
         mbsState = MBS_STATE_IDLE;
@@ -126,7 +124,7 @@ var runModbus = function()
 
     // set for next run
     setTimeout (runModbus, mbsScan);
-}
+};
 
 //==============================================================
 runModbus();
