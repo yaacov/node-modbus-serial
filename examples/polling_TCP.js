@@ -23,7 +23,7 @@ var MBS_STATE_NEXT          = "State next";
 var MBS_STATE_GOOD_READ     = "State good (read)";
 var MBS_STATE_FAIL_READ     = "State fail (read)";
 var MBS_STATE_GOOD_CONNECT  = "State good (port)";
-var MBS_STATE_FAIL_CONNECT  = 'State fail (port)";
+var MBS_STATE_FAIL_CONNECT  = "State fail (port)";
 
 // Modbus TCP configuration values
 var mbsId       = 1;
