@@ -563,8 +563,8 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             modbusErrorCode: 0x02, // Illegal address
             msg: "Invalid length"
         });
-
-    if (vector.setCoil) {        
+    
+    if (vector.setCoil) {
         var state;
 
         for (var i = 0; i < length; i++) {
