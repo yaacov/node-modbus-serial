@@ -534,37 +534,37 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(length, 4);
 
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(/* i - not used at the moment */) {
-        return function(err) {
-            if (err) {
-                if (!callbackInvoked) {
-                    callbackInvoked = true;
-                    callback(err);
+    if (vector.setCoil) {
+        var callbackInvoked = false;
+        var cbCount = 0;
+        var buildCb = function(/* i - not used at the moment */) {
+            return function(err) {
+                if (err) {
+                    if (!callbackInvoked) {
+                        callbackInvoked = true;
+                        callback(err);
+                    }
+
+                    return;
                 }
 
-                return;
-            }
+                cbCount = cbCount + 1;
 
-            cbCount = cbCount + 1;
+                if (cbCount === length && !callbackInvoked) {
+                    modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
 
-            if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
-
-                callbackInvoked = true;
-                callback(null, responseBuffer);
-            }
+                    callbackInvoked = true;
+                    callback(null, responseBuffer);
+                }
+            };
         };
-    };
 
-    if (length === 0)
-        callback({
-            modbusErrorCode: 0x02, // Illegal address
-            msg: "Invalid length"
-        });
+        if (length === 0)
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
-    if (vector.setCoil) {        
         var state;
 
         for (var i = 0; i < length; i++) {
@@ -583,26 +583,6 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             catch(err) {
                 cb(err);
             }
-        }
-    } else if (vector.setCoilArray) {
-        state = [];
-
-        for (i = 0; i < length; i++) {
-            cb = buildCb(i);
-            state.push(requestBuffer.readBit(i, 7));
-            _handlePromiseOrValue(promiseOrValue, cb);
-        }
-
-        try {
-            if (vector.setCoilArray.length === 4) {
-                vector.setCoilArray(address, state, unitID, cb);
-            }
-            else {
-                vector.setCoilArray(address, state, unitID);
-            }
-        }
-        catch(err) {
-            cb(err);
         }
     }
 }
@@ -632,37 +612,37 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
     responseBuffer.writeUInt16BE(length, 4);
 
     // write registers
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(/* i - not used at the moment */) {
-        return function(err) {
-            if (err) {
-                if (!callbackInvoked) {
-                    callbackInvoked = true;
-                    callback(err);
+    if (vector.setRegister) {
+        var callbackInvoked = false;
+        var cbCount = 0;
+        var buildCb = function(/* i - not used at the moment */) {
+            return function(err) {
+                if (err) {
+                    if (!callbackInvoked) {
+                        callbackInvoked = true;
+                        callback(err);
+                    }
+
+                    return;
                 }
 
-                return;
-            }
+                cbCount = cbCount + 1;
 
-            cbCount = cbCount + 1;
+                if (cbCount === length && !callbackInvoked) {
+                    modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
 
-            if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
-
-                callbackInvoked = true;
-                callback(null, responseBuffer);
-            }
+                    callbackInvoked = true;
+                    callback(null, responseBuffer);
+                }
+            };
         };
-    };
 
-    if (length === 0)
-        callback({
-            modbusErrorCode: 0x02, // Illegal address
-            msg: "Invalid length"
-        });
+        if (length === 0)
+            callback({
+                modbusErrorCode: 0x02, // Illegal address
+                msg: "Invalid length"
+            });
 
-    if (vector.setRegister) {
         var value;
 
         for (var i = 0; i < length; i++) {
@@ -681,27 +661,6 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             catch(err) {
                 cb(err);
             }
-        }
-    } else if (vector.setRegisterArray) {
-        value = [];
-
-        for (i = 0; i < length; i++) {
-            cb = buildCb(i);
-
-            value.push(requestBuffer.readUInt16BE(7 + i * 2));
-            _handlePromiseOrValue(value, cb);
-        }
-
-        try {
-            if (vector.setRegisterArray.length === 6) {
-                vector.setRegisterArray(address, value, unitID, cb);
-            }
-            else {
-                vector.setRegisterArray(address, value, unitID);
-            }
-        }
-        catch (err) {
-            cb(err);
         }
     }
 }
