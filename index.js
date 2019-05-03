@@ -380,6 +380,9 @@ ModbusRTU.prototype.close = function(callback) {
     if (this._port) {
         this._port.removeAllListeners("data");
         this._port.close(callback);
+    } else {
+        // nothing needed to be done
+        callback();
     }
 };
 
@@ -394,6 +397,9 @@ ModbusRTU.prototype.destroy = function(callback) {
     if (this._port && this._port.destroy) {
         this._port.removeAllListeners("data");
         this._port.destroy(callback);
+    } else {
+        // nothing needed to be done
+        callback();
     }
 };
 
