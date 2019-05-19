@@ -44,6 +44,8 @@ export class ModbusRTU {
   writeCoils(dataAddress: number, states: Array<boolean>): Promise<WriteMultipleResult>;
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number>): Promise<WriteMultipleResult>; // 16
+  
+  isOpen: boolean;
 }
 
 export interface NodeStyleCallback<T> {
