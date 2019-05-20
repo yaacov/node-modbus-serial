@@ -39,8 +39,8 @@ var vector = {
 console.log("ModbusTCP listening on modbus://0.0.0.0:8502");
 var serverTCP = new ModbusRTU.ServerTCP(vector, { host: "0.0.0.0", port: 8502, debug: true, unitID: 1 });
 
-serverTCP.on("initialized", function(err) {
-    console.log('initialized');
+serverTCP.on("initialized", function() {
+    console.log("initialized");
 });
 
 serverTCP.on("socketError", function(err) {

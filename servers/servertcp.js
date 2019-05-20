@@ -208,10 +208,10 @@ var ServerTCP = function(vector, options) {
     // create a tcp server
     modbus._server = net.createServer();
     modbus._server.listen({
-        port : options.port || MODBUS_PORT,
+        port: options.port || MODBUS_PORT,
         host: options.host || HOST
     }, function() {
-        modbus.emit('initialized')
+        modbus.emit("initialized");
     });
 
     // create a server unit id
