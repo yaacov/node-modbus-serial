@@ -24,7 +24,7 @@ var networkErrors = [
     "EHOSTDOWN",
     "ENETDOWN",
     "EWOULDBLOCK",
-    "EAGAIN",
+    "EAGAIN"
 ];
 
 
