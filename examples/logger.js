@@ -7,7 +7,23 @@ var client = new ModbusRTU();
 var timeoutRunRef = null;
 var timeoutConnectRef = null;
 
-var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
+var networkErrors = [
+  'ESOCKETTIMEDOUT',
+  'ETIMEDOUT',
+  'ECONNRESET',
+  'ECONNREFUSED',
+  'EHOSTUNREACH',
+  'ENETRESET',
+  'ECONNABORTED',
+  'ENETUNREACH',
+  'ENOTCONN',
+  'ESHUTDOWN',
+  'EHOSTDOWN',
+  'ENETDOWN',
+  'EWOULDBLOCK',
+  'EAGAIN',
+];
+
 
 // check error, and reconnect if needed
 function checkError(e) {
