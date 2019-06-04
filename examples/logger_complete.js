@@ -11,20 +11,20 @@ var timeoutRunRefHoldings = null;
 var timeoutConnectRef = null;
 
 var networkErrors = [
-  'ESOCKETTIMEDOUT',
-  'ETIMEDOUT',
-  'ECONNRESET',
-  'ECONNREFUSED',
-  'EHOSTUNREACH',
-  'ENETRESET',
-  'ECONNABORTED',
-  'ENETUNREACH',
-  'ENOTCONN',
-  'ESHUTDOWN',
-  'EHOSTDOWN',
-  'ENETDOWN',
-  'EWOULDBLOCK',
-  'EAGAIN',
+    'ESOCKETTIMEDOUT',
+    'ETIMEDOUT',
+    'ECONNRESET',
+    'ECONNREFUSED',
+    'EHOSTUNREACH',
+    'ENETRESET',
+    'ECONNABORTED',
+    'ENETUNREACH',
+    'ENOTCONN',
+    'ESHUTDOWN',
+    'EHOSTDOWN',
+    'ENETDOWN',
+    'EWOULDBLOCK',
+    'EAGAIN',
 ];
 
 
