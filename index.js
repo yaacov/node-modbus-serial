@@ -31,13 +31,13 @@ var TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
 var TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
 
 var modbusErrorMessages = [
-	'Unknown error',
-	'Illegal function (device does not support this read/write function)',
-	'Illegal data address (register not supported by device)',
-	'Illegal data value (value cannot be written to this register)',
-	'Slave device failure (device reports internal error)',
-	'Acknowledge (requested data will be available later)',
-	'Slave device busy (retry request again later)',
+    'Unknown error',
+    'Illegal function (device does not support this read/write function)',
+    'Illegal data address (register not supported by device)',
+    'Illegal data value (value cannot be written to this register)',
+    'Slave device failure (device reports internal error)',
+    'Acknowledge (requested data will be available later)',
+    'Slave device busy (retry request again later)',
 ];
 
 var PortNotOpenError = function() {
