@@ -30,6 +30,16 @@ var BAD_ADDRESS_ERRNO = "ECONNREFUSED";
 var TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
 var TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
 
+var modbusErrorMessages = [
+    "Unknown error",
+    "Illegal function (device does not support this read/write function)",
+    "Illegal data address (register not supported by device)",
+    "Illegal data value (value cannot be written to this register)",
+    "Slave device failure (device reports internal error)",
+    "Acknowledge (requested data will be available later)",
+    "Slave device busy (retry request again later)"
+];
+
 var PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
@@ -283,9 +293,12 @@ ModbusRTU.prototype.open = function(callback) {
                  */
                 if (data.length >= 5 &&
                     code === (0x80 | transaction.nextCode)) {
-                    error = "Modbus exception " + data.readUInt8(2);
-                    if (transaction.next)
-                        transaction.next(new Error(error));
+                    var errorCode = data.readUInt8(2);
+                    if (transaction.next) {
+                        error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
+                        error.modbusCode = errorCode;
+                        transaction.next(error);
+                    }
                     return;
                 }
 
