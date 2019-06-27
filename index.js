@@ -295,7 +295,7 @@ ModbusRTU.prototype.open = function(callback) {
                     code === (0x80 | transaction.nextCode)) {
                     var errorCode = data.readUInt8(2);
                     if (transaction.next) {
-                        error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || 'Unknown error'));
+                        error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
                         error.modbusCode = errorCode;
                         transaction.next(error);
                     }
