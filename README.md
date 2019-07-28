@@ -94,7 +94,7 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", { baudRate: 9600 }, write);
+client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600 }, write);
 
 function write() {
     client.setID(1);
