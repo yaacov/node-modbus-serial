@@ -729,26 +729,33 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
         next: next
     };
 
-    // if array is in number array, convert it info buffer
-    if (!Buffer.isBuffer(array)) {
-        var bufTemp = Buffer.alloc(array.length * 2);
-        for (var i = 0; i < array.length; i++) {
-            bufTemp.writeUInt16BE(array[i], 2 * i);
-        }
-        array = bufTemp;
+    var codeLength = 7 + 2 * (array.length);
+    if (Buffer.isBuffer(array)) {
+        // if array is a buffer it has double length
+        codeLength = 7 + 2 * (array.length / 2);
     }
 
-    var codeLength = 7 + 2 * (array.length / 2);
     var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
-    buf.writeUInt16BE(array.length / 2, 4);
-    buf.writeUInt8(array.length * 2, 6);
 
     // copy content of array to buf
-    array.copy(buf, 7);
+    if (Buffer.isBuffer(array)) {
+        // if array is a buffer, just copy the data
+        buf.writeUInt16BE(array.length / 2, 4);
+        buf.writeUInt8(array.length, 6);
+
+        array.copy(buf, 7);
+    } else {
+        buf.writeUInt16BE(array.length, 4);
+        buf.writeUInt8(array.length * 2, 6);
+
+        for (var i = 0; i < array.length; i++) {
+            buf.writeUInt16BE(array[i], 7 + 2 * i);
+        }
+    }
 
     // add crc bytes to buffer
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
