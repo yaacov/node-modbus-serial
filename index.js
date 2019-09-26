@@ -604,7 +604,11 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
 
-    buf.writeUInt16BE(value, 4);
+    if (Buffer.isBuffer(value)) {
+        value.copy(buf, 4);
+    } else {
+        buf.writeUInt16BE(value, 4);
+    }
 
     // add crc bytes to buffer
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
@@ -706,18 +710,26 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
         next: next
     };
 
-    var codeLength = 7 + 2 * array.length;
+    // if array is in number array, convert it info buffer
+    if (!Buffer.isBuffer(array)) {
+        var bufTemp = Buffer.alloc(array.length * 2);
+        for (var i = 0; i < array.length; i++) {
+            bufTemp.writeUInt16BE(array[i], 2 * i);
+        }
+        array = bufTemp;
+    }
+
+    var codeLength = 7 + 2 * (array.length / 2);
     var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
-    buf.writeUInt16BE(array.length, 4);
+    buf.writeUInt16BE(array.length / 2, 4);
     buf.writeUInt8(array.length * 2, 6);
 
-    for (var i = 0; i < array.length; i++) {
-        buf.writeUInt16BE(array[i], 7 + 2 * i);
-    }
+    // copy content of array to buf
+    array.copy(buf, 7);
 
     // add crc bytes to buffer
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
@@ -737,7 +749,7 @@ module.exports = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
 try {
     module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
-} catch (err) {}
+} catch (err) { }
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
