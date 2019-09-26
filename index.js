@@ -729,30 +729,26 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
         next: next
     };
 
-    var codeLength = 7 + 2 * (array.length);
+    var dataLength = array.length;
     if (Buffer.isBuffer(array)) {
         // if array is a buffer it has double length
-        codeLength = 7 + 2 * (array.length / 2);
+        dataLength = array.length / 2;
     }
 
+    var codeLength = 7 + 2 * dataLength;
     var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
+    buf.writeUInt16BE(dataLength, 4);
+    buf.writeUInt8(dataLength * 2, 6);
 
     // copy content of array to buf
     if (Buffer.isBuffer(array)) {
-        // if array is a buffer, just copy the data
-        buf.writeUInt16BE(array.length / 2, 4);
-        buf.writeUInt8(array.length, 6);
-
         array.copy(buf, 7);
     } else {
-        buf.writeUInt16BE(array.length, 4);
-        buf.writeUInt8(array.length * 2, 6);
-
-        for (var i = 0; i < array.length; i++) {
+        for (var i = 0; i < dataLength; i++) {
             buf.writeUInt16BE(array[i], 7 + 2 * i);
         }
     }
