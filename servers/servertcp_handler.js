@@ -86,14 +86,11 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         return;
     }
 
-    var vectorCB;
-    if(fc === 1)
-        vectorCB = vector.getCoil;
-    else if (fc === 2)
-        vectorCB = vector.getDiscreteInput;
+    var isGetCoil = (fc === 1 && vector.getCoil);
+    var isGetDiscreteInpupt = (fc === 2 && vector.getDiscreteInput);
 
     // read coils
-    if (vectorCB) {
+    if (isGetCoil || isGetDiscreteInpupt) {
         var callbackInvoked = false;
         var cbCount = 0;
         var buildCb = function(i) {
@@ -126,19 +123,50 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 msg: "Invalid length"
             });
 
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            try {
-                if (vectorCB.length === 3) {
-                    vectorCB(address + i, unitID, cb);
+        var cb = buildCb(i);
+        var i = 0;
+        var promiseOrValue = null;
+
+        if (isGetCoil && vector.getCoil.length === 3) {
+            for (i = 0; i < length; i++) {
+                try {
+                    vector.getCoil(address + i, unitID, cb);
                 }
-                else {
-                    var promiseOrValue = vectorCB(address + i, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
+                catch(err) {
+                    cb(err);
                 }
             }
-            catch(err) {
-                cb(err);
+        }
+        else if (isGetDiscreteInpupt && vector.isGetDiscreteInpupt.length === 3) {
+            for (i = 0; i < length; i++) {
+                try {
+                    vector.isGetDiscreteInpupt(address + i, unitID, cb);
+                }
+                catch(err) {
+                    cb(err);
+                }
+            }
+        }
+        else if (isGetCoil && vector.getCoil.length === 2) {
+            for (i = 0; i < length; i++) {
+                try {
+                    promiseOrValue = vector.getCoil(address + i, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
+                }
+                catch(err) {
+                    cb(err);
+                }
+            }
+        }
+        else if (isGetDiscreteInpupt && vector.isGetDiscreteInpupt.length === 2) {
+            for (i = 0; i < length; i++) {
+                try {
+                    promiseOrValue = vector.isGetDiscreteInpupt(address + i, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
+                }
+                catch(err) {
+                    cb(err);
+                }
             }
         }
     }
