@@ -137,10 +137,10 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetDiscreteInpupt && vector.isGetDiscreteInpupt.length === 3) {
+        else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 3) {
             for (i = 0; i < length; i++) {
                 try {
-                    vector.isGetDiscreteInpupt(address + i, unitID, cb);
+                    vector.getDiscreteInput(address + i, unitID, cb);
                 }
                 catch(err) {
                     cb(err);
@@ -158,10 +158,10 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetDiscreteInpupt && vector.isGetDiscreteInpupt.length === 2) {
+        else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 2) {
             for (i = 0; i < length; i++) {
                 try {
-                    promiseOrValue = vector.isGetDiscreteInpupt(address + i, unitID);
+                    promiseOrValue = vector.getDiscreteInput(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
                 catch(err) {
