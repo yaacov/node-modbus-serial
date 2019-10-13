@@ -41,7 +41,7 @@ var vector = {
         console.log("set coil", addr, value, unitID);
         return;
     },
-    readDeviceIdentification: function(addr) {
+    readDeviceIdentification: function(unitID) {
         return new Promise(function(resolve) {
             setTimeout(function() {
                 resolve({
