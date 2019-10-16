@@ -203,7 +203,6 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
 var ServerTCP = function(vector, options) {
     var modbus = this;
     options = options || {};
-    var recvBuffer = Buffer.from([]);
 
     // create a tcp server
     modbus._server = net.createServer();
@@ -221,6 +220,7 @@ var ServerTCP = function(vector, options) {
     modbus.socks = new Map();
 
     modbus._server.on("connection", function(sock) {
+        var recvBuffer = Buffer.from([]);
         modbus.socks.set(sock, 0);
 
         modbusSerialDebug({
