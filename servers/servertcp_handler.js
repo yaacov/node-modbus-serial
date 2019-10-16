@@ -123,8 +123,8 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 msg: "Invalid length"
             });
 
-        var cb = buildCb(i);
         var i = 0;
+        var cb = buildCb(i);
         var promiseOrValue = null;
 
         if (isGetCoil && vector.getCoil.length === 3) {
