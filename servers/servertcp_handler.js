@@ -124,11 +124,11 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
             });
 
         var i = 0;
-        var cb = buildCb(i);
         var promiseOrValue = null;
 
         if (isGetCoil && vector.getCoil.length === 3) {
             for (i = 0; i < length; i++) {
+                var cb = buildCb(i);
                 try {
                     vector.getCoil(address + i, unitID, cb);
                 }
@@ -139,6 +139,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         }
         else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 3) {
             for (i = 0; i < length; i++) {
+                var cb = buildCb(i);
                 try {
                     vector.getDiscreteInput(address + i, unitID, cb);
                 }
@@ -149,6 +150,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         }
         else if (isGetCoil && vector.getCoil.length === 2) {
             for (i = 0; i < length; i++) {
+                var cb = buildCb(i);
                 try {
                     promiseOrValue = vector.getCoil(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
@@ -160,6 +162,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         }
         else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 2) {
             for (i = 0; i < length; i++) {
+                var cb = buildCb(i);
                 try {
                     promiseOrValue = vector.getDiscreteInput(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
