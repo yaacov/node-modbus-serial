@@ -99,10 +99,14 @@ export interface SerialPortUnixPlatformOptions {
 
 export interface TcpPortOptions {
   port?: number;
+  localAddress?: string;
+  family?: number;
 }
 
 export interface TcpRTUPortOptions {
   port?: number;
+  localAddress?: string;
+  family?: number;
 }
 
 export interface TelnetPortOptions {
