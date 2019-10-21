@@ -23,18 +23,25 @@ var MODBUS_PORT = 502;
  *
  * @param {string} ip - ip address
  * @param {object} options - all options as JSON object
+ *   options.port: Nonstandard Modbus port (default is 502).
+ *   options.localAddress: Local IP address to bind to, default is any.
+ *   options.family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  * @constructor
  */
 var TcpRTUBufferedPort = function(ip, options) {
     var modbus = this;
-    modbus.ip = ip;
     modbus.openFlag = false;
     modbus.callback = null;
     modbus._transactionIdWrite = 1;
 
     // options
     if (typeof options === "undefined") options = {};
-    modbus.port = options.port || MODBUS_PORT;
+    modbus.connectOptions = {
+        host: ip,
+        port: options.port || MODBUS_PORT,
+        localAddress: options.localAddress,
+        family: options.family || 0
+    };
 
     // internal buffer
     modbus._buffer = Buffer.alloc(0);
@@ -187,7 +194,7 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
  */
 TcpRTUBufferedPort.prototype.open = function(callback) {
     this.callback = callback;
-    this._client.connect(this.port, this.ip);
+    this._client.connect(this.connectOptions);
 };
 
 /**
