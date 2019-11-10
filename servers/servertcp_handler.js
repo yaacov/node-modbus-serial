@@ -149,7 +149,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetCoil && vector.getCoil.length === 2) {
+        else if (isGetCoil) {
             for (i = 0; i < length; i++) {
                 cb = buildCb(i);
                 try {
@@ -161,7 +161,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 2) {
+        else if (isGetDiscreteInpupt) {
             for (i = 0; i < length; i++) {
                 cb = buildCb(i);
                 try {
