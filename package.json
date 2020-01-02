@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "serialport": "^8.0.5"
+    "serialport": "^8.0.6"
   }
 }
