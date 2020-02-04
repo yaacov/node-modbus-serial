@@ -1,6 +1,6 @@
 {
   "name": "modbus-serial",
-  "version": "7.2.1",
+  "version": "7.7.4",
   "description": "A pure JavaScript implemetation of MODBUS-RTU (Serial and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
@@ -25,19 +25,19 @@
   },
   "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
   "devDependencies": {
-    "chai": "^3.5.0",
-    "eslint": "^3.16.1",
-    "gulp": "^3.9.1",
-    "gulp-clean": "^0.3.2",
-    "gulp-jsdoc3": "^1.0.1",
-    "mocha": "^3.2.0",
-    "mocha-eslint": "^3.0.1",
-    "mockery": "^2.0.0",
-    "pump": "^1.0.2",
-    "sinon": "^1.17.7"
+    "chai": "^4.2.0",
+    "eslint": "^6.5.1",
+    "gulp": "^4.0.2",
+    "gulp-clean": "^0.4.0",
+    "gulp-jsdoc3": "^2.0.0",
+    "mocha": "^6.2.1",
+    "mocha-eslint": "^5.0.0",
+    "mockery": "^2.1.0",
+    "pump": "^3.0.0",
+    "sinon": "^7.5.0"
   },
   "dependencies": {
-    "debug": "^3.0.1",
-    "serialport": "^6.1.1"
+    "debug": "^4.1.1",
+    "serialport": "^8.0.6"
   }
 }

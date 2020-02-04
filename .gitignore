@@ -33,3 +33,6 @@ modbus-serial
 docs
 
 package-lock\.json
+
+# Visual Studio Code
+.vscode/

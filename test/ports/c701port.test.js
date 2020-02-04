@@ -55,10 +55,10 @@ describe("Modbus UDP port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
 
-                if (port._client._data.slice(-8).equals(new Buffer("1103006B00037687", "hex"))) {
-                    var buffer = new Buffer(116 + 11).fill(0);
+                if (port._client._data.slice(-8).equals(Buffer.from("1103006B00037687", "hex"))) {
+                    var buffer = Buffer.alloc(116 + 11).fill(0);
                     buffer.writeUInt16LE(602, 2);           // C701 magic for serial bridge
                     buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)
                     buffer.writeUInt16LE(0, 38);            // expected serial answer length
@@ -66,7 +66,7 @@ describe("Modbus UDP port", function() {
                     buffer.writeUInt16LE(11, 104);          // serial data length
 
                     // add serial line data
-                    new Buffer("110306ae415652434049ad", "hex").copy(buffer, 116);
+                    Buffer.from("110306ae415652434049ad", "hex").copy(buffer, 116);
                     port._client.receive(buffer);
                 }
             });
@@ -78,10 +78,10 @@ describe("Modbus UDP port", function() {
                 done();
             });
             port.open(function() {
-                port.write(new Buffer("1103006B00037687", "hex"));
+                port.write(Buffer.from("1103006B00037687", "hex"));
 
-                if (port._client._data.slice(-8).equals(new Buffer("1103006B00037687", "hex"))) {
-                    var buffer = new Buffer(116 + 5).fill(0);
+                if (port._client._data.slice(-8).equals(Buffer.from("1103006B00037687", "hex"))) {
+                    var buffer = Buffer.alloc(116 + 5).fill(0);
                     buffer.writeUInt16LE(602, 2);           // C701 magic for serial bridge
                     buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)
                     buffer.writeUInt16LE(0, 38);            // expected serial answer length
@@ -89,7 +89,7 @@ describe("Modbus UDP port", function() {
                     buffer.writeUInt16LE(11, 104);          // serial data length
 
                     // add serial line data
-                    new Buffer("1183044136", "hex").copy(buffer, 116);
+                    Buffer.from("1183044136", "hex").copy(buffer, 116);
                     port._client.receive(buffer);
                 }
             });
@@ -98,7 +98,7 @@ describe("Modbus UDP port", function() {
 
     describe("#write", function() {
         it("should write a valid message to the port", function() {
-            port.write(new Buffer("1103006B00037687", "hex"));
+            port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.length).to.equal(116 + 8);
             expect(port._client._data.slice(-8).toString("hex")).to.equal("1103006b00037687");
             expect(port._client._offset).to.equal(0);

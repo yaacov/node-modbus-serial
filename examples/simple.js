@@ -8,8 +8,8 @@ var client = new ModbusRTU();
 var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", { baudRate: 115200 })
-//client.connectTCP("modbus.local", { port: 502 })
+//client.connectRTUBuffered("/dev/ttyUSB0", { hupcl: false, dsrdtr: false })
+client.connectTCP("127.0.0.1", { port: 8502 })
     .then(setClient)
     .then(function() {
         console.log("Connected"); })

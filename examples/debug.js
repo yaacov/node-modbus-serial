@@ -15,7 +15,7 @@ var ModbusRTU = require("../index");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-//client.connectRTU("/dev/ttyUSB0", {baudRate: 9600})
+//client.connectRTUBuffered("/dev/ttyUSB0", {baudRate: 9600})
 client.connectTCP("127.0.0.1", { port: 8502 })
     .then(setClient)
     .then(function() {
@@ -34,7 +34,7 @@ function setClient() {
 }
 
 function run() {
-  // read the 4 registers starting at address 5
+    // read the 4 registers starting at address 5
     client.readHoldingRegisters(5, 4)
         .then(function(d) {
             console.log("Receive:", d.data); })

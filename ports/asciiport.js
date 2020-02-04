@@ -25,7 +25,7 @@ function _asciiEncodeRequestBuffer(buf) {
     buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length - 2);
 
     // create a new buffer of the correct size
-    var bufAscii = new Buffer(buf.length * 2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
+    var bufAscii = Buffer.alloc(buf.length * 2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
 
     // create the ascii payload
 
@@ -50,7 +50,7 @@ function _asciiEncodeRequestBuffer(buf) {
 function _asciiDecodeResponseBuffer(bufAscii) {
 
     // create a new buffer of the correct size (based on ascii encoded buffer length)
-    var bufDecoded = new Buffer((bufAscii.length - 1) / 2);
+    var bufDecoded = Buffer.alloc((bufAscii.length - 1) / 2);
 
     // decode into new buffer (removing delimiters at start and end)
     for (var i = 0; i < (bufAscii.length - 3) / 2; i++) {
@@ -112,7 +112,7 @@ var AsciiPort = function(path, options) {
     options.autoOpen = false;
 
     // internal buffer
-    this._buffer = new Buffer(0);
+    this._buffer = Buffer.from("");
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
@@ -133,7 +133,7 @@ var AsciiPort = function(path, options) {
         var sdIndex = modbus._buffer.indexOf(0x3A); // ascii for ':'
         if(sdIndex === -1) {
             // if not there, reset the buffer and return
-            modbus._buffer = new Buffer(0);
+            modbus._buffer = Buffer.from("");
             return;
         }
         // if there is data before the start delimiter, remove it
@@ -163,7 +163,7 @@ var AsciiPort = function(path, options) {
                 }
             }
             // reset the buffer now its been used
-            modbus._buffer = new Buffer(0);
+            modbus._buffer = Buffer.from("");
         } else {
             // otherwise just wait for more data to arrive
         }

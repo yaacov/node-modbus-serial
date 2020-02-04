@@ -27,6 +27,19 @@ var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 var BAD_ADDRESS_MESSAGE = "Bad Client Address";
 var BAD_ADDRESS_ERRNO = "ECONNREFUSED";
 
+var TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
+var TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
+
+var modbusErrorMessages = [
+    "Unknown error",
+    "Illegal function (device does not support this read/write function)",
+    "Illegal data address (register not supported by device)",
+    "Illegal data value (value cannot be written to this register)",
+    "Slave device failure (device reports internal error)",
+    "Acknowledge (requested data will be available later)",
+    "Slave device busy (retry request again later)"
+];
+
 var PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
@@ -39,6 +52,12 @@ var BadAddressError = function() {
     this.name = this.constructor.name;
     this.message = BAD_ADDRESS_MESSAGE;
     this.errno = BAD_ADDRESS_ERRNO;
+};
+
+var TransactionTimedOutError = function() {
+    this.name = this.constructor.name;
+    this.message = TRANSACTION_TIMED_OUT_MESSAGE;
+    this.errno = TRANSACTION_TIMED_OUT_ERRNO;
 };
 
 /**
@@ -169,7 +188,7 @@ function _startTimeout(duration, transaction) {
     return setTimeout(function() {
         transaction._timeoutFired = true;
         if (transaction.next) {
-            transaction.next(new Error("Timed out"));
+            transaction.next(new TransactionTimedOutError());
         }
     }, duration);
 }
@@ -274,9 +293,12 @@ ModbusRTU.prototype.open = function(callback) {
                  */
                 if (data.length >= 5 &&
                     code === (0x80 | transaction.nextCode)) {
-                    error = "Modbus exception " + data.readUInt8(2);
-                    if (transaction.next)
-                        transaction.next(new Error(error));
+                    var errorCode = data.readUInt8(2);
+                    if (transaction.next) {
+                        error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
+                        error.modbusCode = errorCode;
+                        transaction.next(error);
+                    }
                     return;
                 }
 
@@ -371,6 +393,26 @@ ModbusRTU.prototype.close = function(callback) {
     if (this._port) {
         this._port.removeAllListeners("data");
         this._port.close(callback);
+    } else {
+        // nothing needed to be done
+        callback();
+    }
+};
+
+/**
+ * Destory the serial port
+ *
+ * @param {Function} callback the function to call next on close success
+ *      or failure.
+ */
+ModbusRTU.prototype.destroy = function(callback) {
+    // close the serial port if exist and it has a destroy function
+    if (this._port && this._port.destroy) {
+        this._port.removeAllListeners("data");
+        this._port.destroy(callback);
+    } else {
+        // nothing needed to be done
+        callback();
     }
 };
 
@@ -419,7 +461,7 @@ ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -478,7 +520,7 @@ ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -524,7 +566,7 @@ ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     };
 
     var codeLength = 6;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -575,13 +617,17 @@ ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     };
 
     var codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
 
-    buf.writeUInt16BE(value, 4);
+    if (Buffer.isBuffer(value)) {
+        value.copy(buf, 4);
+    } else {
+        buf.writeUInt16BE(value, 4);
+    }
 
     // add crc bytes to buffer
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
@@ -624,7 +670,7 @@ ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
 
     var dataBytes = Math.ceil(array.length / 8);
     var codeLength = 7 + dataBytes;
-    var buf = new Buffer(codeLength + 2);  // add 2 crc bytes
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
@@ -683,17 +729,28 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
         next: next
     };
 
-    var codeLength = 7 + 2 * array.length;
-    var buf = new Buffer(codeLength + 2); // add 2 crc bytes
+    var dataLength = array.length;
+    if (Buffer.isBuffer(array)) {
+        // if array is a buffer it has double length
+        dataLength = array.length / 2;
+    }
+
+    var codeLength = 7 + 2 * dataLength;
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
-    buf.writeUInt16BE(array.length, 4);
-    buf.writeUInt8(array.length * 2, 6);
+    buf.writeUInt16BE(dataLength, 4);
+    buf.writeUInt8(dataLength * 2, 6);
 
-    for (var i = 0; i < array.length; i++) {
-        buf.writeUInt16BE(array[i], 7 + 2 * i);
+    // copy content of array to buf
+    if (Buffer.isBuffer(array)) {
+        array.copy(buf, 7);
+    } else {
+        for (var i = 0; i < dataLength; i++) {
+            buf.writeUInt16BE(array[i], 7 + 2 * i);
+        }
     }
 
     // add crc bytes to buffer
@@ -714,7 +771,7 @@ module.exports = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
 try {
     module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
-} catch (err) {}
+} catch (err) { }
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");

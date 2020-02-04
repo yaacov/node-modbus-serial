@@ -65,6 +65,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 * FC6 "Preset Single Register"
 * FC15 "Force Multiple Coil"
 * FC16 "Preset Multiple Registers"
+* FC43/14 "Read Device Identification" (server only)
 
 ###### Client Serial:
 
@@ -93,7 +94,7 @@ var ModbusRTU = require("modbus-serial");
 var client = new ModbusRTU();
 
 // open connection to a serial port
-client.connectRTU("/dev/ttyUSB0", { baudRate: 9600 }, write);
+client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600 }, write);
 
 function write() {
     client.setID(1);
@@ -238,6 +239,16 @@ var vector = {
         // Asynchronous handling supported also here
         console.log("set coil", addr, value, unitID);
         return;
+    },
+    readDeviceIdentification: function(addr) {
+        return {
+            0x00: "MyVendorName",
+            0x01: "MyProductCode",
+            0x02: "MyMajorMinorRevision",
+            0x05: "MyModelName",
+            0x97: "MyExtendedObject1",
+            0xAB: "MyExtendedObject2"
+        };
     }
 };
 
@@ -252,3 +263,13 @@ serverTCP.on("socketError", function(err){
 ```
 
 to get more see [Examples](https://github.com/yaacov/node-modbus-serial/wiki)
+
+###### Serial connection
+
+node-modbus-serial use node-serialport for serial communication, for serial port options settings
+it passes to serial port the [openOptions](https://node-serialport.github.io/node-serialport/global.html#openOptions) object,
+default serial port settings are 9600,8,n,1.
+
+``` javascript
+client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600, parity: 'even' });
+```

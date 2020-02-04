@@ -19,18 +19,25 @@ var CRC_LENGTH = 2;
  *
  * @param ip
  * @param options
+ *   options.port: Nonstandard Modbus port (default is 502).
+ *   options.localAddress: Local IP address to bind to, default is any.
+ *   options.family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
  * @constructor
  */
 var TcpPort = function(ip, options) {
     var modbus = this;
-    this.ip = ip;
     this.openFlag = false;
     this.callback = null;
     this._transactionIdWrite = 1;
 
     // options
     if (typeof(options) === "undefined") options = {};
-    this.port = options.port || MODBUS_PORT; // modbus port
+    this.connectOptions = {
+        host: ip,
+        port: options.port || MODBUS_PORT,
+        localAddress: options.localAddress,
+        family: options.family
+    };
 
     // handle callback - call a callback function only once, for the first event
     // it will triger
@@ -58,7 +65,7 @@ var TcpPort = function(ip, options) {
             length = data.readUInt16BE(4);
 
             // cut 6 bytes of mbap and copy pdu
-            buffer = new Buffer(length + CRC_LENGTH);
+            buffer = Buffer.alloc(length + CRC_LENGTH);
             data.copy(buffer, 0, MIN_MBAP_LENGTH);
 
             // add crc to message
@@ -96,9 +103,11 @@ var TcpPort = function(ip, options) {
     });
 
     this._client.on("timeout", function() {
-        modbus.openFlag = false;
+        // modbus.openFlag is left in its current state as it reflects two types of timeouts,
+        // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
+        // (this allows to continue Modbus request re-tries without reconnecting TCP).
         modbusSerialDebug("TCP port: TimedOut");
-        handleCallback(new Error("TCP Connection Timed Out."));
+        handleCallback(new Error("TCP Connection Timed Out"));
     });
 
     /**
@@ -124,7 +133,7 @@ util.inherits(TcpPort, EventEmitter);
  */
 TcpPort.prototype.open = function(callback) {
     this.callback = callback;
-    this._client.connect(this.port, this.ip);
+    this._client.connect(this.connectOptions);
 };
 
 /**
@@ -135,6 +144,18 @@ TcpPort.prototype.open = function(callback) {
 TcpPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
+};
+
+/**
+ * Simulate successful destroy port.
+ *
+ * @param callback
+ */
+TcpPort.prototype.destroy = function(callback) {
+    this.callback = callback;
+    if (!this._client.destroyed) {
+        this._client.destroy();
+    }
 };
 
 /**
@@ -153,7 +174,7 @@ TcpPort.prototype.write = function(data) {
     this._cmd = data[1];
 
     // remove crc and add mbap
-    var buffer = new Buffer(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+    var buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
     buffer.writeUInt16BE(this._transactionIdWrite, 0);
     buffer.writeUInt16BE(0, 2);
     buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);

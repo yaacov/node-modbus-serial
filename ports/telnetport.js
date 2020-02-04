@@ -29,7 +29,7 @@ var TelnetPort = function(ip, options) {
     this.port = options.port || TELNET_PORT; // telnet server port
 
     // internal buffer
-    this._buffer = new Buffer(0);
+    this._buffer = Buffer.alloc(0);
     this._id = 0;
     this._cmd = 0;
     this._length = 0;
@@ -178,6 +178,18 @@ TelnetPort.prototype.open = function(callback) {
 TelnetPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
+};
+
+/**
+ * Simulate successful destroy port.
+ *
+ * @param callback
+ */
+TelnetPort.prototype.destroy = function(callback) {
+    this.callback = callback;
+    if (!this._client.destroyed) {
+        this._client.destroy();
+    }
 };
 
 /**

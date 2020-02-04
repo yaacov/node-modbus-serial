@@ -27,7 +27,7 @@ var RTUBufferedPort = function(path, options) {
     options.autoOpen = false;
 
     // internal buffer
-    this._buffer = new Buffer(0);
+    this._buffer = Buffer.alloc(0);
     this._id = 0;
     this._cmd = 0;
     this._length = 0;

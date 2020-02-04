@@ -21,12 +21,98 @@ var net = require("net");
 var modbusSerialDebug = require("debug")("modbus-serial");
 
 var HOST = "127.0.0.1";
+var UNIT_ID = 255; // listen to all adresses
 var MODBUS_PORT = 502;
+
+// Not really its official length, but we parse UnitID as part of PDU
+const MBAP_LEN = 6;
+
+/* Get Handlers
+ */
+var handlers = require("./servertcp_handler");
 
 /* Add bit operation functions to Buffer
  */
 require("../utils/buffer_bit")();
 var crc16 = require("../utils/crc16");
+
+/**
+ * Helper function for sending debug objects.
+ *
+ * @param {string} text - text of message, an error or an action
+ * @param {int} unitID - Id of the requesting unit
+ * @param {int} functionCode - a modbus function code.
+ * @param {Buffer} requestBuffer - request Buffer from client
+ * @returns undefined
+ * @private
+ */
+function _serverDebug(text, unitID, functionCode, responseBuffer) {
+    // If no responseBuffer, then assume this is an error
+    // o/w assume an action
+    if (typeof responseBuffer === "undefined") {
+        modbusSerialDebug({
+            error: text,
+            unitID: unitID,
+            functionCode: functionCode
+        });
+
+    } else {
+        modbusSerialDebug({
+            action: text,
+            unitID: unitID,
+            functionCode: functionCode,
+            responseBuffer: responseBuffer.toString("hex")
+        });
+    }
+}
+
+/**
+ * Helper function for creating callback functions.
+ *
+ * @param {int} unitID - Id of the requesting unit
+ * @param {int} functionCode - a modbus function code
+ * @param {function} sockWriter - write buffer (or error) to tcp socket
+ * @returns {function} - a callback function
+ * @private
+ */
+function _callbackFactory(unitID, functionCode, sockWriter) {
+    return function cb(err, responseBuffer) {
+        var crc;
+
+        // If we have an error.
+        if (err) {
+            var errorCode = 0x04; // slave device failure
+            if (!isNaN(err.modbusErrorCode)) {
+                errorCode = err.modbusErrorCode;
+            }
+
+            // Set an error response
+            functionCode = parseInt(functionCode) | 0x80;
+            responseBuffer = Buffer.alloc(3 + 2);
+            responseBuffer.writeUInt8(errorCode, 2);
+
+            _serverDebug("error processing response", unitID, functionCode);
+        }
+
+        // If we do not have a responseBuffer
+        if (!responseBuffer) {
+            _serverDebug("no response buffer", unitID, functionCode);
+            return sockWriter(null, responseBuffer);
+        }
+
+        // add unit number and function code
+        responseBuffer.writeUInt8(unitID, 0);
+        responseBuffer.writeUInt8(functionCode, 1);
+
+        // Add crc
+        crc = crc16(responseBuffer.slice(0, -2));
+        responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
+
+        // Call callback function
+        _serverDebug("server response", unitID, functionCode, responseBuffer);
+        return sockWriter(null, responseBuffer);
+    };
+}
 
 /**
  * Parse a ModbusRTU buffer and return an answer buffer.
@@ -37,7 +123,15 @@ var crc16 = require("../utils/crc16");
  * @returns undefined
  * @private
  */
-function _parseModbusBuffer(requestBuffer, vector, callback) {
+function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
+    var cb;
+
+    // Check requestBuffer length
+    if (!requestBuffer || requestBuffer.length < MBAP_LEN) {
+        modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
+        return;
+    }
+
     var unitID = requestBuffer[0];
     var functionCode = requestBuffer[1];
     var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
@@ -48,86 +142,40 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
         return;
     }
 
+    // if crc is bad, ignore message
+    if (serverUnitID !== 255 && serverUnitID !== unitID) {
+        modbusSerialDebug("wrong unitID");
+        return;
+    }
+
     modbusSerialDebug("request for function code " + functionCode);
-
-    var cb = function(err, responseBuffer) {
-        if (err) {
-            modbusSerialDebug({
-                error: "error processing response",
-                unitID: unitID,
-                functionCode: functionCode
-            });
-
-            var errorCode = 0x04; // slave device failure
-            if (!isNaN(err.modbusErrorCode))
-                errorCode = err.modbusErrorCode;
-
-            // set an error response
-            functionCode = parseInt(functionCode) | 0x80;
-            responseBuffer = Buffer.alloc(3 + 2);
-            responseBuffer.writeUInt8(errorCode, 2);
-
-            cb(null, responseBuffer);
-            return;
-        }
-
-        // add unit-id, function code and crc
-        if (responseBuffer) {
-            // add unit number and function code
-            responseBuffer.writeUInt8(unitID, 0);
-            responseBuffer.writeUInt8(functionCode, 1);
-
-            // add crc
-            crc = crc16(responseBuffer.slice(0, -2));
-            responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
-
-            modbusSerialDebug({
-                action: "server response",
-                unitID: unitID,
-                functionCode: functionCode,
-                responseBuffer: responseBuffer.toString("hex")
-            });
-        }
-        else {
-            modbusSerialDebug({
-                error: "no response buffer",
-                unitID: unitID,
-                functionCode: functionCode
-            });
-        }
-
-        modbusSerialDebug({
-            action: "server response",
-            unitID: unitID,
-            functionCode: functionCode,
-            responseBuffer: responseBuffer.toString("hex")
-        });
-
-        callback(null, responseBuffer);
-    };
+    cb = _callbackFactory(unitID, functionCode, sockWriter);
 
     switch (parseInt(functionCode)) {
         case 1:
         case 2:
-            _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, cb);
+            handlers.readCoilsOrInputDiscretes(requestBuffer, vector, unitID, cb, functionCode);
             break;
         case 3:
-            _handleReadMultipleRegisters(requestBuffer, vector, unitID, cb);
+            handlers.readMultipleRegisters(requestBuffer, vector, unitID, cb);
             break;
         case 4:
-            _handleReadInputRegisters(requestBuffer, vector, unitID, cb);
+            handlers.readInputRegisters(requestBuffer, vector, unitID, cb);
             break;
         case 5:
-            _handleWriteCoil(requestBuffer, vector, unitID, cb);
+            handlers.writeCoil(requestBuffer, vector, unitID, cb);
             break;
         case 6:
-            _handleWriteSingleRegister(requestBuffer, vector, unitID, cb);
+            handlers.writeSingleRegister(requestBuffer, vector, unitID, cb);
             break;
         case 15:
-            _handleForceMultipleCoils(requestBuffer, vector, unitID, cb);
+            handlers.forceMultipleCoils(requestBuffer, vector, unitID, cb);
             break;
         case 16:
-            _handleWriteMultipleRegisters(requestBuffer, vector, unitID, cb);
+            handlers.writeMultipleRegisters(requestBuffer, vector, unitID, cb);
+            break;
+        case 43:
+            handlers.handleMEI(requestBuffer, vector, unitID, cb);
             break;
         default:
             var errorCode = 0x01; // illegal function
@@ -142,544 +190,9 @@ function _parseModbusBuffer(requestBuffer, vector, callback) {
                 functionCode: functionCode
             });
 
-            cb(null, responseBuffer);
+            cb({ modbusErrorCode: errorCode }, responseBuffer);
     }
 }
-
-/**
- * Check the length of request Buffer for length of 8.
- *
- * @param requestBuffer - request Buffer from client
- * @returns {boolean} - if error it is true, otherwise false
- * @private
- */
-function _errorRequestBufferLength(requestBuffer) {
-
-    if (requestBuffer.length !== 8) {
-        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be >= 8");
-        return true;
-    }
-
-    return false; // length is okay - no error
-}
-
-/**
- * Handle the callback invocation for Promises or synchronous values
- *
- * @param promiseOrValue - the Promise to be resolved or value to be returned
- * @param cb - the callback to be invoked
- * @returns undefined
- * @private
- */
-function _handlePromiseOrValue(promiseOrValue, cb) {
-    if (promiseOrValue && promiseOrValue.then && typeof promiseOrValue.then === "function") {
-        promiseOrValue.then(function(value) {
-            cb(null, value);
-        });
-        if (promiseOrValue.catch && typeof promiseOrValue.catch === "function") {
-            promiseOrValue.catch(function(err) {
-                cb(err);
-            });
-        }
-    }
-    else {
-        cb(null, promiseOrValue);
-    }
-}
-
-
-/**
- * Function to handle FC1 or FC2 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
-
-    if (_errorRequestBufferLength(requestBuffer)) {
-        return;
-    }
-
-    // build answer
-    var dataBytes = parseInt((length - 1) / 8 + 1);
-    var responseBuffer = Buffer.alloc(3 + dataBytes + 2);
-    responseBuffer.writeUInt8(dataBytes, 2);
-
-    // read coils
-    if (vector.getCoil) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
-            return function(err, value) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                responseBuffer.writeBit(value, i % 8, 3 + parseInt(i / 8));
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC1/2 response", responseBuffer: responseBuffer });
-
-                    callbackInvoked = true;
-                    callback(null, responseBuffer);
-                }
-            };
-        };
-
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
-            });
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            try {
-                if (vector.getCoil.length === 3) {
-                    vector.getCoil(address + i, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.getCoil(address + i, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    }
-}
-
-/**
- * Function to handle FC3 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
-
-    if (_errorRequestBufferLength(requestBuffer)) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
-    responseBuffer.writeUInt8(length * 2, 2);
-
-    // read registers
-    if (vector.getHoldingRegister) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
-            return function(err, value) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
-
-                    callbackInvoked = true;
-                    callback(null, responseBuffer);
-                }
-            };
-        };
-
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
-            });
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            try {
-                if (vector.getHoldingRegister.length === 3) {
-                    vector.getHoldingRegister(address + i, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.getHoldingRegister(address + i, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    }
-}
-
-/**
- * Function to handle FC4 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
-
-    if (_errorRequestBufferLength(requestBuffer)) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
-    responseBuffer.writeUInt8(length * 2, 2);
-
-    if (vector.getInputRegister) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
-            return function(err, value) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                responseBuffer.writeUInt16BE(value, 3 + i * 2);
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC4 response", responseBuffer: responseBuffer });
-
-                    callbackInvoked = true;
-                    callback(null, responseBuffer);
-                }
-            };
-        };
-
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
-            });
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            try {
-                if (vector.getInputRegister.length === 3) {
-                    vector.getInputRegister(address + i, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.getInputRegister(address + i, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    }
-}
-
-/**
- * Function to handle FC5 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var state = requestBuffer.readUInt16BE(4);
-
-    if (_errorRequestBufferLength(requestBuffer)) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(8);
-    responseBuffer.writeUInt16BE(address, 2);
-    responseBuffer.writeUInt16BE(state, 4);
-
-    if (vector.setCoil) {
-        var callbackInvoked = false;
-        var cb = function(err) {
-            if (err) {
-                if (!callbackInvoked) {
-                    callbackInvoked = true;
-                    callback(err);
-                }
-
-                return;
-            }
-
-            if (!callbackInvoked) {
-                modbusSerialDebug({ action: "FC5 response", responseBuffer: responseBuffer });
-
-                callbackInvoked = true;
-                callback(null, responseBuffer);
-            }
-        };
-
-        try {
-            if (vector.setCoil.length === 4) {
-                vector.setCoil(address, state === 0xff00, unitID, cb);
-            }
-            else {
-                var promiseOrValue = vector.setCoil(address, state === 0xff00, unitID);
-                _handlePromiseOrValue(promiseOrValue, cb);
-            }
-        }
-        catch(err) {
-            cb(err);
-        }
-    }
-}
-
-/**
- * Function to handle FC6 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var value = requestBuffer.readUInt16BE(4);
-
-    if (_errorRequestBufferLength(requestBuffer)) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(8);
-    responseBuffer.writeUInt16BE(address, 2);
-    responseBuffer.writeUInt16BE(value, 4);
-
-    if (vector.setRegister) {
-        var callbackInvoked = false;
-        var cb = function(err) {
-            if (err) {
-                if (!callbackInvoked) {
-                    callbackInvoked = true;
-                    callback(err);
-                }
-
-                return;
-            }
-
-            if (!callbackInvoked) {
-                modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
-
-                callbackInvoked = true;
-                callback(null, responseBuffer);
-            }
-        };
-
-        try {
-            if (vector.setRegister.length === 4) {
-                vector.setRegister(address, value, unitID, cb);
-            }
-            else {
-                var promiseOrValue = vector.setRegister(address, value, unitID);
-                _handlePromiseOrValue(promiseOrValue, cb);
-            }
-        } catch(err) {
-            cb(err);
-        }
-    }
-}
-
-/**
- * Function to handle FC15 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
-
-    // if length is bad, ignore message
-    if (requestBuffer.length !== 7 + Math.ceil(length / 8) + 2) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(8);
-    responseBuffer.writeUInt16BE(address, 2);
-    responseBuffer.writeUInt16BE(length, 4);
-
-    if (vector.setCoil) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(/* i - not used at the moment */) {
-            return function(err) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC15 response", responseBuffer: responseBuffer });
-
-                    callbackInvoked = true;
-                    callback(null, responseBuffer);
-                }
-            };
-        };
-
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
-            });
-
-        var state;
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            state = requestBuffer.readBit(i, 7);
-
-            try {
-                if (vector.setCoil.length === 4) {
-                    vector.setCoil(address + i, state !== false, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    }
-}
-
-/**
- * Function to handle FC16 request.
- *
- * @param requestBuffer - request Buffer from client
- * @param vector - vector of functions for read and write
- * @param unitID - Id of the requesting unit
- * @param {function} callback - callback to be invoked passing {Buffer} response
- * @returns undefined
- * @private
- */
-function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
-
-    // if length is bad, ignore message
-    if (requestBuffer.length !== (7 + length * 2 + 2)) {
-        return;
-    }
-
-    // build answer
-    var responseBuffer = Buffer.alloc(8);
-    responseBuffer.writeUInt16BE(address, 2);
-    responseBuffer.writeUInt16BE(length, 4);
-
-    // write registers
-    if (vector.setRegister) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(/* i - not used at the moment */) {
-            return function(err) {
-                if (err) {
-                    if (!callbackInvoked) {
-                        callbackInvoked = true;
-                        callback(err);
-                    }
-
-                    return;
-                }
-
-                cbCount = cbCount + 1;
-
-                if (cbCount === length && !callbackInvoked) {
-                    modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
-
-                    callbackInvoked = true;
-                    callback(null, responseBuffer);
-                }
-            };
-        };
-
-        if (length === 0)
-            callback({
-                modbusErrorCode: 0x02, // Illegal address
-                msg: "Invalid length"
-            });
-
-        var value;
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            value = requestBuffer.readUInt16BE(7 + i * 2);
-
-            try {
-                if (vector.setRegister.length === 4) {
-                    vector.setRegister(address + i, value, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.setRegister(address + i, value, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    }
-}
-
 /**
  * Class making ModbusTCP server.
  *
@@ -693,61 +206,96 @@ var ServerTCP = function(vector, options) {
 
     // create a tcp server
     modbus._server = net.createServer();
-    modbus._server.listen(options.port || MODBUS_PORT, options.host || HOST);
+    modbus._server.listen({
+        port: options.port || MODBUS_PORT,
+        host: options.host || HOST
+    }, function() {
+        modbus.emit("initialized");
+    });
+
+    // create a server unit id
+    var serverUnitID = options.unitID || UNIT_ID;
+
+    // remember open sockets
+    modbus.socks = new Map();
 
     modbus._server.on("connection", function(sock) {
+        var recvBuffer = Buffer.from([]);
+        modbus.socks.set(sock, 0);
+
         modbusSerialDebug({
             action: "connected",
             address: sock.address(),
             remoteAddress: sock.remoteAddress,
-            remotePort: sock.remotePort
+            localPort: sock.localPort
+        });
+
+        sock.once("close", function() {
+            modbusSerialDebug({
+                action: "closed"
+            });
+            modbus.socks.delete(sock);
         });
 
         sock.on("data", function(data) {
             modbusSerialDebug({ action: "socket data", data: data });
+            recvBuffer = Buffer.concat([recvBuffer, data], recvBuffer.length + data.length);
 
-            // remove mbap and add crc16
-            var requestBuffer = Buffer.alloc(data.length - 6 + 2);
-            data.copy(requestBuffer, 0, 6);
-            var crc = crc16(requestBuffer.slice(0, -2));
-            requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
+            while(recvBuffer.length > MBAP_LEN) {
+                const transactionsId = recvBuffer.readUInt16BE(0);
+                var pduLen = recvBuffer.readUInt16BE(4);
 
-            modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
-            modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
+                // Check the presence of the full request (MBAP + PDU)
+                if(recvBuffer.length - MBAP_LEN < pduLen)
+                    break;
 
-            // if length is too short, ignore message
-            if (requestBuffer.length < 8) {
-                return;
+                // remove mbap and add crc16
+                var requestBuffer = Buffer.alloc(pduLen + 2);
+                recvBuffer.copy(requestBuffer, 0, MBAP_LEN, MBAP_LEN + pduLen);
+
+                // Move receive buffer on
+                recvBuffer = recvBuffer.slice(MBAP_LEN + pduLen);
+
+                var crc = crc16(requestBuffer.slice(0, -2));
+                requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
+
+                modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
+                modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
+
+                var sockWriter = function(err, responseBuffer) {
+                    if (err) {
+                        modbus.emit("error", err);
+                        return;
+                    }
+
+                    // send data back
+                    if (responseBuffer) {
+                        // remove crc and add mbap
+                        var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
+                        outTcp.writeUInt16BE(transactionsId, 0);
+                        outTcp.writeUInt16BE(0, 2);
+                        outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
+                        responseBuffer.copy(outTcp, 6);
+
+                        modbusSerialDebug({ action: "send", data: responseBuffer });
+                        modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
+
+                        // write to port
+                        sock.write(outTcp);
+                    }
+                };
+
+                // parse the modbusRTU buffer
+                setTimeout(
+                    _parseModbusBuffer.bind(this,
+                        requestBuffer,
+                        vector,
+                        serverUnitID,
+                        sockWriter
+                    ),
+                    0
+                );
             }
-
-            var cb = function(err, responseBuffer) {
-                if (err) {
-                    modbus.emit("error", err);
-                    return;
-                }
-
-                // send data back
-                if (responseBuffer) {
-                    // get transaction id
-                    var transactionsId = data.readUInt16BE(0);
-
-                    // remove crc and add mbap
-                    var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
-                    outTcp.writeUInt16BE(transactionsId, 0);
-                    outTcp.writeUInt16BE(0, 2);
-                    outTcp.writeUInt16BE(responseBuffer.length - 2, 4);
-                    responseBuffer.copy(outTcp, 6);
-
-                    modbusSerialDebug({ action: "send", data: responseBuffer });
-                    modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
-
-                    // write to port
-                    sock.write(outTcp);
-                }
-            };
-
-            // parse the modbusRTU buffer
-            _parseModbusBuffer(requestBuffer, vector, cb);
         });
 
         sock.on("error", function(err) {
@@ -766,10 +314,16 @@ util.inherits(ServerTCP, EventEmitter);
 * @param callback
 */
 ServerTCP.prototype.close = function(callback) {
+    const modbus = this;
+
     // close the net port if exist
-    if (this._server) {
-        this._server.removeAllListeners("data");
-        this._server.close(callback);
+    if (modbus._server) {
+        modbus._server.removeAllListeners("data");
+        modbus._server.close(callback);
+
+        modbus.socks.forEach(function(e, sock) {
+            sock.destroy();
+        });
 
         modbusSerialDebug({ action: "close server" });
     } else {
