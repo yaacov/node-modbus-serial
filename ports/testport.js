@@ -9,7 +9,7 @@ var modbusSerialDebug = require("debug")("modbus-serial");
 require("../utils/buffer_bit")();
 var crc16 = require("../utils/crc16");
 
-var MIN_DATA_LENGTH = 8;
+var MIN_DATA_LENGTH = 7;
 
 /**
  * Simulate a serial port with 4 modbus-rtu slaves connected.
@@ -88,7 +88,6 @@ TestPort.prototype.write = function(data) {
     var unitNumber = data[0];
     var functionCode = data[1];
     var crc = data[data.length - 2] + data[data.length - 1] * 0x100;
-
     // if crc is bad, ignore message
     if (crc !== crc16(data.slice(0, -2))) {
         return;
@@ -238,6 +237,20 @@ TestPort.prototype.write = function(data) {
         for (i = 0; i < length; i++) {
             this._holding_registers[address + i] = data.readUInt16BE(7 + i * 2);
         }
+    }
+
+    if (functionCode === 43) {
+        const productCode = "MyProductCode1234";
+        buffer = Buffer.alloc(12 + productCode.length);
+        buffer.writeUInt8(16, 2); // MEI Type
+        buffer.writeUInt8(data.readInt8(3), 3); // read device ID code
+        buffer.writeUInt8(0x01, 4); // conformity level
+        buffer.writeUInt8(0, 5); // number of follows left
+        buffer.writeUInt8(0, 6); // next object ID
+        buffer.writeUInt8(1, 7); // number of objects
+        buffer.writeUInt8(data.readInt8(4), 8);
+        buffer.writeUInt8(productCode.length, 9);
+        buffer.write(productCode, 10, productCode.length, "ascii");
     }
 
     // send data back
