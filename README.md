@@ -206,6 +206,25 @@ setInterval(function() {
 }, 1000);
 ```
 ----
+###### Logger UDP
+``` javascript
+// create an empty modbus client
+var ModbusRTU = require("modbus-serial");
+var client = new ModbusRTU();
+
+// open connection to a udp line
+client.connectUDP("127.0.0.1", { port: 8502 });
+client.setID(1);
+
+// read the values of 10 registers starting at address 0
+// on device number 1. and log the values to the console.
+setInterval(function() {
+    client.readHoldingRegisters(0, 10, function(err, data) {
+        console.log(data.data);
+    });
+}, 1000);
+```
+----
 ###### ModbusTCP Server
 ``` javascript
 // create an empty modbus client
