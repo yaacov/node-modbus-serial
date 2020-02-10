@@ -398,11 +398,7 @@ ModbusRTU.prototype.open = function(callback) {
                         break;
                     case 43:
                         // read device identification
-<<<<<<< HEAD
                         _readFC43(data, modbus, transaction.next);
-=======
-                        _readFC43(data, this, transaction.next);
->>>>>>> master
                 }
             });
 
