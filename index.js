@@ -171,7 +171,7 @@ function _readFC43(data, modbus, next) {
     var address = parseInt(data.readUInt8(0));
     var readDeviceIdCode = parseInt(data.readUInt8(3));
     var conformityLevel = parseInt(data.readUInt8(4));
-    var moreFollows = data.readUInt8(5);
+    var moreFollows = parseInt(data.readUInt8(5));
     var nextObjectId = parseInt(data.readUInt8(6));
     var numOfObjects = parseInt(data.readUInt8(7));
 
@@ -184,15 +184,17 @@ function _readFC43(data, modbus, next) {
         result[objectId] = data.toString("ascii", startOfData, startOfData + objectLength);
         startAt = startOfData + objectLength;
     }
-
-    if (moreFollows) {
+    // is it saying to follow and did you previously get data
+    // if you did not previously get data go ahead and halt to prevent an infinite loop
+    if (moreFollows && numOfObjects) {
         const cb = function(err, data) {
-            data.result = Object.assign(data.result, result);
+            data.data = Object.assign(data.data, result);
             return next(err, data);
         };
         modbus.writeFC43(address, readDeviceIdCode, nextObjectId, cb);
-    } else if (next)
+    } else if (next) {
         next(null, { data: result, conformityLevel });
+    }
 }
 
 /**
@@ -395,7 +397,7 @@ ModbusRTU.prototype.open = function(callback) {
                         break;
                     case 43:
                         // read device identification
-                        _readFC43(data, this, transaction.next);
+                        _readFC43(data, modbus, transaction.next);
                 }
             });
 
