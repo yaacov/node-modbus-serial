@@ -184,6 +184,7 @@ function _readFC43(data, modbus, next) {
         result[objectId] = data.toString("ascii", startOfData, startOfData + objectLength);
         startAt = startOfData + objectLength;
     }
+
     // is it saying to follow and did you previously get data
     // if you did not previously get data go ahead and halt to prevent an infinite loop
     if (moreFollows && numOfObjects) {
@@ -397,7 +398,11 @@ ModbusRTU.prototype.open = function(callback) {
                         break;
                     case 43:
                         // read device identification
+<<<<<<< HEAD
                         _readFC43(data, modbus, transaction.next);
+=======
+                        _readFC43(data, this, transaction.next);
+>>>>>>> master
                 }
             });
 

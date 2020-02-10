@@ -33,12 +33,17 @@ Socket.prototype.send = function(buffer, offset, length, port, address, callback
     }
 };
 
+Socket.prototype.bind = function() {
+    this.emit("listening");
+};
+
+// Obsolete? It doesn't reflect the dgram interface
 Socket.prototype.listen = function() {
     this.emit("listening");
 };
 
 Socket.prototype.receive = function(buffer) {
-    this.emit("message", buffer);
+    this.emit("message", buffer, { address: this._address, port: this._port, size: this._data.length });
 };
 
 exports.Socket = Socket;

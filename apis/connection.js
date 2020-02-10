@@ -200,6 +200,33 @@ var addConnctionAPI = function(Modbus) {
     };
 
     /**
+     * Connect to a communication port, using modbus-udp.
+     *
+     * @param {string} ip the ip of the UDP Port - required.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
+     */
+    cl.connectUDP = function(ip, options, next) {
+        // check if we have options
+        if (typeof next === "undefined" && typeof options === "function") {
+            next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
+        // create the UdpPort
+        var UdpPort = require("../ports/udpport");
+        this._port = new UdpPort(ip, options);
+
+        // open and call next
+        return open(this, next);
+    };
+
+    /**
      * Connect to a communication port, using Bufferd Serial port.
      *
      * @param {string} path the path to the Serial Port - required.
