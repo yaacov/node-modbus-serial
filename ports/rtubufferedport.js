@@ -162,6 +162,9 @@ RTUBufferedPort.prototype.write = function(data) {
         case 16:
             this._length = 6 + 2;
             break;
+        // case 43: problem is most likely here
+        //  this._lenght = ???;
+        //  break;
         default:
             // raise and error ?
             this._length = 0;
