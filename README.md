@@ -65,7 +65,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 * FC6 "Preset Single Register"
 * FC15 "Force Multiple Coil"
 * FC16 "Preset Multiple Registers"
-* FC43/14 "Read Device Identification"
+* FC43/14 "Read Device Identification" (supported ports: TCP, RTU)
 
 ###### Client Serial:
 
