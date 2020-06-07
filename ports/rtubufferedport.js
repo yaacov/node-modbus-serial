@@ -162,8 +162,10 @@ RTUBufferedPort.prototype.write = function(data) {
         case 16:
             this._length = 6 + 2;
             break;
-        case 43: 
+        case 43:
             modbusSerialDebug("RTUBuffered F43 not supported");
+            this._length = 0;
+            break;
         default:
             // raise and error ?
             this._length = 0;

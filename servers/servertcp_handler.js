@@ -879,7 +879,8 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
 
             // Enforcing maximum string length
             if(objects[id].length > stringLengthMax) {
-                callback({ modbusErrorCode: 0x04, msg: "Read Device Identification string size can be maximum " +
+                callback({ modbusErrorCode: 0x04,
+                    msg: "Read Device Identification string size can be maximum " +
                                 stringLengthMax });
             }
 
