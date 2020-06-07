@@ -1,6 +1,6 @@
 {
   "name": "modbus-serial",
-  "version": "7.8.1",
+  "version": "7.8.2",
   "description": "A pure JavaScript implemetation of MODBUS-RTU (Serial and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
@@ -38,6 +38,6 @@
   },
   "dependencies": {
     "debug": "^4.1.1",
-    "serialport": "^8.0.6"
+    "serialport": "^9.0.0"
   }
 }
