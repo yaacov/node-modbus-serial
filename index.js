@@ -390,6 +390,10 @@ var ModbusRTU = function(port) {
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
     this._unitID = 1;
 
+    // Flag to indicate whether debug mode (pass-through of raw
+    // request/response) is enabled.
+    this._debugEnabled = false;
+
     this._onReceive = _onReceive.bind(this);
 
     EventEmitter.call(this);
@@ -432,6 +436,21 @@ ModbusRTU.prototype.open = function(callback) {
         }
     });
 };
+
+
+/**
+ * Check if port debug mode is enabled
+ */
+Object.defineProperty(ModbusRTU.prototype, "isDebugEnabled", {
+    enumerable: true,
+    get: function() {
+        return this._debugEnabled;
+    },
+    set: function(enable) {
+        enable = Boolean(enable);
+        this._debugEnabled = enable;
+    }
+});
 
 
 /**
