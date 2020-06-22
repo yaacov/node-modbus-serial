@@ -210,7 +210,6 @@ function _readFC43(data, modbus, next) {
 function _writeBufferToPort(buffer, transactionId) {
     var transaction = this._transactions[transactionId];
 
-    this._port.write(buffer);
     if (transaction) {
         transaction._timeoutFired = false;
         transaction._timeoutHandle = _startTimeout(this._timeout, transaction);
@@ -221,6 +220,8 @@ function _writeBufferToPort(buffer, transactionId) {
             transaction.responses = [];
         }
     }
+
+    this._port.write(buffer);
 }
 
 /**
