@@ -21,6 +21,10 @@ require("./utils/buffer_bit")();
 var crc16 = require("./utils/crc16");
 var modbusSerialDebug = require("debug")("modbus-serial");
 
+var util = require("util");
+var events = require("events");
+var EventEmitter = events.EventEmitter || events;
+
 var PORT_NOT_OPEN_MESSAGE = "Port Not Open";
 var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 
@@ -256,7 +260,10 @@ var ModbusRTU = function(port) {
     this._transactions = {};
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
     this._unitID = 1;
+
+    EventEmitter.call(this);
 };
+util.inherits(ModbusRTU, EventEmitter);
 
 /**
  * Open the serial port and register Modbus parsers
