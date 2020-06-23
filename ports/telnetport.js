@@ -114,6 +114,7 @@ var TelnetPort = function(ip, options) {
     this._client.on("close", function(had_error) {
         self.openFlag = false;
         handleCallback(had_error);
+        self.emit("close");
     });
 
     this._client.on("error", function(had_error) {

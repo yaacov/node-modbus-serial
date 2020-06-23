@@ -121,6 +121,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     this._client.on("close", function(had_error) {
         modbus.openFlag = false;
         handleCallback(had_error);
+        modbus.emit("close");
     });
 
     this._client.on("error", function(had_error) {
