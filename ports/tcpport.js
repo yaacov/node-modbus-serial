@@ -94,6 +94,7 @@ var TcpPort = function(ip, options) {
         modbus.openFlag = false;
         modbusSerialDebug("TCP port: signal close: " + had_error);
         handleCallback(had_error);
+        modbus.emit("close");
     });
 
     this._client.on("error", function(had_error) {

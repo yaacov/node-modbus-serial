@@ -21,6 +21,10 @@ require("./utils/buffer_bit")();
 var crc16 = require("./utils/crc16");
 var modbusSerialDebug = require("debug")("modbus-serial");
 
+var util = require("util");
+var events = require("events");
+var EventEmitter = events.EventEmitter || events;
+
 var PORT_NOT_OPEN_MESSAGE = "Port Not Open";
 var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 
@@ -244,6 +248,135 @@ function _cancelTimeout(timeoutHandle) {
 }
 
 /**
+ * Handle incoming data from the Modbus port.
+ *
+ * @param {Buffer} data The data received
+ * @private
+ */
+function _onReceive(data) {
+    var modbus = this;
+    var error;
+
+    // set locale helpers variables
+    var transaction = modbus._transactions[modbus._port._transactionIdRead];
+
+    // the _transactionIdRead can be missing, ignore wrong transaction it's
+    if (!transaction) {
+        return;
+    }
+
+    /* cancel the timeout */
+    _cancelTimeout(transaction._timeoutHandle);
+    transaction._timeoutHandle = undefined;
+
+    /* check if the timeout fired */
+    if (transaction._timeoutFired === true) {
+        // we have already called back with an error, so don't generate a new callback
+        return;
+    }
+
+    /* check incoming data
+     */
+
+    /* check minimal length
+     */
+    if (!transaction.lengthUnknown && data.length < 5) {
+        error = "Data length error, expected " +
+            transaction.nextLength + " got " + data.length;
+        if (transaction.next)
+            transaction.next(new Error(error));
+        return;
+    }
+
+    /* check message CRC
+     * if CRC is bad raise an error
+     */
+    var crcIn = data.readUInt16LE(data.length - 2);
+    if (crcIn !== crc16(data.slice(0, -2))) {
+        error = "CRC error";
+        if (transaction.next)
+            transaction.next(new Error(error));
+        return;
+    }
+
+    // if crc is OK, read address and function code
+    var address = data.readUInt8(0);
+    var code = data.readUInt8(1);
+
+    /* check for modbus exception
+     */
+    if (data.length >= 5 &&
+        code === (0x80 | transaction.nextCode)) {
+        var errorCode = data.readUInt8(2);
+        if (transaction.next) {
+            error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
+            error.modbusCode = errorCode;
+            transaction.next(error);
+        }
+        return;
+    }
+
+    /* check message length
+     * if we do not expect this data
+     * raise an error
+     */
+    if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
+        error = "Data length error, expected " +
+            transaction.nextLength + " got " + data.length;
+        if (transaction.next)
+            transaction.next(new Error(error));
+        return;
+    }
+
+    /* check message address and code
+     * if we do not expect this message
+     * raise an error
+     */
+    if (address !== transaction.nextAddress || code !== transaction.nextCode) {
+        error = "Unexpected data error, expected " +
+            transaction.nextAddress + " got " + address;
+        if (transaction.next)
+            transaction.next(new Error(error));
+        return;
+    }
+
+    /* parse incoming data
+     */
+
+    switch (code) {
+        case 1:
+        case 2:
+            // Read Coil Status (FC=01)
+            // Read Input Status (FC=02)
+            _readFC2(data, transaction.next);
+            break;
+        case 3:
+        case 4:
+            // Read Input Registers (FC=04)
+            // Read Holding Registers (FC=03)
+            _readFC4(data, transaction.next);
+            break;
+        case 5:
+            // Force Single Coil
+            _readFC5(data, transaction.next);
+            break;
+        case 6:
+            // Preset Single Register
+            _readFC6(data, transaction.next);
+            break;
+        case 15:
+        case 16:
+            // Force Multiple Coils
+            // Preset Multiple Registers
+            _readFC16(data, transaction.next);
+            break;
+        case 43:
+            // read device identification
+            _readFC43(data, modbus, transaction.next);
+    }
+}
+
+/**
  * Class making ModbusRTU calls fun and easy.
  *
  * @param {SerialPort} port the serial port to use.
@@ -256,7 +389,12 @@ var ModbusRTU = function(port) {
     this._transactions = {};
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
     this._unitID = 1;
+
+    this._onReceive = _onReceive.bind(this);
+
+    EventEmitter.call(this);
 };
+util.inherits(ModbusRTU, EventEmitter);
 
 /**
  * Open the serial port and register Modbus parsers
@@ -280,127 +418,13 @@ ModbusRTU.prototype.open = function(callback) {
             modbus._port._transactionIdWrite = 1;
 
             /* On serial port success
-             * register the modbus parser functions
+             * (re-)register the modbus parser functions
              */
-            modbus._port.on("data", function(data) {
-                // set locale helpers variables
-                var transaction = modbus._transactions[modbus._port._transactionIdRead];
+            modbus._port.removeListener("data", modbus._onReceive);
+            modbus._port.on("data", modbus._onReceive);
 
-                // the _transactionIdRead can be missing, ignore wrong transaction it's
-                if (!transaction) {
-                    return;
-                }
-
-                /* cancel the timeout */
-                _cancelTimeout(transaction._timeoutHandle);
-                transaction._timeoutHandle = undefined;
-
-                /* check if the timeout fired */
-                if (transaction._timeoutFired === true) {
-                    // we have already called back with an error, so don't generate a new callback
-                    return;
-                }
-
-                /* check incoming data
-                 */
-
-                /* check minimal length
-                 */
-                if (!transaction.lengthUnknown && data.length < 5) {
-                    error = "Data length error, expected " +
-                        transaction.nextLength + " got " + data.length;
-                    if (transaction.next)
-                        transaction.next(new Error(error));
-                    return;
-                }
-
-                /* check message CRC
-                 * if CRC is bad raise an error
-                 */
-                var crcIn = data.readUInt16LE(data.length - 2);
-                if (crcIn !== crc16(data.slice(0, -2))) {
-                    error = "CRC error";
-                    if (transaction.next)
-                        transaction.next(new Error(error));
-                    return;
-                }
-
-                // if crc is OK, read address and function code
-                var address = data.readUInt8(0);
-                var code = data.readUInt8(1);
-
-                /* check for modbus exception
-                 */
-                if (data.length >= 5 &&
-                    code === (0x80 | transaction.nextCode)) {
-                    var errorCode = data.readUInt8(2);
-                    if (transaction.next) {
-                        error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
-                        error.modbusCode = errorCode;
-                        transaction.next(error);
-                    }
-                    return;
-                }
-
-                /* check message length
-                 * if we do not expect this data
-                 * raise an error
-                 */
-                if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
-                    error = "Data length error, expected " +
-                        transaction.nextLength + " got " + data.length;
-                    if (transaction.next)
-                        transaction.next(new Error(error));
-                    return;
-                }
-
-                /* check message address and code
-                 * if we do not expect this message
-                 * raise an error
-                 */
-                if (address !== transaction.nextAddress || code !== transaction.nextCode) {
-                    error = "Unexpected data error, expected " +
-                        transaction.nextAddress + " got " + address;
-                    if (transaction.next)
-                        transaction.next(new Error(error));
-                    return;
-                }
-
-                /* parse incoming data
-                 */
-
-                switch (code) {
-                    case 1:
-                    case 2:
-                        // Read Coil Status (FC=01)
-                        // Read Input Status (FC=02)
-                        _readFC2(data, transaction.next);
-                        break;
-                    case 3:
-                    case 4:
-                        // Read Input Registers (FC=04)
-                        // Read Holding Registers (FC=03)
-                        _readFC4(data, transaction.next);
-                        break;
-                    case 5:
-                        // Force Single Coil
-                        _readFC5(data, transaction.next);
-                        break;
-                    case 6:
-                        // Preset Single Register
-                        _readFC6(data, transaction.next);
-                        break;
-                    case 15:
-                    case 16:
-                        // Force Multiple Coils
-                        // Preset Multiple Registers
-                        _readFC16(data, transaction.next);
-                        break;
-                    case 43:
-                        // read device identification
-                        _readFC43(data, modbus, transaction.next);
-                }
-            });
+            /* Hook the close event so we can relay it to our callers. */
+            modbus._port.once("close", modbus.emit.bind(modbus, "close"));
 
             /* On serial port open OK call next function with no error */
             if (callback)
