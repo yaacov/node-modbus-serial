@@ -409,6 +409,9 @@ ModbusRTU.prototype.open = function(callback) {
                 }
             });
 
+            /* Hook the close event so we can relay it to our callers. */
+            modbus._port.once("close", modbus.emit.bind(modbus, "close"));
+
             /* On serial port open OK call next function with no error */
             if (callback)
                 callback(error);
