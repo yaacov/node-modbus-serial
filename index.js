@@ -210,11 +210,18 @@ function _readFC43(data, modbus, next) {
 function _writeBufferToPort(buffer, transactionId) {
     var transaction = this._transactions[transactionId];
 
-    this._port.write(buffer);
     if (transaction) {
         transaction._timeoutFired = false;
         transaction._timeoutHandle = _startTimeout(this._timeout, transaction);
+
+        // If in debug mode, stash a copy of the request payload
+        if (this._debugEnabled) {
+            transaction.request = Uint8Array.prototype.slice.call(buffer);
+            transaction.responses = [];
+        }
     }
+
+    this._port.write(buffer);
 }
 
 /**
@@ -232,7 +239,12 @@ function _startTimeout(duration, transaction) {
     return setTimeout(function() {
         transaction._timeoutFired = true;
         if (transaction.next) {
-            transaction.next(new TransactionTimedOutError());
+            var err = new TransactionTimedOutError();
+            if (transaction.request && transaction.responses) {
+                err.modbusRequest = transaction.request;
+                err.modbusResponses = transaction.responses;
+            }
+            transaction.next(err);
         }
     }, duration);
 }
@@ -265,6 +277,32 @@ function _onReceive(data) {
         return;
     }
 
+    if (transaction.responses) {
+        /* Stash what we received */
+        transaction.responses.push(Uint8Array.prototype.slice.call(data));
+    }
+
+    /* What do we do next? */
+    var next = function(err, res) {
+        if (transaction.next) {
+            /* Include request/response data if enabled */
+            if (transaction.request && transaction.responses) {
+                if (err) {
+                    err.modbusRequest = transaction.request;
+                    err.modbusResponses = transaction.responses;
+                }
+
+                if (res) {
+                    res.request = transaction.request;
+                    res.responses = transaction.responses;
+                }
+            }
+
+            /* Pass the data on */
+            return transaction.next(err, res);
+        }
+    };
+
     /* cancel the timeout */
     _cancelTimeout(transaction._timeoutHandle);
     transaction._timeoutHandle = undefined;
@@ -283,8 +321,7 @@ function _onReceive(data) {
     if (!transaction.lengthUnknown && data.length < 5) {
         error = "Data length error, expected " +
             transaction.nextLength + " got " + data.length;
-        if (transaction.next)
-            transaction.next(new Error(error));
+        next(new Error(error));
         return;
     }
 
@@ -294,8 +331,7 @@ function _onReceive(data) {
     var crcIn = data.readUInt16LE(data.length - 2);
     if (crcIn !== crc16(data.slice(0, -2))) {
         error = "CRC error";
-        if (transaction.next)
-            transaction.next(new Error(error));
+        next(new Error(error));
         return;
     }
 
@@ -311,7 +347,7 @@ function _onReceive(data) {
         if (transaction.next) {
             error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
             error.modbusCode = errorCode;
-            transaction.next(error);
+            next(error);
         }
         return;
     }
@@ -323,8 +359,7 @@ function _onReceive(data) {
     if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
         error = "Data length error, expected " +
             transaction.nextLength + " got " + data.length;
-        if (transaction.next)
-            transaction.next(new Error(error));
+        next(new Error(error));
         return;
     }
 
@@ -335,8 +370,7 @@ function _onReceive(data) {
     if (address !== transaction.nextAddress || code !== transaction.nextCode) {
         error = "Unexpected data error, expected " +
             transaction.nextAddress + " got " + address;
-        if (transaction.next)
-            transaction.next(new Error(error));
+        next(new Error(error));
         return;
     }
 
@@ -348,31 +382,31 @@ function _onReceive(data) {
         case 2:
             // Read Coil Status (FC=01)
             // Read Input Status (FC=02)
-            _readFC2(data, transaction.next);
+            _readFC2(data, next);
             break;
         case 3:
         case 4:
             // Read Input Registers (FC=04)
             // Read Holding Registers (FC=03)
-            _readFC4(data, transaction.next);
+            _readFC4(data, next);
             break;
         case 5:
             // Force Single Coil
-            _readFC5(data, transaction.next);
+            _readFC5(data, next);
             break;
         case 6:
             // Preset Single Register
-            _readFC6(data, transaction.next);
+            _readFC6(data, next);
             break;
         case 15:
         case 16:
             // Force Multiple Coils
             // Preset Multiple Registers
-            _readFC16(data, transaction.next);
+            _readFC16(data, next);
             break;
         case 43:
             // read device identification
-            _readFC43(data, modbus, transaction.next);
+            _readFC43(data, modbus, next);
     }
 }
 
@@ -389,6 +423,10 @@ var ModbusRTU = function(port) {
     this._transactions = {};
     this._timeout = null; // timeout in msec before unanswered request throws timeout error
     this._unitID = 1;
+
+    // Flag to indicate whether debug mode (pass-through of raw
+    // request/response) is enabled.
+    this._debugEnabled = false;
 
     this._onReceive = _onReceive.bind(this);
 
@@ -432,6 +470,21 @@ ModbusRTU.prototype.open = function(callback) {
         }
     });
 };
+
+
+/**
+ * Check if port debug mode is enabled
+ */
+Object.defineProperty(ModbusRTU.prototype, "isDebugEnabled", {
+    enumerable: true,
+    get: function() {
+        return this._debugEnabled;
+    },
+    set: function(enable) {
+        enable = Boolean(enable);
+        this._debugEnabled = enable;
+    }
+});
 
 
 /**

@@ -295,6 +295,47 @@ describe("ModbusRTU", function() {
                     done();
                 });
             });
+
+            it("should include raw payload data in response if debug enabled", function(done) {
+                /* This feature is common to _all_ function handlers. */
+                modbusRTU.isDebugEnabled = true;
+
+                modbusRTU.writeFC3(1, 8, 3, function(err, data) {
+                    modbusRTU.isDebugEnabled = false;
+
+                    expect(err).to.be.a("null");
+                    expect(data).to.have.property("request").with.length(8);
+                    expect(data.request.toString("hex")).to.equal("0103000800038409");
+
+                    expect(data).to.have.property("responses").with.length(1);
+                    expect(data.responses[0]).to.be.instanceof(Buffer).with.length(11);
+                    expect(data.responses[0].toString("hex")).to.equal("010306002a00800005f958");
+
+                    done();
+                });
+            });
+
+            it("should include raw payload data in exception if debug enabled", function(done) {
+                /* This feature is common to _all_ function handlers. */
+                modbusRTU.isDebugEnabled = true;
+
+                // Pretend Unit 3 sends buggy CRCs apparently.
+                modbusRTU.writeFC3(3, 8, 3, function(err, data) {
+                    modbusRTU.isDebugEnabled = false;
+
+                    expect(err).to.not.be.a("null");
+                    expect(err).to.have.property("modbusRequest").with.length(8);
+                    expect(err.modbusRequest.toString("hex")).to.equal("03030008000385eb");
+
+                    expect(err).to.have.property("modbusResponses").with.length(1);
+                    expect(err.modbusResponses[0]).to.be.instanceof(Buffer).with.length(11);
+                    expect(err.modbusResponses[0].toString("hex")).to.equal("030306002a00800005e138");
+
+                    expect(data).to.be.undefined;
+
+                    done();
+                });
+            });
         });
 
         describe("#writeFC5() - force one coil.", function() {
