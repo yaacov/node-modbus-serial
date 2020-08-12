@@ -57,15 +57,17 @@ This module has not been tested on every single version of NodeJS. For best resu
 
 ###### These classes are implemented:
 
-* FC1 "Read Coil Status"
-* FC2 "Read Input Status"
-* FC3 "Read Holding Registers"
-* FC4 "Read Input Registers"
-* FC5 "Force Single Coil"
-* FC6 "Preset Single Register"
-* FC15 "Force Multiple Coil"
-* FC16 "Preset Multiple Registers"
-* FC43/14 "Read Device Identification"
+| Class | Function |
+|-------|----------|
+| FC1 "Read Coil Status" | `readCoils(coil, len)` |
+| FC2 "Read Input Status" | `readDiscreteInputs(addr, arg)` |
+| FC3 "Read Holding Registers" | `readHoldingRegisters(addr, len) ` |
+| FC4 "Read Input Registers" | `readInputRegisters(addr, len) ` |
+| FC5 "Force Single Coil" | `writeCoil(coil, binary) //NOT setCoil` |
+| FC6 "Preset Single Register"
+| FC15 "Force Multiple Coil" | `writeRegister(addr, value)` |
+| FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
+| FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
 
 ###### Client Serial:
 

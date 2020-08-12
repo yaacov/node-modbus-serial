@@ -6,7 +6,7 @@ const jsdoc = require("gulp-jsdoc3");
 const clean = require("gulp-clean");
 
 gulp.task("default", function() {
-  // place code for your default task here
+    // place code for your default task here
 });
 
 gulp.task("docs", ["doc", "docExamples"]);
@@ -33,7 +33,7 @@ gulp.task("apis", function(cb) {
         gulp.dest("modbus-serial/apis")
     ],
     cb
-  );
+    );
 });
 
 gulp.task("ports", function(cb) {
@@ -41,7 +41,7 @@ gulp.task("ports", function(cb) {
         gulp.src("ports/**/*.js"),
         gulp.dest("modbus-serial/ports")
     ],
-        cb
+    cb
     );
 });
 

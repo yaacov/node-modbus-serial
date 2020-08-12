@@ -255,7 +255,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 if (!err && values.length !== length) {
                     var error = new Error("Requested address length and response length do not match");
                     callback(error);
-                    throw error;
                 } else {
                     for (var i = 0; i < length; i++) {
                         var cb = buildCb(i);
@@ -277,7 +276,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
             } else {
                 var error = new Error("Requested address length and response length do not match");
                 callback(error);
-                throw error;
             }
         }
 
@@ -380,7 +378,6 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 if (!err && values.length !== length) {
                     var error = new Error("Requested address length and response length do not match");
                     callback(error);
-                    throw error;
                 } else {
                     for (var i = 0; i < length; i++) {
                         var cb = buildCb(i);
@@ -402,7 +399,6 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
             } else {
                 var error = new Error("Requested address length and response length do not match");
                 callback(error);
-                throw error;
             }
         }
 
@@ -869,8 +865,7 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
 
             // Enforcing valid object IDs from the user
             if(id < 0x00 || (id > 0x06 && id < 0x80) || id > 0xFF) {
-                callback({ modbusErrorCode: 0x04 });
-                throw new Error("Invalid Object ID provided for Read Device Identification: " + id);
+                callback({ modbusErrorCode: 0x04, msg: "Invalid Object ID provided for Read Device Identification: " + id });
             }
 
             if(id > 0x02)
@@ -884,9 +879,9 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
 
             // Enforcing maximum string length
             if(objects[id].length > stringLengthMax) {
-                callback({ modbusErrorCode: 0x04 });
-                throw new Error("Read Device Identification string size can be maximum " +
-                                stringLengthMax);
+                callback({ modbusErrorCode: 0x04,
+                    msg: "Read Device Identification string size can be maximum " +
+                                stringLengthMax });
             }
 
             if(lastID !== 0)
