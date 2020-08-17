@@ -9,6 +9,40 @@ var modbusSerialDebug = require("debug")("modbus-serial");
 var EXCEPTION_LENGTH = 5;
 var MIN_DATA_LENGTH = 6;
 var MAX_BUFFER_LENGTH = 256;
+var CRC_LENGTH = 2;
+
+// Helper function -> Bool
+// BIT | TYPE
+// 8 | OBJECTID
+// 9 | length of OBJECTID
+// 10 -> n | the object
+// 10 + n + 1 | new object id
+var calculateFC43Length = function(buffer, numObjects, i, bufferLength) {
+    var result = { hasAllData: true };
+    var currentByte = 8 + i; // current byte starts at object id.
+    if (numObjects > 0) {
+        for (var j = 0; j < numObjects; j++) {
+            if (bufferLength < currentByte) {
+                result.hasAllData = false;
+                break;
+            }
+            var objLength = buffer[currentByte + 1];
+            if (!objLength) {
+                result.hasAllData = false;
+                break;
+            }
+            currentByte += 2 + objLength;
+        }
+    }
+    if (currentByte + CRC_LENGTH > bufferLength) {
+        // still waiting on the CRC!
+        result.hasAllData = false;
+    }
+    if (result.hasAllData) {
+        result.bufLength = currentByte + CRC_LENGTH;
+    }
+    return result;
+};
 
 /**
  * Simulate a modbus-RTU port using buffered serial connection.
@@ -40,14 +74,18 @@ var RTUBufferedPort = function(path, options) {
         // add data to buffer
         self._buffer = Buffer.concat([self._buffer, data]);
 
+        modbusSerialDebug({ action: "receive serial rtu buffered port", data: data, buffer: self._buffer });
+
         // check if buffer include a complete modbus answer
         var expectedLength = self._length;
         var bufferLength = self._buffer.length;
 
-        modbusSerialDebug({ action: "receive serial rtu buffered port", data: data, buffer: self._buffer });
 
         // check data length
-        if (expectedLength < MIN_DATA_LENGTH || bufferLength < EXCEPTION_LENGTH) return;
+        if (expectedLength !== "unknown" &&
+            expectedLength < MIN_DATA_LENGTH ||
+            bufferLength < EXCEPTION_LENGTH
+        ) { return; }
 
         // check buffer size for MAX_BUFFER_SIZE
         if (bufferLength > MAX_BUFFER_LENGTH) {
@@ -57,19 +95,32 @@ var RTUBufferedPort = function(path, options) {
 
         // loop and check length-sized buffer chunks
         var maxOffset = bufferLength - EXCEPTION_LENGTH;
+
         for (var i = 0; i <= maxOffset; i++) {
             var unitId = self._buffer[i];
             var functionCode = self._buffer[i + 1];
 
             if (unitId !== self._id) continue;
 
-            if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
-                self._emitData(i, expectedLength);
-                return;
-            }
-            if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
-                self._emitData(i, EXCEPTION_LENGTH);
-                return;
+            if (functionCode === self._cmd && functionCode === 43) {
+                if (bufferLength <= 7) {
+                    return;
+                }
+                var numObjects = self._buffer[7 + i];
+                var result = calculateFC43Length(self._buffer, numObjects, i, bufferLength);
+                if (result.hasAllData) {
+                    self._emitData(i, result.bufLength);
+                    return;
+                }
+            } else {
+                if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
+                    self._emitData(i, expectedLength);
+                    return;
+                }
+                if (functionCode === (0x80 | self._cmd) && i + EXCEPTION_LENGTH <= bufferLength) {
+                    self._emitData(i, EXCEPTION_LENGTH);
+                    return;
+                }
             }
 
             // frame header matches, but still missing bytes pending
@@ -102,9 +153,7 @@ util.inherits(RTUBufferedPort, EventEmitter);
  */
 RTUBufferedPort.prototype._emitData = function(start, length) {
     var buffer = this._buffer.slice(start, start + length);
-
     modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
-
     this.emit("data", buffer);
     this._buffer = this._buffer.slice(start + length);
 };
@@ -163,8 +212,11 @@ RTUBufferedPort.prototype.write = function(data) {
             this._length = 6 + 2;
             break;
         case 43:
-            modbusSerialDebug("RTUBuffered F43 not supported");
-            this._length = 0;
+            // this function is super special
+            // you know the format of the code response
+            // and you need to continuously check that all of the data has arrived before emitting
+            // see onData for more info.
+            this._length = "unknown";
             break;
         default:
             // raise and error ?
@@ -178,8 +230,7 @@ RTUBufferedPort.prototype.write = function(data) {
     modbusSerialDebug({
         action: "send serial rtu buffered",
         data: data,
-        unitid: this._id,
-        functionCode: this._cmd
+        length: this._length
     });
 };
 
