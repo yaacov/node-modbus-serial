@@ -12,6 +12,7 @@ var MAX_BUFFER_LENGTH = 256;
 var CRC_LENGTH = 2;
 var READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
 var LENGTH_UNKNOWN = "unknown";
+var BITS_TO_NUM_OF_OBJECTS = 7;
 
 // Helper function -> Bool
 // BIT | TYPE
@@ -105,7 +106,7 @@ var RTUBufferedPort = function(path, options) {
             if (unitId !== self._id) continue;
 
             if (functionCode === self._cmd && functionCode === READ_DEVICE_IDENTIFICATION_FUNCTION_CODE) {
-                if (bufferLength <= 7) {
+                if (bufferLength <= BITS_TO_NUM_OF_OBJECTS + i) {
                     return;
                 }
                 var numObjects = self._buffer[7 + i];
