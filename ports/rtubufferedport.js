@@ -10,6 +10,7 @@ var EXCEPTION_LENGTH = 5;
 var MIN_DATA_LENGTH = 6;
 var MAX_BUFFER_LENGTH = 256;
 var CRC_LENGTH = 2;
+var READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
 
 // Helper function -> Bool
 // BIT | TYPE
@@ -102,7 +103,7 @@ var RTUBufferedPort = function(path, options) {
 
             if (unitId !== self._id) continue;
 
-            if (functionCode === self._cmd && functionCode === 43) {
+            if (functionCode === self._cmd && functionCode === READ_DEVICE_IDENTIFICATION_FUNCTION_CODE) {
                 if (bufferLength <= 7) {
                     return;
                 }
@@ -230,6 +231,8 @@ RTUBufferedPort.prototype.write = function(data) {
     modbusSerialDebug({
         action: "send serial rtu buffered",
         data: data,
+        unitid: this._id,
+        functionCode: this._cmd,
         length: this._length
     });
 };
