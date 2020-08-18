@@ -11,6 +11,7 @@ var MIN_DATA_LENGTH = 6;
 var MAX_BUFFER_LENGTH = 256;
 var CRC_LENGTH = 2;
 var READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
+var LENGTH_UNKNOWN = "unknown";
 
 // Helper function -> Bool
 // BIT | TYPE
@@ -83,7 +84,7 @@ var RTUBufferedPort = function(path, options) {
 
 
         // check data length
-        if (expectedLength !== "unknown" &&
+        if (expectedLength !== LENGTH_UNKNOWN &&
             expectedLength < MIN_DATA_LENGTH ||
             bufferLength < EXCEPTION_LENGTH
         ) { return; }
@@ -217,7 +218,7 @@ RTUBufferedPort.prototype.write = function(data) {
             // you know the format of the code response
             // and you need to continuously check that all of the data has arrived before emitting
             // see onData for more info.
-            this._length = "unknown";
+            this._length = LENGTH_UNKNOWN;
             break;
         default:
             // raise and error ?
