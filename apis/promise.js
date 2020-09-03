@@ -65,7 +65,7 @@ var addPromiseAPI = function(Modbus) {
     var cl = Modbus.prototype;
 
     // set/get unitID
-    cl.setID = function(id) {this._unitID = +id;};
+    cl.setID = function(id) {this._unitID = Number(id);};
     cl.getID = function() {return this._unitID;};
 
     // set/get timeout
