@@ -162,6 +162,23 @@ function _readFC16(data, next) {
         next(null, { "address": dataAddress, "length": length });
 }
 
+/**
+ * Parse  the data fro Modbus -
+ * Read File Records
+ *
+ * @param {Buffer4} buffer
+ * @param {Function} next
+ */
+function _readFC20(data,  next) {
+    var fileRespLength = parseInt(data.readUInt8(2));
+    var result = [];
+    for (var i = 5; i < fileRespLength + 5; i++) {
+        var reg = data.readUInt8(i);
+        result.push(reg);
+    }
+    if(next)
+        next(null, { "data": result, "length": fileRespLength });
+}
 
 /**
  * Parse the data for a Modbus -
@@ -403,6 +420,9 @@ function _onReceive(data) {
             // Force Multiple Coils
             // Preset Multiple Registers
             _readFC16(data, next);
+            break;
+        case 20:
+            _readFC20(data, transaction.next);
             break;
         case 43:
             // read device identification
@@ -877,6 +897,45 @@ ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
 
     // write buffer to serial port
+    _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+};
+
+/**
+ * Write  mODBUS "Read Device Identification" (FC=20) to serial port
+ * @param {number} address the slave unit address.
+ * @param {Function} next;
+ */
+ModbusRTU.prototype.writeFC20 = function(address, fileNumber, recordNumber, next) {
+    if (this.isOpen !== true) {
+        if (next) next(new PortNotOpenError());
+        return;
+    }
+    // sanity check
+    if (typeof address === "undefined") {
+        if (next) next(new BadAddressError());
+        return;
+    }
+    // function code defaults to 20
+    var code = 20;
+    var codeLength = 10;
+    var byteCount = 7;
+    var chunck = 100;
+
+    this._transactions[this._port._transactionIdWrite] = {
+        nextAddress: address,
+        nextCode: code,
+        lengthUnknown: true,
+        next: next
+    };
+    var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+    buf.writeUInt8(address, 0);
+    buf.writeUInt8(code, 1);
+    buf.writeUInt8(byteCount, 2);
+    buf.writeUInt8(6, 3); // ReferenceType
+    buf.writeUInt16BE(fileNumber, 4);
+    buf.writeUInt16BE(recordNumber, 6);
+    buf.writeUInt8(chunck, 9);
+    buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
     _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 };
 
