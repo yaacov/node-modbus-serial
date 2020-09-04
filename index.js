@@ -44,24 +44,21 @@ var modbusErrorMessages = [
     "Slave device busy (retry request again later)"
 ];
 
-var PortNotOpenError = function ()
-{
+var PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = PORT_NOT_OPEN_MESSAGE;
     this.errno = PORT_NOT_OPEN_ERRNO;
 };
 
-var BadAddressError = function ()
-{
+var BadAddressError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = BAD_ADDRESS_MESSAGE;
     this.errno = BAD_ADDRESS_ERRNO;
 };
 
-var TransactionTimedOutError = function ()
-{
+var TransactionTimedOutError = function() {
     this.name = this.constructor.name;
     this.message = TRANSACTION_TIMED_OUT_MESSAGE;
     this.errno = TRANSACTION_TIMED_OUT_ERRNO;
@@ -83,17 +80,14 @@ var TransactionTimedOutError = function ()
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC2(data, next)
-{
+function _readFC2(data, next) {
     var length = data.readUInt8(2);
     var contents = [];
 
-    for (var i = 0; i < length; i++)
-    {
+    for (var i = 0; i < length; i++) {
         var reg = data[i + 3];
 
-        for (var j = 0; j < 8; j++)
-        {
+        for (var j = 0; j < 8; j++) {
             contents.push((reg & 1) === 1);
             reg = reg >> 1;
         }
@@ -110,13 +104,11 @@ function _readFC2(data, next)
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC4(data, next)
-{
+function _readFC4(data, next) {
     var length = data.readUInt8(2);
     var contents = [];
 
-    for (var i = 0; i < length; i += 2)
-    {
+    for (var i = 0; i < length; i += 2) {
         var reg = data.readUInt16BE(i + 3);
         contents.push(reg);
     }
@@ -132,8 +124,7 @@ function _readFC4(data, next)
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC5(data, next)
-{
+function _readFC5(data, next) {
     var dataAddress = data.readUInt16BE(2);
     var state = data.readUInt16BE(4);
 
@@ -148,8 +139,7 @@ function _readFC5(data, next)
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC6(data, next)
-{
+function _readFC6(data, next) {
     var dataAddress = data.readUInt16BE(2);
     var value = data.readUInt16BE(4);
 
@@ -164,8 +154,7 @@ function _readFC6(data, next)
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC16(data, next)
-{
+function _readFC16(data, next) {
     var dataAddress = data.readUInt16BE(2);
     var length = data.readUInt16BE(4);
 
@@ -176,21 +165,19 @@ function _readFC16(data, next)
 /**
  * Parse  the data fro Modbus -
  * Read File Records
- * 
- * @param {Buffer4} buffer 
- * @param {Function} next 
+ *
+ * @param {Buffer4} buffer
+ * @param {Function} next
  */
-function _readFC20(data, next)
-{
+function _readFC20(data,  next) {
     var fileRespLength = parseInt(data.readUInt8(2));
     var result = [];
-    for (var i = 5; i < fileRespLength + 5; i++)
-    {
+    for (var i = 5; i < fileRespLength + 5; i++) {
         var reg = data.readUInt8(i);
         result.push(reg);
     }
-    if (next)
-        next(null, { "data": result, "length": fileRespLength })
+    if(next)
+        next(null, { "data": result, "length": fileRespLength });
 }
 
 /**
@@ -201,8 +188,7 @@ function _readFC20(data, next)
  * @param {Modbus} modbus the client in case we need to read more device information
  * @param {Function} next the function to call next.
  */
-function _readFC43(data, modbus, next)
-{
+function _readFC43(data, modbus, next) {
     var address = parseInt(data.readUInt8(0));
     var readDeviceIdCode = parseInt(data.readUInt8(3));
     var conformityLevel = parseInt(data.readUInt8(4));
@@ -212,8 +198,7 @@ function _readFC43(data, modbus, next)
 
     var startAt = 8;
     var result = {};
-    for (var i = 0; i < numOfObjects; i++)
-    {
+    for (var i = 0; i < numOfObjects; i++) {
         var objectId = parseInt(data.readUInt8(startAt));
         var objectLength = parseInt(data.readUInt8(startAt + 1));
         const startOfData = startAt + 2;
@@ -223,16 +208,13 @@ function _readFC43(data, modbus, next)
 
     // is it saying to follow and did you previously get data
     // if you did not previously get data go ahead and halt to prevent an infinite loop
-    if (moreFollows && numOfObjects)
-    {
-        const cb = function (err, data)
-        {
+    if (moreFollows && numOfObjects) {
+        const cb = function(err, data) {
             data.data = Object.assign(data.data, result);
             return next(err, data);
         };
         modbus.writeFC43(address, readDeviceIdCode, nextObjectId, cb);
-    } else if (next)
-    {
+    } else if (next) {
         next(null, { data: result, conformityLevel });
     }
 }
@@ -242,18 +224,15 @@ function _readFC43(data, modbus, next)
  * @param {Buffer} buffer The data to send
  * @private
  */
-function _writeBufferToPort(buffer, transactionId)
-{
+function _writeBufferToPort(buffer, transactionId) {
     var transaction = this._transactions[transactionId];
 
-    if (transaction)
-    {
+    if (transaction) {
         transaction._timeoutFired = false;
         transaction._timeoutHandle = _startTimeout(this._timeout, transaction);
 
         // If in debug mode, stash a copy of the request payload
-        if (this._debugEnabled)
-        {
+        if (this._debugEnabled) {
             transaction.request = Uint8Array.prototype.slice.call(buffer);
             transaction.responses = [];
         }
@@ -270,20 +249,15 @@ function _writeBufferToPort(buffer, transactionId)
  * @return {number} The handle of the timeout
  * @private
  */
-function _startTimeout(duration, transaction)
-{
-    if (!duration)
-    {
+function _startTimeout(duration, transaction) {
+    if (!duration) {
         return undefined;
     }
-    return setTimeout(function ()
-    {
+    return setTimeout(function() {
         transaction._timeoutFired = true;
-        if (transaction.next)
-        {
+        if (transaction.next) {
             var err = new TransactionTimedOutError();
-            if (transaction.request && transaction.responses)
-            {
+            if (transaction.request && transaction.responses) {
                 err.modbusRequest = transaction.request;
                 err.modbusResponses = transaction.responses;
             }
@@ -298,8 +272,7 @@ function _startTimeout(duration, transaction)
  * @param {number} timeoutHandle The handle of the timeout
  * @private
  */
-function _cancelTimeout(timeoutHandle)
-{
+function _cancelTimeout(timeoutHandle) {
     clearTimeout(timeoutHandle);
 }
 
@@ -309,8 +282,7 @@ function _cancelTimeout(timeoutHandle)
  * @param {Buffer} data The data received
  * @private
  */
-function _onReceive(data)
-{
+function _onReceive(data) {
     var modbus = this;
     var error;
 
@@ -318,33 +290,26 @@ function _onReceive(data)
     var transaction = modbus._transactions[modbus._port._transactionIdRead];
 
     // the _transactionIdRead can be missing, ignore wrong transaction it's
-    if (!transaction)
-    {
+    if (!transaction) {
         return;
     }
 
-    if (transaction.responses)
-    {
+    if (transaction.responses) {
         /* Stash what we received */
         transaction.responses.push(Uint8Array.prototype.slice.call(data));
     }
 
     /* What do we do next? */
-    var next = function (err, res)
-    {
-        if (transaction.next)
-        {
+    var next = function(err, res) {
+        if (transaction.next) {
             /* Include request/response data if enabled */
-            if (transaction.request && transaction.responses)
-            {
-                if (err)
-                {
+            if (transaction.request && transaction.responses) {
+                if (err) {
                     err.modbusRequest = transaction.request;
                     err.modbusResponses = transaction.responses;
                 }
 
-                if (res)
-                {
+                if (res) {
                     res.request = transaction.request;
                     res.responses = transaction.responses;
                 }
@@ -360,8 +325,7 @@ function _onReceive(data)
     transaction._timeoutHandle = undefined;
 
     /* check if the timeout fired */
-    if (transaction._timeoutFired === true)
-    {
+    if (transaction._timeoutFired === true) {
         // we have already called back with an error, so don't generate a new callback
         return;
     }
@@ -371,8 +335,7 @@ function _onReceive(data)
 
     /* check minimal length
      */
-    if (!transaction.lengthUnknown && data.length < 5)
-    {
+    if (!transaction.lengthUnknown && data.length < 5) {
         error = "Data length error, expected " +
             transaction.nextLength + " got " + data.length;
         next(new Error(error));
@@ -383,8 +346,7 @@ function _onReceive(data)
      * if CRC is bad raise an error
      */
     var crcIn = data.readUInt16LE(data.length - 2);
-    if (crcIn !== crc16(data.slice(0, -2)))
-    {
+    if (crcIn !== crc16(data.slice(0, -2))) {
         error = "CRC error";
         next(new Error(error));
         return;
@@ -397,11 +359,9 @@ function _onReceive(data)
     /* check for modbus exception
      */
     if (data.length >= 5 &&
-        code === (0x80 | transaction.nextCode))
-    {
+        code === (0x80 | transaction.nextCode)) {
         var errorCode = data.readUInt8(2);
-        if (transaction.next)
-        {
+        if (transaction.next) {
             error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
             error.modbusCode = errorCode;
             next(error);
@@ -413,8 +373,7 @@ function _onReceive(data)
      * if we do not expect this data
      * raise an error
      */
-    if (!transaction.lengthUnknown && data.length !== transaction.nextLength)
-    {
+    if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
         error = "Data length error, expected " +
             transaction.nextLength + " got " + data.length;
         next(new Error(error));
@@ -425,8 +384,7 @@ function _onReceive(data)
      * if we do not expect this message
      * raise an error
      */
-    if (address !== transaction.nextAddress || code !== transaction.nextCode)
-    {
+    if (address !== transaction.nextAddress || code !== transaction.nextCode) {
         error = "Unexpected data error, expected " +
             transaction.nextAddress + " got " + address;
         next(new Error(error));
@@ -436,8 +394,7 @@ function _onReceive(data)
     /* parse incoming data
      */
 
-    switch (code)
-    {
+    switch (code) {
         case 1:
         case 2:
             // Read Coil Status (FC=01)
@@ -478,8 +435,7 @@ function _onReceive(data)
  *
  * @param {SerialPort} port the serial port to use.
  */
-var ModbusRTU = function (port)
-{
+var ModbusRTU = function(port) {
     // the serial port to use
     this._port = port;
 
@@ -504,21 +460,17 @@ util.inherits(ModbusRTU, EventEmitter);
  * @param {Function} callback the function to call next on open success
  *      of failure.
  */
-ModbusRTU.prototype.open = function (callback)
-{
+ModbusRTU.prototype.open = function(callback) {
     var modbus = this;
 
     // open the serial port
-    modbus._port.open(function (error)
-    {
-        if (error)
-        {
+    modbus._port.open(function(error) {
+        if (error) {
             modbusSerialDebug({ action: "port open error", error: error });
             /* On serial port open error call next function */
             if (callback)
                 callback(error);
-        } else
-        {
+        } else {
             /* init ports transaction id and counter */
             modbus._port._transactionIdRead = 1;
             modbus._port._transactionIdWrite = 1;
@@ -545,12 +497,10 @@ ModbusRTU.prototype.open = function (callback)
  */
 Object.defineProperty(ModbusRTU.prototype, "isDebugEnabled", {
     enumerable: true,
-    get: function ()
-    {
+    get: function() {
         return this._debugEnabled;
     },
-    set: function (enable)
-    {
+    set: function(enable) {
         enable = Boolean(enable);
         this._debugEnabled = enable;
     }
@@ -562,10 +512,8 @@ Object.defineProperty(ModbusRTU.prototype, "isDebugEnabled", {
  */
 Object.defineProperty(ModbusRTU.prototype, "isOpen", {
     enumerable: true,
-    get: function ()
-    {
-        if (this._port)
-        {
+    get: function() {
+        if (this._port) {
             return this._port.isOpen;
         }
 
@@ -580,15 +528,12 @@ Object.defineProperty(ModbusRTU.prototype, "isOpen", {
  * @param {Function} callback the function to call next on close success
  *      or failure.
  */
-ModbusRTU.prototype.close = function (callback)
-{
+ModbusRTU.prototype.close = function(callback) {
     // close the serial port if exist
-    if (this._port)
-    {
+    if (this._port) {
         this._port.removeAllListeners("data");
         this._port.close(callback);
-    } else
-    {
+    } else {
         // nothing needed to be done
         callback();
     }
@@ -600,15 +545,12 @@ ModbusRTU.prototype.close = function (callback)
  * @param {Function} callback the function to call next on close success
  *      or failure.
  */
-ModbusRTU.prototype.destroy = function (callback)
-{
+ModbusRTU.prototype.destroy = function(callback) {
     // close the serial port if exist and it has a destroy function
-    if (this._port && this._port.destroy)
-    {
+    if (this._port && this._port.destroy) {
         this._port.removeAllListeners("data");
         this._port.destroy(callback);
-    } else
-    {
+    } else {
         // nothing needed to be done
         callback();
     }
@@ -622,8 +564,7 @@ ModbusRTU.prototype.destroy = function (callback)
  * @param {number} length the total number of coils requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next)
-{
+ModbusRTU.prototype.writeFC1 = function(address, dataAddress, length, next) {
     this.writeFC2(address, dataAddress, length, next, 1);
 };
 
@@ -635,18 +576,15 @@ ModbusRTU.prototype.writeFC1 = function (address, dataAddress, length, next)
  * @param {number} length the total number of digital inputs requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, code)
-{
+ModbusRTU.prototype.writeFC2 = function(address, dataAddress, length, next, code) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -685,8 +623,7 @@ ModbusRTU.prototype.writeFC2 = function (address, dataAddress, length, next, cod
  * @param {number} length the total number of registers requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next)
-{
+ModbusRTU.prototype.writeFC3 = function(address, dataAddress, length, next) {
     this.writeFC4(address, dataAddress, length, next, 3);
 };
 
@@ -698,18 +635,15 @@ ModbusRTU.prototype.writeFC3 = function (address, dataAddress, length, next)
  * @param {number} length the total number of registers requested.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, code)
-{
+ModbusRTU.prototype.writeFC4 = function(address, dataAddress, length, next, code) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -748,18 +682,15 @@ ModbusRTU.prototype.writeFC4 = function (address, dataAddress, length, next, cod
  * @param {number} state the boolean state to write to the coil (true / false).
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next)
-{
+ModbusRTU.prototype.writeFC5 = function(address, dataAddress, state, next) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -781,11 +712,9 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next)
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
 
-    if (state)
-    {
+    if (state) {
         buf.writeUInt16BE(0xff00, 4);
-    } else
-    {
+    } else {
         buf.writeUInt16BE(0x0000, 4);
     }
 
@@ -804,18 +733,15 @@ ModbusRTU.prototype.writeFC5 = function (address, dataAddress, state, next)
  * @param {number} value the value to write to the register.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next)
-{
+ModbusRTU.prototype.writeFC6 = function(address, dataAddress, value, next) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -837,11 +763,9 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next)
     buf.writeUInt8(code, 1);
     buf.writeUInt16BE(dataAddress, 2);
 
-    if (Buffer.isBuffer(value))
-    {
+    if (Buffer.isBuffer(value)) {
         value.copy(buf, 4);
-    } else
-    {
+    } else {
         buf.writeUInt16BE(value, 4);
     }
 
@@ -860,18 +784,15 @@ ModbusRTU.prototype.writeFC6 = function (address, dataAddress, value, next)
  * @param {Array} array the array of boolean states to write to coils.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next)
-{
+ModbusRTU.prototype.writeFC15 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -898,17 +819,14 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next)
     buf.writeUInt8(dataBytes, 6);
 
     // clear the data bytes before writing bits data
-    for (i = 0; i < dataBytes; i++)
-    {
+    for (i = 0; i < dataBytes; i++) {
         buf.writeUInt8(0, 7 + i);
     }
 
-    for (i = 0; i < array.length; i++)
-    {
+    for (i = 0; i < array.length; i++) {
         // buffer bits are already all zero (0)
         // only set the ones set to one (1)
-        if (array[i])
-        {
+        if (array[i]) {
             buf.writeBit(1, i, 7);
         }
     }
@@ -928,18 +846,15 @@ ModbusRTU.prototype.writeFC15 = function (address, dataAddress, array, next)
  * @param {Array} array the array of values to write to registers.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next)
-{
+ModbusRTU.prototype.writeFC16 = function(address, dataAddress, array, next) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
 
     // sanity check
-    if (typeof address === "undefined" || typeof dataAddress === "undefined")
-    {
+    if (typeof address === "undefined" || typeof dataAddress === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -955,8 +870,7 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next)
     };
 
     var dataLength = array.length;
-    if (Buffer.isBuffer(array))
-    {
+    if (Buffer.isBuffer(array)) {
         // if array is a buffer it has double length
         dataLength = array.length / 2;
     }
@@ -971,13 +885,10 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next)
     buf.writeUInt8(dataLength * 2, 6);
 
     // copy content of array to buf
-    if (Buffer.isBuffer(array))
-    {
+    if (Buffer.isBuffer(array)) {
         array.copy(buf, 7);
-    } else
-    {
-        for (var i = 0; i < dataLength; i++)
-        {
+    } else {
+        for (var i = 0; i < dataLength; i++) {
             buf.writeUInt16BE(array[i], 7 + 2 * i);
         }
     }
@@ -990,20 +901,17 @@ ModbusRTU.prototype.writeFC16 = function (address, dataAddress, array, next)
 };
 
 /**
- * Write  Modbus "Read Device Identification" (FC=20) to serial port
+ * Write  mODBUS "Read Device Identification" (FC=20) to serial port
  * @param {number} address the slave unit address.
  * @param {Function} next;
  */
-ModbusRTU.prototype.writeFC20 = function (address, fileNumber, recordNumber, next)
-{
-    if (this.isOpen !== true)
-    {
+ModbusRTU.prototype.writeFC20 = function(address, fileNumber, recordNumber, next) {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
     // sanity check
-    if (typeof address === "undefined")
-    {
+    if (typeof address === "undefined") {
         if (next) next(new BadAddressError());
         return;
     }
@@ -1023,13 +931,13 @@ ModbusRTU.prototype.writeFC20 = function (address, fileNumber, recordNumber, nex
     buf.writeUInt8(address, 0);
     buf.writeUInt8(code, 1);
     buf.writeUInt8(byteCount, 2);
-    buf.writeUInt8(6, 3); //ReferenceType
+    buf.writeUInt8(6, 3); // ReferenceType
     buf.writeUInt16BE(fileNumber, 4);
     buf.writeUInt16BE(recordNumber, 6);
     buf.writeUInt8(chunck, 9);
     buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
     _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
-}
+};
 
 /**
  * Write a Modbus "Read Device Identification" (FC=43) to serial port.
@@ -1039,11 +947,9 @@ ModbusRTU.prototype.writeFC20 = function (address, fileNumber, recordNumber, nex
  * @param {number} objectId the array of values to write to registers.
  * @param {Function} next the function to call next.
  */
-ModbusRTU.prototype.writeFC43 = function (address, deviceIdCode, objectId, next)
-{
+ModbusRTU.prototype.writeFC43 = function(address, deviceIdCode, objectId, next) {
     // check port is actually open before attempting write
-    if (this.isOpen !== true)
-    {
+    if (this.isOpen !== true) {
         if (next) next(new PortNotOpenError());
         return;
     }
@@ -1079,8 +985,7 @@ require("./apis/promise")(ModbusRTU);
 // exports
 module.exports = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
-try
-{
+try {
     module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
 } catch (err) { }
 module.exports.TcpPort = require("./ports/tcpport");
