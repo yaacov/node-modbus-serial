@@ -45,7 +45,7 @@ export class ModbusRTU {
   writeCoil(dataAddress: number, state: boolean): Promise<WriteCoilResult>;
   writeCoils(dataAddress: number, states: Array<boolean>): Promise<WriteMultipleResult>;
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
-  writeRegisters(dataAddress: number, values: Array<number>): Promise<WriteMultipleResult>; // 16
+  writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
   
   isOpen: boolean;
 }
