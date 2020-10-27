@@ -143,8 +143,11 @@ TcpPort.prototype.open = function(callback) {
  * @param callback
  */
 TcpPort.prototype.close = function(callback) {
-    this.callback = callback;
-    this._client.end();
+    this._client.removeAllListeners();
+    this._client.end(function() {
+        modbus.emit("close");
+        callback()
+    );
 };
 
 /**
