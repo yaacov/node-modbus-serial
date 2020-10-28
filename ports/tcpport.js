@@ -146,7 +146,7 @@ TcpPort.prototype.close = function(callback) {
     this._client.removeAllListeners();
     this._client.end(function() {
         modbus.emit("close");
-        callback()
+        callback();
     );
 };
 
