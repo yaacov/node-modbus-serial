@@ -179,6 +179,7 @@ TelnetPort.prototype.open = function(callback) {
 TelnetPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end();
+    this.removeAllListeners();
 };
 
 /**
