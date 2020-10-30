@@ -201,6 +201,7 @@ AsciiPort.prototype.open = function(callback) {
  */
 AsciiPort.prototype.close = function(callback) {
     this._client.close(callback);
+    this.removeAllListeners();
 };
 
 /**

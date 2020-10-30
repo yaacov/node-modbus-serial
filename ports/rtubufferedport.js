@@ -177,6 +177,7 @@ RTUBufferedPort.prototype.open = function(callback) {
  */
 RTUBufferedPort.prototype.close = function(callback) {
     this._client.close(callback);
+    this.removeAllListeners();
 };
 
 /**
