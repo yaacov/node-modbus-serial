@@ -7,10 +7,10 @@ var mockery = require("mockery");
 describe("Modbus TCP RTU buffered port", function() {
     var port;
 
-    function send(buffer) {
+    function send(buffers) {
         port.open(function() {
             setTimeout(function() {
-                port._client.receive(buffer);
+                buffers.forEach(function(buffer) { port._client.receive(buffer); });
                 port.close();
             });
         });
@@ -67,7 +67,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(Buffer.from("000100000006110366778899", "hex"));
+            send([Buffer.from("000100000006110366778899", "hex")]);
         });
 
         it("should return a valid Modbus TCP RTU message", function(done) {
@@ -75,9 +75,11 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(Buffer.from("0002000000", "hex"));
-            send(Buffer.from("0611036677", "hex"));
-            send(Buffer.from("8899", "hex"));
+            send([
+                Buffer.from("0002000000", "hex"),
+                Buffer.from("0611036677", "hex"),
+                Buffer.from("8899", "hex")
+            ]);
         });
 
         it("should return a valid Modbus TCP exception", function(done) {
@@ -85,7 +87,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1183044136");
                 done();
             });
-            send(Buffer.from("000300000003118304", "hex"));
+            send([Buffer.from("000300000003118304", "hex")]);
         });
 
         it("Illegal start chars, should synchronize to valid Modbus TCP RTU message", function(done) {
@@ -93,7 +95,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(Buffer.from("3456000400000006110366778899", "hex"));
+            send([Buffer.from("3456000400000006110366778899", "hex")]);
         });
 
         it("Illegal end chars, should return a valid Modbus TCP RTU message", function(done) {
@@ -101,7 +103,7 @@ describe("Modbus TCP RTU buffered port", function() {
                 expect(data.toString("hex")).to.equal("1103667788994fa2");
                 done();
             });
-            send(Buffer.from("0005000000061103667788993456", "hex"));
+            send([Buffer.from("0005000000061103667788993456", "hex")]);
         });
     });
 
