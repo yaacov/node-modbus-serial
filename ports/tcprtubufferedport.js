@@ -206,6 +206,8 @@ TcpRTUBufferedPort.prototype.open = function(callback) {
 TcpRTUBufferedPort.prototype.close = function(callback) {
     this.callback = callback;
     this._client.end(callback);
+
+    this.removeAllListeners();
 };
 
 /**
