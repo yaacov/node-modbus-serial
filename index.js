@@ -64,6 +64,12 @@ var TransactionTimedOutError = function() {
     this.errno = TRANSACTION_TIMED_OUT_ERRNO;
 };
 
+var SerialPortError = function() {
+    this.name = this.constructor.name;
+    this.message = null;
+    this.errno = "ECONNREFUSED";
+};
+
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
  * this class makes ModbusRTU calls fun and easy.
@@ -437,10 +443,10 @@ function _onReceive(data) {
  * @private
  */
 function _onError (e) {
-	var err = new SerialPortError();
-	err.message = e.message;
-	err.stack = e.stack;
-	this.emit ('error', err);
+    var err = new SerialPortError();
+    err.message = e.message;
+    err.stack = e.stack;
+    this.emit ('error', err);
 };
 
 /**
