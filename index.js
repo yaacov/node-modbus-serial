@@ -447,7 +447,7 @@ function _onError(e) {
     err.message = e.message;
     err.stack = e.stack;
     this.emit("error", err);
-};
+}
 
 /**
  * Class making ModbusRTU calls fun and easy.
