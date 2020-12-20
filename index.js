@@ -446,7 +446,7 @@ function _onError(e) {
     var err = new SerialPortError();
     err.message = e.message;
     err.stack = e.stack;
-    this.emit('error', err);
+    this.emit("error", err);
 };
 
 /**
@@ -468,6 +468,7 @@ var ModbusRTU = function(port) {
     this._debugEnabled = false;
 
     this._onReceive = _onReceive.bind(this);
+    this._onError = _onError.bind(this);
 
     EventEmitter.call(this);
 };
@@ -499,12 +500,12 @@ ModbusRTU.prototype.open = function(callback) {
              */
             modbus._port.removeListener("data", modbus._onReceive);
             modbus._port.on("data", modbus._onReceive);
-			
-			/* On serial port error
-			 * (re-)register the error listner function
-			 */
-			modbus._port.removeListener("error", modbus._onError);
-			modbus._port.on("error", modbus._onError);
+
+            /* On serial port error
+             * (re-)register the error listner function
+             */
+            modbus._port.removeListener("error", modbus._onError);
+            modbus._port.on("error", modbus._onError);
 
             /* Hook the close event so we can relay it to our callers. */
             modbus._port.once("close", modbus.emit.bind(modbus, "close"));
