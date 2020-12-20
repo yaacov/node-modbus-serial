@@ -73,7 +73,7 @@ var RTUBufferedPort = function(path, options) {
     this._client = new SerialPort(path, options);
 
     // attach an error listner on the SerialPort object
-    this._client.on("error", function (error) {
+    this._client.on("error", function(error) {
         self.emit("error", error);
     });
 

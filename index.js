@@ -442,11 +442,11 @@ function _onReceive(data) {
  * @param {Error} error The error received
  * @private
  */
-function _onError (e) {
+function _onError(e) {
     var err = new SerialPortError();
     err.message = e.message;
     err.stack = e.stack;
-    this.emit ('error', err);
+    this.emit('error', err);
 };
 
 /**

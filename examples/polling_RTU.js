@@ -33,7 +33,7 @@ var mbsState    = MBS_STATE_INIT;
 
 // Upon SerialPort error
 client.on("error", function(error) {
-	console.log("SerialPort Error: ", error);
+    console.log("SerialPort Error: ", error);
 });
 
 
