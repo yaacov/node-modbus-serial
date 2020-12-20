@@ -64,6 +64,12 @@ var TransactionTimedOutError = function() {
     this.errno = TRANSACTION_TIMED_OUT_ERRNO;
 };
 
+var SerialPortError = function() {
+    this.name = this.constructor.name;
+    this.message = null;
+    this.errno = "ECONNREFUSED";
+};
+
 /**
  * @fileoverview ModbusRTU module, exports the ModbusRTU class.
  * this class makes ModbusRTU calls fun and easy.
@@ -431,6 +437,19 @@ function _onReceive(data) {
 }
 
 /**
+ * Handle SerialPort errors.
+ *
+ * @param {Error} error The error received
+ * @private
+ */
+function _onError(e) {
+    var err = new SerialPortError();
+    err.message = e.message;
+    err.stack = e.stack;
+    this.emit("error", err);
+}
+
+/**
  * Class making ModbusRTU calls fun and easy.
  *
  * @param {SerialPort} port the serial port to use.
@@ -449,6 +468,7 @@ var ModbusRTU = function(port) {
     this._debugEnabled = false;
 
     this._onReceive = _onReceive.bind(this);
+    this._onError = _onError.bind(this);
 
     EventEmitter.call(this);
 };
@@ -480,6 +500,12 @@ ModbusRTU.prototype.open = function(callback) {
              */
             modbus._port.removeListener("data", modbus._onReceive);
             modbus._port.on("data", modbus._onReceive);
+
+            /* On serial port error
+             * (re-)register the error listner function
+             */
+            modbus._port.removeListener("error", modbus._onError);
+            modbus._port.on("error", modbus._onError);
 
             /* Hook the close event so we can relay it to our callers. */
             modbus._port.once("close", modbus.emit.bind(modbus, "close"));

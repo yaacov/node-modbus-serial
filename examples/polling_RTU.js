@@ -31,6 +31,11 @@ var mbsScan     = 1000;
 var mbsTimeout  = 5000;
 var mbsState    = MBS_STATE_INIT;
 
+// Upon SerialPort error
+client.on("error", function(error) {
+    console.log("SerialPort Error: ", error);
+});
+
 
 //==============================================================
 var connectClient = function()
