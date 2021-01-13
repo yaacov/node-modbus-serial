@@ -282,6 +282,22 @@ var addConnctionAPI = function(Modbus) {
         // open and call next
         return open(this, next);
     };
+
+    //Connect to existing client socket
+    cl.connectRTUSocket = function( socket, next ) {
+
+        const thisModbus = this;
+        this._port = socket;
+        this._port.open = function( callback ) {
+            
+            //existing socket is already connected
+            thisModbus._port.isOpen = true;
+            callback();
+        }
+        
+        // open and call next
+        return open(this, next);
+    };
 };
 
 /**
