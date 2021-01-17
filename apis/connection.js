@@ -296,7 +296,7 @@ var addConnctionAPI = function(Modbus) {
             // existing socket is already connected
             thisModbus._port.isOpen = true;
             callback();
-        }
+        };
 
         // open and call next
         return open(this, next);
