@@ -293,7 +293,7 @@ var addConnctionAPI = function(Modbus) {
         const thisModbus = this;
         this._port = socket;
         this._port.open = function(callback) {
-            //existing socket is already connected
+            // existing socket is already connected
             thisModbus._port.isOpen = true;
             callback();
         }
