@@ -35,7 +35,7 @@ var addConnctionAPI = function(Modbus) {
             obj.open(next);
         } else {
             // o/w use  a promise
-            var promise = new Promise(function(resolve, reject) {
+            return new Promise(function(resolve, reject) {
                 function cb(err) {
                     if (err) {
                         reject(err);
@@ -46,8 +46,6 @@ var addConnctionAPI = function(Modbus) {
 
                 obj.open(cb);
             });
-
-            return promise;
         }
     };
 
@@ -108,6 +106,38 @@ var addConnctionAPI = function(Modbus) {
             options.timeout = this._timeout;
         }
         this._port = new TcpPort(ip, options);
+
+        // open and call next
+        return open(this, next);
+    };
+
+    /**
+     * Setup a communication port with existing socket, using TcpPort.
+     *
+     * @param {string} socket the instance of the net.Socket - required.
+     * @param {Object} options - the serial port options - optional.
+     * @param {Function} next the function to call next.
+     */
+    cl.linkTCP = function(socket, options, next) {
+        // check if we have options
+        if (typeof next === "undefined" && typeof options === "function") {
+            next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
+        options.socket = socket;
+
+        // create the TcpPort
+        const TcpPort = require("../ports/tcpport");
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
+        this._port = new TcpPort(options);
 
         // open and call next
         return open(this, next);
