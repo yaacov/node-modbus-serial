@@ -60,7 +60,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("03", "ascii"));
                     port._client.receive(Buffer.from("06", "ascii"));
@@ -84,7 +84,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("83", "ascii"));
                     port._client.receive(Buffer.from("04", "ascii"));
@@ -102,7 +102,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("010300000040443A", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     for (var i = 0; i < (LONG_MSG.length - 4); i += 2) {
                         port._client.receive(Buffer.from(LONG_MSG.slice(i, i + 2), "ascii"));
                     }
@@ -124,7 +124,7 @@ describe("Modbus Ascii port", function() {
                     port._client.receive(Buffer.from("54", "ascii")); // illegal char
                     port._client.receive(Buffer.from("54", "ascii")); // illegal char
                     port._client.receive(Buffer.from("FF", "ascii")); // illegal char
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("03", "ascii"));
                     port._client.receive(Buffer.from("06", "ascii"));
@@ -148,7 +148,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("03", "ascii"));
                     port._client.receive(Buffer.from("06", "ascii"));
@@ -176,7 +176,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(":", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("03", "ascii"));
                     port._client.receive(Buffer.from("06", "ascii"));
