@@ -23,8 +23,13 @@ var TelnetPort = function(ip, options) {
     this.ip = ip;
     this.openFlag = false;
     this.callback = null;
+    this._externalSocket = null;
 
     // options
+    if(typeof ip === "object") {
+        options = ip;
+        this.ip = options.ip;
+    }
     if (typeof options === "undefined") options = {};
     this.port = options.port || TELNET_PORT; // telnet server port
 
@@ -43,8 +48,17 @@ var TelnetPort = function(ip, options) {
         }
     };
 
+    if(options.socket) {
+        if(options.socket instanceof net.Socket) {
+            this._externalSocket = options.socket;
+            this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
+        } else {
+            throw new Error("invalid socket provided");
+        }
+    }
+
     // create a socket
-    this._client = new net.Socket();
+    this._client = this._externalSocket || new net.Socket();
     if (options.timeout) this._client.setTimeout(options.timeout);
 
     // register the port data event
@@ -167,8 +181,15 @@ TelnetPort.prototype._emitData = function(start, length) {
  * @param callback
  */
 TelnetPort.prototype.open = function(callback) {
-    this.callback = callback;
-    this._client.connect(this.port, this.ip);
+    if(this._externalSocket === null) {
+        this.callback = callback;
+        this._client.connect(this.port, this.ip);
+    } else if(this.openFlag) {
+        modbusSerialDebug("telnet port: external socket is opened");
+        callback(); // go ahead to setup existing socket
+    } else {
+        callback(new Error("telnet port: external socket is not opened"));
+    }
 };
 
 /**

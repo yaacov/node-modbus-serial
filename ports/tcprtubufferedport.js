@@ -33,15 +33,28 @@ var TcpRTUBufferedPort = function(ip, options) {
     modbus.openFlag = false;
     modbus.callback = null;
     modbus._transactionIdWrite = 1;
+    this._externalSocket = null;
 
     // options
+    if(typeof ip === "object") {
+        options = ip;
+    }
     if (typeof options === "undefined") options = {};
     modbus.connectOptions = {
-        host: ip,
+        host: ip || options.ip,
         port: options.port || MODBUS_PORT,
         localAddress: options.localAddress,
         family: options.family || 0
     };
+
+    if(options.socket) {
+        if(options.socket instanceof net.Socket) {
+            this._externalSocket = options.socket;
+            this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
+        } else {
+            throw new Error("invalid socket provided");
+        }
+    }
 
     // internal buffer
     modbus._buffer = Buffer.alloc(0);
@@ -56,7 +69,7 @@ var TcpRTUBufferedPort = function(ip, options) {
     };
 
     // create a socket
-    modbus._client = new net.Socket();
+    modbus._client = this._externalSocket || new net.Socket();
     if (options.timeout) this._client.setTimeout(options.timeout);
 
     // register the port data event
@@ -194,8 +207,15 @@ TcpRTUBufferedPort.prototype._emitData = function(start, length) {
  * @param callback
  */
 TcpRTUBufferedPort.prototype.open = function(callback) {
-    this.callback = callback;
-    this._client.connect(this.connectOptions);
+    if(this._externalSocket === null) {
+        this.callback = callback;
+        this._client.connect(this.connectOptions);
+    } else if(this.openFlag) {
+        modbusSerialDebug("TcpRTUBuffered port: external socket is opened");
+        callback(); // go ahead to setup existing socket
+    } else {
+        callback(new Error("TcpRTUBuffered port: external socket is not opened"));
+    }
 };
 
 /**
