@@ -171,6 +171,30 @@ var addConnctionAPI = function(Modbus) {
         // open and call next
         return open(this, next);
     };
+    cl.linkTcpRTUBuffered = function(socket, options, next) {
+        // check if we have options
+        if (typeof next === "undefined" && typeof options === "function") {
+            next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
+        options.socket = socket;
+
+        // create the TcpPort
+        const TcpRTUBufferedPort = require("../ports/tcprtubufferedport");
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
+        this._port = new TcpRTUBufferedPort(options);
+
+        // open and call next
+        return open(this, next);
+    };
 
     /**
      * Connect to a communication port, using TelnetPort.

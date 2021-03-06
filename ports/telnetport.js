@@ -28,6 +28,7 @@ var TelnetPort = function(ip, options) {
     // options
     if(typeof ip === "object") {
         options = ip;
+        this.ip = options.ip;
     }
     if (typeof options === "undefined") options = {};
     this.port = options.port || TELNET_PORT; // telnet server port
