@@ -1008,6 +1008,9 @@ require("./apis/connection")(ModbusRTU);
 // add the promise API
 require("./apis/promise")(ModbusRTU);
 
+// add worker API
+require("./apis/worker")(ModbusRTU);
+
 // exports
 module.exports = ModbusRTU;
 module.exports.TestPort = require("./ports/testport");
