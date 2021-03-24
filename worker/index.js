@@ -7,11 +7,8 @@ function getByteLength(type) {
             return 2;
         case "int32":
         case "uint32":
-            return 4;
         case "float":
-            return 6;
-        case "double":
-            return 8;
+            return 4;
         default:
             throw new Error("Unsupported type");
     }
@@ -96,8 +93,6 @@ Worker.prototype.bufferize = function(data, type) {
             buffer.writeUInt32BE(data[i], i * byteLength);
         } else if(type === "float") {
             buffer.writeFloatBE(data[i], i * byteLength);
-        } else if(type === "double") {
-            buffer.writeDoubleBE(data[i], i * byteLength);
         }
     }
 
@@ -119,8 +114,6 @@ Worker.prototype.unbufferize = function(buffer, type) {
             data.push(buffer.readUInt32BE(i * byteLength));
         } else if(type === "float") {
             data.push(buffer.readFloatBE(i * byteLength));
-        } else if(type === "double") {
-            data.push(buffer.readDoubleBE(i * byteLength));
         }
     }
 
@@ -141,14 +134,26 @@ Worker.prototype.send = function({ fc, unit, address, value, quantity, arg, type
 
         arg = arg || quantity || value;
 
+        if(fc === 1 || fc === 2) {
+            arg = arg || 1;
+        }
+
         if(fc === 3 || fc === 4) {
             type = type || "int16";
-            arg = arg * getByteLength(type) / 2;
+            arg = (arg || 1) * getByteLength(type) / 2;
         }
 
         if(fc === 6 || fc === 16) {
             type = type || "int16";
             arg = this.bufferize(arg, type);
+
+            if(fc === 6 && arg.length > 2) {
+                fc = 16;
+            }
+        }
+
+        if(fc === 5 && arg instanceof Array && arg.length > 1) {
+            fc = 15;
         }
 
         const id = this.nextId();
@@ -189,7 +194,7 @@ Worker.prototype.run = function() {
 
     if(typeof request.checkBeforeQueuing === "function") {
         if(request.checkBeforeQueuing() === false) {
-            return this.process();
+            return this.process(); // Skip current request and go on
         }
     }
 
@@ -228,7 +233,9 @@ Worker.prototype.run = function() {
         .catch((error) => {
             this._running.delete(request.id);
 
-            this.emit("failed", { request, error });
+            error.request = request;
+
+            this.emit("failed", error);
 
             request.reject(error);
 
@@ -245,7 +252,7 @@ Worker.prototype._poll_send = function(result, { i, fc, unit, address, arg, item
         this.log("scheduled push", "poll #" + result.id, "req #" + i, "#" + id, fc, length, type);
 
         const resolve = function(response) {
-            const data = items.map((address, index) => [fc, address, response[index]]);
+            const data = items.map((address, index) => ({ address, value: response[index] }));
             result._req += 1;
             result.done += 1;
             result.data = [...result.data, ...data];
@@ -275,10 +282,15 @@ Worker.prototype.poll = function({ unit, map, onProgress, maxChunkSize, skipErro
     skipErrors = Boolean(skipErrors);
     defaultType = defaultType || "int16";
 
+    if(unit < 1 || unit > 250 || isNaN(unit) || unit === undefined) {
+        throw new Error("invalid unit");
+    }
+
     this.log("poll", `unit=${unit}`, "map size=" + Object.keys(map).length, `maxChunkSize=${maxChunkSize}`, `skipErrors=${skipErrors}`);
 
     const result = {
         id: this.nextId(),
+        unit,
         total: 0,
         done: 0,
         data: [],
@@ -360,7 +372,7 @@ Worker.prototype.poll = function({ unit, map, onProgress, maxChunkSize, skipErro
 
     result.total = requests.length;
 
-    return new Promise(((resolve, reject) => {
+    return new Promise(((resolve) => {
 
         const check = function() {
             if(result._req === result.total) {
@@ -368,7 +380,7 @@ Worker.prototype.poll = function({ unit, map, onProgress, maxChunkSize, skipErro
                 resolve(result);
             } else if(result.error && skipErrors !== true) {
                 result.dt = Date.now() - result.dt;
-                reject(result);
+                resolve(result);
             }
         };
 
