@@ -146,7 +146,6 @@ Worker.prototype.send = function({ fc, unit, address, value, quantity, arg, type
         if(fc === 6 || fc === 16) {
             type = type || "int16";
             arg = this.bufferize(arg, type);
-
             if(fc === 6 && arg.length > 2) {
                 fc = 16;
             }
@@ -373,7 +372,6 @@ Worker.prototype.poll = function({ unit, map, onProgress, maxChunkSize, skipErro
     result.total = requests.length;
 
     return new Promise(((resolve) => {
-
         const check = function() {
             if(result._req === result.total) {
                 result.dt = Date.now() - result.dt;
