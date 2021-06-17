@@ -168,7 +168,8 @@ TcpPort.prototype.open = function(callback) {
  */
 TcpPort.prototype.close = function(callback) {
     this.callback = callback;
-    this._client.end(callback);
+    // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
+    this._client.end();
 
     this.removeAllListeners();
 };
