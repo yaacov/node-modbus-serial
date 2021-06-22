@@ -557,7 +557,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
  * @returns undefined
  * @private
  */
-function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
+ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
@@ -610,17 +610,17 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             _handlePromiseOrValue(promiseOrValue, cb);
         }
 
-            try {
+        try {
             if (vector.setCoilArray.length === 4) {
                 vector.setCoilArray(address, state, unitID, cb);
-                }
-                else {
+            }
+            else {
                 vector.setCoilArray(address, state, unitID);
-                }
             }
-            catch(err) {
-                cb(err);
-            }
+        }
+        catch(err) {
+            cb(err);
+        }
     } else if (vector.setCoil) {
         var state;
 
@@ -628,21 +628,21 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             var cb = buildCb(i);
             state = requestBuffer.readBit(i, 7);
 
-        try {
+            try {
                 if (vector.setCoil.length === 4) {
                     vector.setCoil(address + i, state !== false, unitID, cb);
-            }
-            else {
+                }
+                else {
                     var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
+                }
+            }
+            catch(err) {
+                cb(err);
             }
         }
-        catch(err) {
-            cb(err);
-        }
-    }
+    } 
 }
-
 /**
  * Function to handle FC16 request.
  *
