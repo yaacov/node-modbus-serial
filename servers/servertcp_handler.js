@@ -698,28 +698,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             modbusErrorCode: 0x02, // Illegal address
             msg: "Invalid length"
         });
-
-    if (vector.setRegister) {
-        var value;
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            value = requestBuffer.readUInt16BE(7 + i * 2);
-
-        try {
-                if (vector.setRegister.length === 4) {
-                    vector.setRegister(address + i, value, unitID, cb);
-            }
-            else {
-                    var promiseOrValue = vector.setRegister(address + i, value, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-            }
-        }
-        catch (err) {
-            cb(err);
-        }
-        }
-    } else if (vector.setRegisterArray) {
+    if (vector.setRegisterArray) {
         value = [];
 
         for (i = 0; i < length; i++) {
@@ -729,12 +708,31 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             _handlePromiseOrValue(value, cb);
         }
 
-            try {
-            if (vector.setRegisterArray.length === 6) {
+        try {
+            if (vector.setRegisterArray.length === 4) {
                 vector.setRegisterArray(address, value, unitID, cb);
+            }
+            else {
+                vector.setRegisterArray(address, value, unitID);
+            }
+        }
+        catch (err) {
+            cb(err);
+        }
+    } else if (vector.setRegister) {
+        var value;
+
+        for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
+            value = requestBuffer.readUInt16BE(7 + i * 2);
+
+            try {
+                if (vector.setRegister.length === 4) {
+                    vector.setRegister(address + i, value, unitID, cb);
                 }
                 else {
-                vector.setRegisterArray(address, value, unitID);
+                    var promiseOrValue = vector.setRegister(address + i, value, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
             catch(err) {
