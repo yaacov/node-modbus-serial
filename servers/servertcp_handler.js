@@ -601,28 +601,8 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             msg: "Invalid length"
         });
 
-    if (vector.setCoil) {
-        var state;
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            state = requestBuffer.readBit(i, 7);
-
-            try {
-                if (vector.setCoil.length === 4) {
-                    vector.setCoil(address + i, state !== false, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    } else if (vector.setCoilArray) {
-        state = [];
+    if (vector.setCoilArray) {
+        var state = [];
 
         for (i = 0; i < length; i++) {
             cb = buildCb(i);
@@ -630,12 +610,31 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             _handlePromiseOrValue(promiseOrValue, cb);
         }
 
-        try {
+            try {
             if (vector.setCoilArray.length === 4) {
                 vector.setCoilArray(address, state, unitID, cb);
+                }
+                else {
+                vector.setCoilArray(address, state, unitID);
+                }
+            }
+            catch(err) {
+                cb(err);
+            }
+    } else if (vector.setCoil) {
+        var state;
+
+        for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
+            state = requestBuffer.readBit(i, 7);
+
+        try {
+                if (vector.setCoil.length === 4) {
+                    vector.setCoil(address + i, state !== false, unitID, cb);
             }
             else {
-                vector.setCoilArray(address, state, unitID);
+                    var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
             }
         }
         catch(err) {
