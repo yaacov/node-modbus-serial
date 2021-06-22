@@ -255,7 +255,16 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 if (!err && values.length !== length) {
                     var error = new Error("Requested address length and response length do not match");
                     callback(error);
-                } else {
+                } else if (err) {
+                    var cb = buildCb(i);
+                    try {
+                        cb(err); //no need to use value array if there is an error
+                    }
+                    catch (ex) {
+                        cb(ex);
+                    }                    
+                }
+                else {
                     for (var i = 0; i < length; i++) {
                         var cb = buildCb(i);
                         try {
@@ -697,18 +706,18 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             var cb = buildCb(i);
             value = requestBuffer.readUInt16BE(7 + i * 2);
 
-            try {
+        try {
                 if (vector.setRegister.length === 4) {
                     vector.setRegister(address + i, value, unitID, cb);
-                }
-                else {
+            }
+            else {
                     var promiseOrValue = vector.setRegister(address + i, value, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
-                }
             }
-            catch(err) {
-                cb(err);
-            }
+        }
+        catch (err) {
+            cb(err);
+        }
         }
     } else if (vector.setRegisterArray) {
         value = [];
@@ -720,16 +729,17 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             _handlePromiseOrValue(value, cb);
         }
 
-        try {
+            try {
             if (vector.setRegisterArray.length === 6) {
                 vector.setRegisterArray(address, value, unitID, cb);
-            }
-            else {
+                }
+                else {
                 vector.setRegisterArray(address, value, unitID);
+                }
             }
-        }
-        catch (err) {
-            cb(err);
+            catch(err) {
+                cb(err);
+            }
         }
     }
 }
