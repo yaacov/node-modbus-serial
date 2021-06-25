@@ -256,17 +256,17 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                     var error = new Error("Requested address length and response length do not match");
                     callback(error);
                 } else if (err) {
-                    var cb = buildCb(i);
+                    const cb = buildCb(i);
                     try {
-                        cb(err); //no need to use value array if there is an error
+                        cb(err); // no need to use value array if there is an error
                     }
                     catch (ex) {
                         cb(ex);
-                    }                    
+                    }
                 }
                 else {
                     for (var i = 0; i < length; i++) {
-                        var cb = buildCb(i);
+                        const cb = buildCb(i);
                         try {
                             cb(err, values[i]);
                         }
@@ -557,7 +557,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
  * @returns undefined
  * @private
  */
- function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
+function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     var address = requestBuffer.readUInt16BE(2);
     var length = requestBuffer.readUInt16BE(4);
 
@@ -622,7 +622,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
             cb(err);
         }
     } else if (vector.setCoil) {
-        var state;
+        let state;
 
         for (var i = 0; i < length; i++) {
             var cb = buildCb(i);
@@ -641,7 +641,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
                 cb(err);
             }
         }
-    } 
+    }
 }
 /**
  * Function to handle FC16 request.
