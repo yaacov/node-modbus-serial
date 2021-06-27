@@ -255,9 +255,18 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 if (!err && values.length !== length) {
                     var error = new Error("Requested address length and response length do not match");
                     callback(error);
-                } else {
+                } else if (err) {
+                    const cb = buildCb(i);
+                    try {
+                        cb(err); // no need to use value array if there is an error
+                    }
+                    catch (ex) {
+                        cb(ex);
+                    }
+                }
+                else {
                     for (var i = 0; i < length; i++) {
-                        var cb = buildCb(i);
+                        const cb = buildCb(i);
                         try {
                             cb(err, values[i]);
                         }
@@ -592,28 +601,8 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
             msg: "Invalid length"
         });
 
-    if (vector.setCoil) {
-        var state;
-
-        for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            state = requestBuffer.readBit(i, 7);
-
-            try {
-                if (vector.setCoil.length === 4) {
-                    vector.setCoil(address + i, state !== false, unitID, cb);
-                }
-                else {
-                    var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
-                    _handlePromiseOrValue(promiseOrValue, cb);
-                }
-            }
-            catch(err) {
-                cb(err);
-            }
-        }
-    } else if (vector.setCoilArray) {
-        state = [];
+    if (vector.setCoilArray) {
+        var state = [];
 
         for (i = 0; i < length; i++) {
             cb = buildCb(i);
@@ -632,9 +621,28 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
         catch(err) {
             cb(err);
         }
+    } else if (vector.setCoil) {
+        let state;
+
+        for (var i = 0; i < length; i++) {
+            var cb = buildCb(i);
+            state = requestBuffer.readBit(i, 7);
+
+            try {
+                if (vector.setCoil.length === 4) {
+                    vector.setCoil(address + i, state !== false, unitID, cb);
+                }
+                else {
+                    var promiseOrValue = vector.setCoil(address + i, state !== false, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
+                }
+            }
+            catch(err) {
+                cb(err);
+            }
+        }
     }
 }
-
 /**
  * Function to handle FC16 request.
  *
@@ -689,8 +697,28 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             modbusErrorCode: 0x02, // Illegal address
             msg: "Invalid length"
         });
+    if (vector.setRegisterArray) {
+        value = [];
 
-    if (vector.setRegister) {
+        for (i = 0; i < length; i++) {
+            cb = buildCb(i);
+
+            value.push(requestBuffer.readUInt16BE(7 + i * 2));
+            _handlePromiseOrValue(value, cb);
+        }
+
+        try {
+            if (vector.setRegisterArray.length === 4) {
+                vector.setRegisterArray(address, value, unitID, cb);
+            }
+            else {
+                vector.setRegisterArray(address, value, unitID);
+            }
+        }
+        catch (err) {
+            cb(err);
+        }
+    } else if (vector.setRegister) {
         var value;
 
         for (var i = 0; i < length; i++) {
@@ -709,27 +737,6 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             catch(err) {
                 cb(err);
             }
-        }
-    } else if (vector.setRegisterArray) {
-        value = [];
-
-        for (i = 0; i < length; i++) {
-            cb = buildCb(i);
-
-            value.push(requestBuffer.readUInt16BE(7 + i * 2));
-            _handlePromiseOrValue(value, cb);
-        }
-
-        try {
-            if (vector.setRegisterArray.length === 6) {
-                vector.setRegisterArray(address, value, unitID, cb);
-            }
-            else {
-                vector.setRegisterArray(address, value, unitID);
-            }
-        }
-        catch (err) {
-            cb(err);
         }
     }
 }
