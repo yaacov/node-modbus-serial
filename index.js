@@ -391,10 +391,14 @@ function _onReceive(data) {
      * raise an error
      */
     if (address !== transaction.nextAddress || code !== transaction.nextCode) {
-        error = "Unexpected data error, expected " +
-            transaction.nextAddress + " got " + address;
-        next(new Error(error));
-        return;
+      error = "Unexpected data error, expected ";
+      if (address !== transaction.nextAddress)
+          error += "address " + transaction.nextAddress + " got " + address;
+      else
+          error += "code " + transaction.nextCode + " got " + code;
+      if (transaction.next)
+          next(new Error(error));
+      return;
     }
 
     /* parse incoming data
