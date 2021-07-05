@@ -386,14 +386,27 @@ function _onReceive(data) {
         return;
     }
 
-    /* check message address and code
+    /* check message address
      * if we do not expect this message
      * raise an error
      */
-    if (address !== transaction.nextAddress || code !== transaction.nextCode) {
+    if (address !== transaction.nextAddress) {
         error = "Unexpected data error, expected " +
-            transaction.nextAddress + " got " + address;
-        next(new Error(error));
+              "address " + transaction.nextAddress + " got " + address;
+        if (transaction.next)
+            next(new Error(error));
+        return;
+    }
+
+    /* check message code
+     * if we do not expect this message
+     * raise an error
+     */
+    if (code !== transaction.nextCode) {
+        error = "Unexpected data error, expected " +
+            "code " + transaction.nextCode + " got " + code;
+        if (transaction.next)
+            next(new Error(error));
         return;
     }
 
