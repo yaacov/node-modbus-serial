@@ -49,7 +49,7 @@ describe("Modbus Telnet port", function() {
                 });
             });
         });
-        it("should be able to be destoryed after opening", function(done) {
+        it("should be able to be destroyed after opening", function(done) {
             port.open(function() {
                 port.destroy(function() {
                     setTimeout(function() {
@@ -57,6 +57,14 @@ describe("Modbus Telnet port", function() {
                         done();
                     });
                 });
+            });
+        });
+        it("should not be closed on timeout", function(done) {
+            port.open(function() {
+                expect(port.isOpen).to.be.true;
+                port.emit("timeout");
+                expect(port.isOpen).to.be.true;
+                done();
             });
         });
     });
