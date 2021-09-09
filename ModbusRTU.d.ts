@@ -31,6 +31,10 @@ export class ModbusRTU {
   connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
   connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
   connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
+  linkTCP(socket: string, options: SerialPortOptions, next: Function);
+  linkTcpRTUBuffered(socket: string, options: TcpRTUPortOptions, next: Function);
+  linkTelnet(socket: string, options: TelnetPortOptions, next: Function);
+  connectRTUSocket(socket: string, next: Function);
 
   // Promise API
   setID(id: number): void;
@@ -46,7 +50,7 @@ export class ModbusRTU {
   writeCoils(dataAddress: number, states: Array<boolean>): Promise<WriteMultipleResult>;
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
-  
+
   isOpen: boolean;
 }
 
