@@ -31,7 +31,7 @@ export class ModbusRTU {
   connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
   connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
   connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
-  linkTCP(socket: string, options: SerialPortOptions, next: Function): void;
+  linkTCP(socket: string, options: TcpPortOptions, next: Function): void;
   linkTcpRTUBuffered(socket: string, options: TcpRTUPortOptions, next: Function): void;
   linkTelnet(socket: string, options: TelnetPortOptions, next: Function): void;
   connectRTUSocket(socket: string, next: Function): void;
@@ -107,6 +107,7 @@ export interface TcpPortOptions {
   port?: number;
   localAddress?: string;
   family?: number;
+  ip?: string;
 }
 
 export interface UdpPortOptions {

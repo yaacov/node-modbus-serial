@@ -115,7 +115,7 @@ var addConnctionAPI = function(Modbus) {
      * Setup a communication port with existing socket, using TcpPort.
      *
      * @param {string} socket the instance of the net.Socket - required.
-     * @param {Object} options - the serial port options - optional.
+     * @param {Object} options - the TCP port options - optional.
      * @param {Function} next the function to call next.
      */
     cl.linkTCP = function(socket, options, next) {
