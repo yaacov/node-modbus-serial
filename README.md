@@ -64,8 +64,8 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC3 "Read Holding Registers" | `readHoldingRegisters(addr, len) ` |
 | FC4 "Read Input Registers" | `readInputRegisters(addr, len) ` |
 | FC5 "Force Single Coil" | `writeCoil(coil, binary) //NOT setCoil` |
-| FC6 "Preset Single Register"
-| FC15 "Force Multiple Coil" | `writeRegister(addr, value)` |
+| FC6 "Preset Single Register" | `writeRegister(addr, value)` |
+ | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
 
