@@ -295,7 +295,7 @@ client.connectAsciiSerial(
     {
         baudRate: 9600,
         startOfSlaveFrameChar: 0x3A  // optional: slave frame delimiter
-        }, 
+    }, 
     write);
 
 function write() {
