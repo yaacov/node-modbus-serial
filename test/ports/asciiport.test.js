@@ -18,7 +18,7 @@ describe("Modbus Ascii port", function() {
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("serialport", mock);
         var AsciiPort = require("./../../ports/asciiport");
-        port = new AsciiPort("/dev/null", {startOfSlaveFrameChar: 0x3E});
+        port = new AsciiPort("/dev/null", { startOfSlaveFrameChar: 0x3E });
     });
 
     after(function() {
