@@ -282,6 +282,40 @@ serverTCP.on("socketError", function(err){
     console.error(err);
 });
 ```
+----
+###### Read and Write Modbus ASCII
+``` javascript
+// create an empty modbus client
+var Modbus = require("modbus-serial");
+var client = new Modbus();
+
+// open connection to a serial port
+client.connectAsciiSerial(
+    "/dev/ttyUSB0", 
+    {
+        baudRate: 9600,
+        startOfSlaveFrameChar: 0x3A  // optional: slave frame delimiter
+    }, 
+    write);
+
+function write() {
+    client.setID(1);
+
+    // write the values 0, 0xffff to registers starting at address 5
+    // on device number 1.
+    client.writeRegisters(5, [0 , 0xffff])
+        .then(read);
+}
+
+function read() {
+    // read the 2 registers starting at address 5
+    // on device number 1.
+    client.readHoldingRegisters(5, 2)
+        .then(console.log);
+}
+```
+----
+
 
 to get more see [Examples](https://github.com/yaacov/node-modbus-serial/wiki)
 
