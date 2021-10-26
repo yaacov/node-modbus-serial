@@ -110,7 +110,9 @@ var AsciiPort = function(path, options) {
     // options
     options = options || {};
     options.startOfSlaveFrameChar =
-        (options.startOfSlaveFrameChar === undefined) ? 0x3A : options.startOfSlaveFrameChar;
+        (options.startOfSlaveFrameChar === undefined) ?
+            0x3A :
+            options.startOfSlaveFrameChar;
 
     // disable auto open, as we handle the open
     options.autoOpen = false;
