@@ -1,4 +1,6 @@
 "use strict";
+/* eslint-disable no-ternary */
+
 var util = require("util");
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
