@@ -18,7 +18,10 @@ describe("Modbus Ascii port", function() {
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("serialport", mock);
         var AsciiPort = require("./../../ports/asciiport");
-        port = new AsciiPort("/dev/null", { startOfSlaveFrameChar: 0x3E });
+        port = new AsciiPort(
+            "/dev/null",
+            { startOfSlaveFrameChar: 0x3E }  // optional slave frame char ('>')
+        );
     });
 
     after(function() {
@@ -60,7 +63,7 @@ describe("Modbus Ascii port", function() {
             port.open(function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
                 setTimeout(function() {
-                    port._client.receive(Buffer.from(">", "ascii"));
+                    port._client.receive(Buffer.from(">", "ascii"));  // changed slave frame char
                     port._client.receive(Buffer.from("11", "ascii"));
                     port._client.receive(Buffer.from("03", "ascii"));
                     port._client.receive(Buffer.from("06", "ascii"));
@@ -76,7 +79,7 @@ describe("Modbus Ascii port", function() {
             });
         });
 
-        it("should return a valid Modbus RTU exception", function(done) {
+        it("should return a valid Modbus ASCII exception", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal("1183044136");
                 done();
@@ -112,7 +115,7 @@ describe("Modbus Ascii port", function() {
             });
         });
 
-        it("Illegal start chars, should synchronize to valid Modbus RTU message", function(done) {
+        it("Illegal start chars, should synchronize to valid Modbus ASCII message", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal("110306ae415652434049ad");
                 done();
@@ -140,7 +143,7 @@ describe("Modbus Ascii port", function() {
             });
         });
 
-        it("Illegal end chars, should return a valid Modbus RTU message", function(done) {
+        it("Illegal end chars, should return a valid Modbus ASCII message", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal("110306ae415652434049ad");
                 done();
@@ -168,7 +171,7 @@ describe("Modbus Ascii port", function() {
             });
         });
 
-        it("should return a valid Modbus RTU message on illegal chars", function(done) {
+        it("should return a valid Modbus ASCII message on illegal chars", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal("110306ae415652434049ad");
                 done();
@@ -194,7 +197,7 @@ describe("Modbus Ascii port", function() {
     });
 
     describe("#write", function() {
-        it("should write a valid RTU message to the port", function() {
+        it("should write a valid Modbus ASCII message to the port", function() {
             port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.toString("ascii")).to.equal(":1103006B00037E\r\n");
         });

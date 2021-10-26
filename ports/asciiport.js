@@ -109,7 +109,9 @@ var AsciiPort = function(path, options) {
 
     // options
     options = options || {};
-    options.startOfSlaveFrameChar =
+
+    // select char for start of slave frame (usually :)
+    this_.startOfSlaveFrameChar =
         (options.startOfSlaveFrameChar === undefined)
             ? 0x3A
             : options.startOfSlaveFrameChar;
@@ -136,7 +138,7 @@ var AsciiPort = function(path, options) {
         modbusSerialDebug(JSON.stringify({ action: "receive serial ascii port strings", data: data, buffer: modbus._buffer }));
 
         // check buffer for start delimiter
-        var sdIndex = modbus._buffer.indexOf(options.startOfSlaveFrameChar);
+        var sdIndex = modbus._buffer.indexOf(modbus._startOfSlaveFrameChar);
         if(sdIndex === -1) {
             // if not there, reset the buffer and return
             modbus._buffer = Buffer.from("");
