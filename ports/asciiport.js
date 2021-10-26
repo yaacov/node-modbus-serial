@@ -111,7 +111,7 @@ var AsciiPort = function(path, options) {
     options = options || {};
 
     // select char for start of slave frame (usually :)
-    this_.startOfSlaveFrameChar =
+    this._startOfSlaveFrameChar =
         (options.startOfSlaveFrameChar === undefined)
             ? 0x3A
             : options.startOfSlaveFrameChar;
