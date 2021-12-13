@@ -2,7 +2,7 @@ export class ModbusRTU {
   constructor(port?: any);
 
   open(callback: Function): void;
-  close(callback: Function): void;
+  close(callback?: Function): void;
 
   writeFC1(address: number, dataAddress: number, length: number, next: NodeStyleCallback<ReadCoilResult>): void;
   writeFC2(address: number, dataAddress: number, length: number, next: NodeStyleCallback<ReadCoilResult>): void;
