@@ -108,6 +108,7 @@ export interface TcpPortOptions {
   localAddress?: string;
   family?: number;
   ip?: string;
+  timeout?: number;
 }
 
 export interface UdpPortOptions {
