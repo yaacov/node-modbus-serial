@@ -4,7 +4,7 @@
 var util = require("util");
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var SerialPort = require("serialport");
+var SerialPort = require("serialport").SerialPort;
 var modbusSerialDebug = require("debug")("modbus-serial");
 
 var crc16 = require("../utils/crc16");
@@ -126,7 +126,7 @@ var AsciiPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client = new SerialPort(path, options);
+    this._client = new SerialPort(Object.assign({}, { path }, options));
 
     // register the port data event
     this._client.on("data", function(data) {

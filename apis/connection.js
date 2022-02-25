@@ -74,8 +74,8 @@ var addConnctionAPI = function(Modbus) {
         options.platformOptions = { vmin: MIN_MODBUSRTU_FRAMESZ, vtime: 0 };
 
         // create the SerialPort
-        var SerialPort = require("serialport");
-        this._port = new SerialPort(path, options);
+        var SerialPort = require("serialport").SerialPort;
+        this._port = new SerialPort(Object.assign({}, { path }, options));
 
         // open and call next
         return open(this, next);

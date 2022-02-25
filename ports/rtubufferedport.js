@@ -2,7 +2,7 @@
 var util = require("util");
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var SerialPort = require("serialport");
+var SerialPort = require("serialport").SerialPort;
 var modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
@@ -70,7 +70,7 @@ var RTUBufferedPort = function(path, options) {
     this._length = 0;
 
     // create the SerialPort
-    this._client = new SerialPort(path, options);
+    this._client = new SerialPort(Object.assign({}, { path }, options));
 
     // attach an error listner on the SerialPort object
     this._client.on("error", function(error) {
