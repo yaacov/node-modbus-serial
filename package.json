@@ -34,7 +34,9 @@
     "mocha-eslint": "^5.0.0",
     "mockery": "^2.1.0",
     "pump": "^3.0.0",
-    "sinon": "^7.5.0"
+    "sinon": "^7.5.0",
+    "webbluetooth": "^2.1.0",
+    "web-bluetooth-mock": "^1.0.2"
   },
   "dependencies": {
     "debug": "^4.1.1",
