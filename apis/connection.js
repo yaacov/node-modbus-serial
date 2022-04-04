@@ -379,6 +379,35 @@ var addConnctionAPI = function(Modbus) {
         // open and call next
         return open(this, next);
     };
+
+    /**
+     * Connect to existing client socket.
+     *
+     * @param {socket} socket the socket to connect to - required.
+     * @param {Function} next the function to call next.
+     */
+    cl.connectBle = function(options, next) {
+        // check if we have options
+        if (typeof next === "undefined" && typeof options === "function") {
+            next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
+        // create the TcpPort
+        var BlePort = require("../ports/bleport");
+        if (this._timeout) {
+            options.timeout = this._timeout;
+        }
+        this._port = new BlePort(options);
+
+        // open and call next
+        return open(this, next);
+    };
 };
 
 /**
