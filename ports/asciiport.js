@@ -1,7 +1,6 @@
 "use strict";
 /* eslint-disable no-ternary */
 
-var util = require("util");
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
 var SerialPort = require("serialport").SerialPort;
@@ -97,183 +96,181 @@ function _checkData(modbus, buf) {
         (0x7f & buf[1]) === modbus._cmd);
 }
 
-/**
- * Simulate a modbus-ascii port using serial connection.
- *
- * @param path
- * @param options
- * @constructor
- */
-var AsciiPort = function(path, options) {
-    var modbus = this;
+class AsciiPort extends EventEmitter {
+    /**
+     * Simulate a modbus-ascii port using serial connection.
+     *
+     * @param path
+     * @param options
+     * @constructor
+     */
+    constructor(path, options) {
+        super();
 
-    // options
-    options = options || {};
+        var modbus = this;
 
-    // select char for start of slave frame (usually :)
-    this._startOfSlaveFrameChar =
-        (options.startOfSlaveFrameChar === undefined)
-            ? 0x3A
-            : options.startOfSlaveFrameChar;
+        // options
+        options = options || {};
 
-    // disable auto open, as we handle the open
-    options.autoOpen = false;
+        // select char for start of slave frame (usually :)
+        this._startOfSlaveFrameChar =
+            (options.startOfSlaveFrameChar === undefined)
+                ? 0x3A
+                : options.startOfSlaveFrameChar;
 
-    // internal buffer
-    this._buffer = Buffer.from("");
-    this._id = 0;
-    this._cmd = 0;
-    this._length = 0;
+        // disable auto open, as we handle the open
+        options.autoOpen = false;
 
-    // create the SerialPort
-    this._client = new SerialPort(Object.assign({}, { path }, options));
+        // internal buffer
+        this._buffer = Buffer.from("");
+        this._id = 0;
+        this._cmd = 0;
+        this._length = 0;
 
-    // register the port data event
-    this._client.on("data", function(data) {
+        // create the SerialPort
+        this._client = new SerialPort(Object.assign({}, { path }, options));
 
-        // add new data to buffer
-        modbus._buffer = Buffer.concat([modbus._buffer, data]);
+        // register the port data event
+        this._client.on("data", function(data) {
 
-        modbusSerialDebug({ action: "receive serial ascii port", data: data, buffer: modbus._buffer });
-        modbusSerialDebug(JSON.stringify({ action: "receive serial ascii port strings", data: data, buffer: modbus._buffer }));
+            // add new data to buffer
+            modbus._buffer = Buffer.concat([modbus._buffer, data]);
 
-        // check buffer for start delimiter
-        var sdIndex = modbus._buffer.indexOf(modbus._startOfSlaveFrameChar);
-        if(sdIndex === -1) {
-            // if not there, reset the buffer and return
-            modbus._buffer = Buffer.from("");
-            return;
-        }
-        // if there is data before the start delimiter, remove it
-        if(sdIndex > 0) {
-            modbus._buffer = modbus._buffer.slice(sdIndex);
-        }
-        // do we have the complete message (i.e. are the end delimiters there)
-        if(modbus._buffer.includes("\r\n", 1, "ascii") === true) {
-            // check there is no excess data after end delimiters
-            var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
-            if(edIndex !== modbus._buffer.length - 1) {
-                // if there is, remove it
-                modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
+            modbusSerialDebug({ action: "receive serial ascii port", data: data, buffer: modbus._buffer });
+            modbusSerialDebug(JSON.stringify({ action: "receive serial ascii port strings", data: data, buffer: modbus._buffer }));
+
+            // check buffer for start delimiter
+            var sdIndex = modbus._buffer.indexOf(modbus._startOfSlaveFrameChar);
+            if(sdIndex === -1) {
+                // if not there, reset the buffer and return
+                modbus._buffer = Buffer.from("");
+                return;
             }
-
-            // we have what looks like a complete ascii encoded response message, so decode
-            var _data = _asciiDecodeResponseBuffer(modbus._buffer);
-            modbusSerialDebug({ action: "got EOM", data: _data, buffer: modbus._buffer });
-            if(_data !== null) {
-
-                // check if this is the data we are waiting for
-                if (_checkData(modbus, _data)) {
-                    modbusSerialDebug({ action: "emit data serial ascii port", data: data, buffer: modbus._buffer });
-                    modbusSerialDebug(JSON.stringify({ action: "emit data serial ascii port strings", data: data, buffer: modbus._buffer }));
-                    // emit a data signal
-                    modbus.emit("data", _data);
+            // if there is data before the start delimiter, remove it
+            if(sdIndex > 0) {
+                modbus._buffer = modbus._buffer.slice(sdIndex);
+            }
+            // do we have the complete message (i.e. are the end delimiters there)
+            if(modbus._buffer.includes("\r\n", 1, "ascii") === true) {
+                // check there is no excess data after end delimiters
+                var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
+                if(edIndex !== modbus._buffer.length - 1) {
+                    // if there is, remove it
+                    modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
                 }
+
+                // we have what looks like a complete ascii encoded response message, so decode
+                var _data = _asciiDecodeResponseBuffer(modbus._buffer);
+                modbusSerialDebug({ action: "got EOM", data: _data, buffer: modbus._buffer });
+                if(_data !== null) {
+
+                    // check if this is the data we are waiting for
+                    if (_checkData(modbus, _data)) {
+                        modbusSerialDebug({ action: "emit data serial ascii port", data: data, buffer: modbus._buffer });
+                        modbusSerialDebug(JSON.stringify({ action: "emit data serial ascii port strings", data: data, buffer: modbus._buffer }));
+                        // emit a data signal
+                        modbus.emit("data", _data);
+                    }
+                }
+                // reset the buffer now its been used
+                modbus._buffer = Buffer.from("");
+            } else {
+                // otherwise just wait for more data to arrive
             }
-            // reset the buffer now its been used
-            modbus._buffer = Buffer.from("");
-        } else {
-            // otherwise just wait for more data to arrive
-        }
-    });
+        });
+    }
 
     /**
      * Check if port is open.
      *
      * @returns {boolean}
      */
-    Object.defineProperty(this, "isOpen", {
-        enumerable: true,
-        get: function() {
-            return this._client.isOpen;
+    get isOpen() {
+        return this._client.isOpen;
+    }
+
+    /**
+     * Simulate successful port open.
+     *
+     * @param callback
+     */
+    open(callback) {
+        this._client.open(callback);
+    }
+
+    /**
+     * Simulate successful close port.
+     *
+     * @param callback
+     */
+    close(callback) {
+        this._client.close(callback);
+        this.removeAllListeners();
+    }
+
+    /**
+     * Send data to a modbus slave.
+     *
+     * @param data
+     */
+    write(data) {
+        if(data.length < MIN_DATA_LENGTH) {
+            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
+            return;
         }
-    });
 
-    EventEmitter.call(this);
-};
-util.inherits(AsciiPort, EventEmitter);
+        var length = null;
 
-/**
- * Simulate successful port open.
- *
- * @param callback
- */
-AsciiPort.prototype.open = function(callback) {
-    this._client.open(callback);
-};
+        // remember current unit and command
+        this._id = data[0];
+        this._cmd = data[1];
 
-/**
- * Simulate successful close port.
- *
- * @param callback
- */
-AsciiPort.prototype.close = function(callback) {
-    this._client.close(callback);
-    this.removeAllListeners();
-};
+        // calculate expected answer length (this is checked after ascii decoding)
+        switch (this._cmd) {
+            case 1:
+            case 2:
+                length = data.readUInt16BE(4);
+                this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
+                break;
+            case 3:
+            case 4:
+                length = data.readUInt16BE(4);
+                this._length = 3 + 2 * length + 2;
+                break;
+            case 5:
+            case 6:
+            case 15:
+            case 16:
+                this._length = 6 + 2;
+                break;
+            default:
+                // raise and error ?
+                modbusSerialDebug({ action: "unknown command", id: this._id.toString(16), command: this._cmd.toString(16) });
+                this._length = 0;
+                break;
+        }
 
-/**
- * Send data to a modbus slave.
- *
- * @param data
- */
-AsciiPort.prototype.write = function(data) {
-    if(data.length < MIN_DATA_LENGTH) {
-        modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
-        return;
+        // ascii encode buffer
+        var _encodedData = _asciiEncodeRequestBuffer(data);
+
+        // send buffer to slave
+        this._client.write(_encodedData);
+
+        modbusSerialDebug({
+            action: "send serial ascii port",
+            data: _encodedData,
+            unitid: this._id,
+            functionCode: this._cmd
+        });
+
+        modbusSerialDebug(JSON.stringify({
+            action: "send serial ascii port",
+            data: _encodedData,
+            unitid: this._id,
+            functionCode: this._cmd
+        }));
     }
-
-    var length = null;
-
-    // remember current unit and command
-    this._id = data[0];
-    this._cmd = data[1];
-
-    // calculate expected answer length (this is checked after ascii decoding)
-    switch (this._cmd) {
-        case 1:
-        case 2:
-            length = data.readUInt16BE(4);
-            this._length = 3 + parseInt((length - 1) / 8 + 1) + 2;
-            break;
-        case 3:
-        case 4:
-            length = data.readUInt16BE(4);
-            this._length = 3 + 2 * length + 2;
-            break;
-        case 5:
-        case 6:
-        case 15:
-        case 16:
-            this._length = 6 + 2;
-            break;
-        default:
-            // raise and error ?
-            modbusSerialDebug({ action: "unknown command", id: this._id.toString(16), command: this._cmd.toString(16) });
-            this._length = 0;
-            break;
-    }
-
-    // ascii encode buffer
-    var _encodedData = _asciiEncodeRequestBuffer(data);
-
-    // send buffer to slave
-    this._client.write(_encodedData);
-
-    modbusSerialDebug({
-        action: "send serial ascii port",
-        data: _encodedData,
-        unitid: this._id,
-        functionCode: this._cmd
-    });
-
-    modbusSerialDebug(JSON.stringify({
-        action: "send serial ascii port",
-        data: _encodedData,
-        unitid: this._id,
-        functionCode: this._cmd
-    }));
-};
+}
 
 /**
  * ASCII port for Modbus.
