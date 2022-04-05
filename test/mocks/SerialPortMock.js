@@ -1,53 +1,50 @@
 "use strict";
-var util = require("util");
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
 
+class SerialPortMock extends EventEmitter {
+    /**
+     * Mock for SerialPort
+     */
+    constructor(options, callback) {
+        super();
 
-/**
- * Mock for SerialPort
- */
-var SerialPortMock = function(options, callback) {
-    EventEmitter.call(this);
-    this._openFlag = false;
-    if (callback) {
-        callback(null);
-    }
-
-    Object.defineProperty(this, "isOpen", {
-        enumerable: true,
-        get: function() {
-            return this._openFlag;
+        this._openFlag = false;
+        if (callback) {
+            callback(null);
         }
-    });
-};
-util.inherits(SerialPortMock, EventEmitter);
-
-SerialPortMock.prototype.open = function(callback) {
-    this._openFlag = true;
-    if (callback) {
-        callback(null);
     }
-    this.emit("open");
-};
 
-SerialPortMock.prototype.write = function(buffer, callback) {
-    this._data = buffer;
-    if (callback) {
-        callback(null);
+    get isOpen() {
+        return this._openFlag;
     }
-};
 
-SerialPortMock.prototype.close = function(callback) {
-    this._openFlag = false;
-    if (callback) {
-        callback(null);
+    open(callback) {
+        this._openFlag = true;
+        if (callback) {
+            callback(null);
+        }
+        this.emit("open");
     }
-    this.emit("close");
-};
 
-SerialPortMock.prototype.receive = function(buffer) {
-    this.emit("data", buffer);
-};
+    write(buffer, callback) {
+        this._data = buffer;
+        if (callback) {
+            callback(null);
+        }
+    }
+
+    close(callback) {
+        this._openFlag = false;
+        if (callback) {
+            callback(null);
+        }
+        this.emit("close");
+    }
+
+    receive(buffer) {
+        this.emit("data", buffer);
+    }
+}
 
 module.exports = { SerialPort: SerialPortMock };

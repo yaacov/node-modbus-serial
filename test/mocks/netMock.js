@@ -1,62 +1,57 @@
 "use strict";
 var events = require("events");
 var EventEmitter = events.EventEmitter || events;
-var util = require("util");
 
-var Socket = function() {
-    EventEmitter.call(this);
-    this.destroyed = false;
-};
-util.inherits(Socket, EventEmitter);
-
-Socket.prototype.connect = function(port, host, connectListener) {
-    this.emit("connect");
-    if (connectListener) {
-        connectListener(null);
+class Socket extends EventEmitter {
+    constructor() {
+        super();
+        this.destroyed = false;
     }
-};
 
-Socket.prototype.end = function() {
-    this.emit("close", false);
-};
+    connect(port, host, connectListener) {
+        this.emit("connect");
+        if (connectListener) {
+            connectListener(null);
+        }
+    }
 
-Socket.prototype.write = function(data) {
-    this._data = data;
-};
+    end() {
+        this.emit("close", false);
+    }
 
-Socket.prototype.receive = function(buffer) {
-    this.emit("data", buffer);
-};
+    write(data) {
+        this._data = data;
+    }
 
-Socket.prototype.destroy = function() {
-    this.emit("close", true);
-    this.destroyed = true;
-};
+    receive(buffer) {
+        this.emit("data", buffer);
+    }
+
+    destroy() {
+        this.emit("close", true);
+        this.destroyed = true;
+    }
+}
 
 exports.Socket = Socket;
 
+class Server extends EventEmitter {
+    connect(socket) {
+        this.emit("connection", socket);
+    }
 
+    listen() {
+        this.emit("listening");
+    }
 
-var Server = function() {
-    EventEmitter.call(this);
-};
-util.inherits(Server, EventEmitter);
+    end() {
+        this.emit("close", false);
+    }
 
-Server.prototype.connect = function(socket) {
-    this.emit("connection", socket);
-};
-
-Server.prototype.listen = function() {
-    this.emit("listening");
-};
-
-Server.prototype.end = function() {
-    this.emit("close", false);
-};
-
-Server.prototype.receive = function(buffer) {
-    this.emit("data", buffer);
-};
+    receive(buffer) {
+        this.emit("data", buffer);
+    }
+}
 
 exports.Server = Server;
 
