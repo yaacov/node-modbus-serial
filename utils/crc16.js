@@ -6,13 +6,13 @@
  * @return {number} the calculated CRC16.
  */
 module.exports = function crc16(buffer) {
-    var crc = 0xFFFF;
-    var odd;
+    let crc = 0xFFFF;
+    let odd;
 
-    for (var i = 0; i < buffer.length; i++) {
+    for (let i = 0; i < buffer.length; i++) {
         crc = crc ^ buffer[i];
 
-        for (var j = 0; j < 8; j++) {
+        for (let j = 0; j < 8; j++) {
             odd = crc & 0x0001;
             crc = crc >> 1;
             if (odd) {

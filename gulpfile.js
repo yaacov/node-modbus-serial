@@ -1,7 +1,7 @@
 "use strict";
 
-var gulp = require("gulp");
-var pump = require("pump");
+const gulp = require("gulp");
+const pump = require("pump");
 const jsdoc = require("gulp-jsdoc3");
 const clean = require("gulp-clean");
 

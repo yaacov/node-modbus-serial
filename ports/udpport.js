@@ -1,17 +1,17 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var dgram = require("dgram");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const dgram = require("dgram");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require("../utils/crc16");
+const crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
-var MODBUS_PORT = 502; // modbus port
-var MAX_TRANSACTIONS = 256; // maximum transaction to wait for
-var MIN_DATA_LENGTH = 6;
-var MIN_MBAP_LENGTH = 6;
-var CRC_LENGTH = 2;
+const MODBUS_PORT = 502; // modbus port
+const MAX_TRANSACTIONS = 256; // maximum transaction to wait for
+const MIN_DATA_LENGTH = 6;
+const MIN_MBAP_LENGTH = 6;
+const CRC_LENGTH = 2;
 
 class ModbusUdpPort extends EventEmitter {
     /**
@@ -24,7 +24,7 @@ class ModbusUdpPort extends EventEmitter {
     constructor(ip, options) {
         super();
 
-        var modbus = this;
+        const modbus = this;
         this.ip = ip;
         this.openFlag = false;
         this._transactionIdWrite = 1;
@@ -42,9 +42,9 @@ class ModbusUdpPort extends EventEmitter {
         // wait for answer
         const self = this;
         this._client.on("message", function(data, rinfo) {
-            var buffer;
-            var crc;
-            var length;
+            let buffer;
+            let crc;
+            let length;
 
             // Filter stuff not intended for us
             if(rinfo.address !== self.ip || rinfo.port !== self.port)
@@ -136,7 +136,7 @@ class ModbusUdpPort extends EventEmitter {
         this._cmd = data[1];
 
         // remove crc and add mbap
-        var buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+        const buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
         buffer.writeUInt16BE(this._transactionIdWrite, 0);
         buffer.writeUInt16BE(0, 2);
         buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);

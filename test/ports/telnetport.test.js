@@ -1,23 +1,23 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
-var LONG_MSG = "010380018301830183018301830183018301830183018301830183018301830\
+const LONG_MSG = "010380018301830183018301830183018301830183018301830183018301830\
 1830183018301830183018301830183018301830183018301830183018301830183018301830183\
 0183018301830183018301830183018301830183018301830183018301830183018301830183018\
 3018301830183018301830183018301830183018346e0";
 
 describe("Modbus Telnet port", function() {
-    var port;
+    let port;
 
     before(function() {
-        var mock = require("./../mocks/netMock");
+        const mock = require("./../mocks/netMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("net", mock);
-        var TelnetPort = require("./../../ports/telnetport");
+        const TelnetPort = require("./../../ports/telnetport");
         port = new TelnetPort("127.0.0.1", { port: 9999 });
     });
 
@@ -118,7 +118,7 @@ describe("Modbus Telnet port", function() {
             port.open(function() {
                 port.write(Buffer.from("010300000040443A", "hex"));
                 setTimeout(function() {
-                    for (var i = 0; i < LONG_MSG.length; i += 2) {
+                    for (let i = 0; i < LONG_MSG.length; i += 2) {
                         port._client.receive(Buffer.from(LONG_MSG.slice(i, i + 2), "hex"));
                     }
                 });

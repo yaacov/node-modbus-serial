@@ -10,9 +10,9 @@
  */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var client = new ModbusRTU();
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+const client = new ModbusRTU();
 
 // open connection to a serial port
 //client.connectRTUBuffered("/dev/ttyUSB0", {baudRate: 9600})

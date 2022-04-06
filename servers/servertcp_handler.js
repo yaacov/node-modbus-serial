@@ -1,3 +1,4 @@
+/* eslint-disable no-var */
 "use strict";
 /**
  * Copyright (c) 2017, Yaacov Zamir <kobi.zamir@gmail.com>
@@ -15,7 +16,7 @@
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
 
-var modbusSerialDebug = require("debug")("modbus-serial");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
 /**
  * Check the length of request Buffer for length of 8.
@@ -68,16 +69,16 @@ function _handlePromiseOrValue(promiseOrValue, cb) {
  * @private
  */
 function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callback, fc) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
     if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
     // build answer
-    var dataBytes = parseInt((length - 1) / 8 + 1);
-    var responseBuffer = Buffer.alloc(3 + dataBytes + 2);
+    const dataBytes = parseInt((length - 1) / 8 + 1);
+    const responseBuffer = Buffer.alloc(3 + dataBytes + 2);
     try {
         responseBuffer.writeUInt8(dataBytes, 2);
     }
@@ -86,14 +87,14 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
         return;
     }
 
-    var isGetCoil = (fc === 1 && vector.getCoil);
-    var isGetDiscreteInpupt = (fc === 2 && vector.getDiscreteInput);
+    const isGetCoil = (fc === 1 && vector.getCoil);
+    const isGetDiscreteInpupt = (fc === 2 && vector.getDiscreteInput);
 
     // read coils
     if (isGetCoil || isGetDiscreteInpupt) {
-        var callbackInvoked = false;
-        var cbCount = 0;
-        var buildCb = function(i) {
+        let callbackInvoked = false;
+        let cbCount = 0;
+        const buildCb = function(i) {
             return function(err, value) {
                 if (err) {
                     if (!callbackInvoked) {
@@ -123,9 +124,9 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 msg: "Invalid length"
             });
 
-        var i = 0;
-        var cb = null;
-        var promiseOrValue = null;
+        let i = 0;
+        let cb = null;
+        let promiseOrValue = null;
 
         if (isGetCoil && vector.getCoil.length === 3) {
             for (i = 0; i < length; i++) {
@@ -187,15 +188,15 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
  * @private
  */
 function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
     if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
+    const responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     try {
         responseBuffer.writeUInt8(length * 2, 2);
     }
@@ -204,9 +205,9 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
         return;
     }
 
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(i) {
+    let callbackInvoked = false;
+    let cbCount = 0;
+    const buildCb = function(i) {
         return function(err, value) {
             if (err) {
                 if (!callbackInvoked) {
@@ -238,9 +239,9 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
     // read registers
     function tryAndHandlePromiseOrValue(i, values) {
-        var cb = buildCb(i);
+        const cb = buildCb(i);
         try {
-            var promiseOrValue = values[i];
+            const promiseOrValue = values[i];
             _handlePromiseOrValue(promiseOrValue, cb);
         }
         catch (err) {
@@ -253,7 +254,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
         if (vector.getMultipleHoldingRegisters.length === 4) {
             vector.getMultipleHoldingRegisters(address, length, unitID, function(err, values) {
                 if (!err && values.length !== length) {
-                    var error = new Error("Requested address length and response length do not match");
+                    const error = new Error("Requested address length and response length do not match");
                     callback(error);
                 } else if (err) {
                     const cb = buildCb(i);
@@ -277,13 +278,13 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
-            var values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            const values = vector.getMultipleHoldingRegisters(address, length, unitID);
             if (values.length === length) {
                 for (i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValue(i, values);
                 }
             } else {
-                var error = new Error("Requested address length and response length do not match");
+                const error = new Error("Requested address length and response length do not match");
                 callback(error);
             }
         }
@@ -291,12 +292,12 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     }
     else if (vector.getHoldingRegister) {
         for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
+            const cb = buildCb(i);
             try {
                 if (vector.getHoldingRegister.length === 3) {
                     vector.getHoldingRegister(address + i, unitID, cb);
                 } else {
-                    var promiseOrValue = vector.getHoldingRegister(address + i, unitID);
+                    const promiseOrValue = vector.getHoldingRegister(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
@@ -320,15 +321,15 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
  * @private
  */
 function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
     if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(3 + length * 2 + 2);
+    const responseBuffer = Buffer.alloc(3 + length * 2 + 2);
     try {
         responseBuffer.writeUInt8(length * 2, 2);
     }
@@ -337,9 +338,9 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
         return;
     }
 
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(i) {
+    let callbackInvoked = false;
+    let cbCount = 0;
+    const buildCb = function(i) {
         return function(err, value) {
             if (err) {
                 if (!callbackInvoked) {
@@ -370,9 +371,9 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
         });
 
     function tryAndHandlePromiseOrValues(i, values) {
-        var cb = buildCb(i);
+        const cb = buildCb(i);
         try {
-            var promiseOrValue = values[i];
+            const promiseOrValue = values[i];
             _handlePromiseOrValue(promiseOrValue, cb);
         }
         catch (err) {
@@ -385,11 +386,11 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
         if (vector.getMultipleInputRegisters.length === 4) {
             vector.getMultipleInputRegisters(address, length, unitID, function(err, values) {
                 if (!err && values.length !== length) {
-                    var error = new Error("Requested address length and response length do not match");
+                    const error = new Error("Requested address length and response length do not match");
                     callback(error);
                 } else {
-                    for (var i = 0; i < length; i++) {
-                        var cb = buildCb(i);
+                    for (let i = 0; i < length; i++) {
+                        const cb = buildCb(i);
                         try {
                             cb(err, values[i]);
                         }
@@ -400,13 +401,13 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
-            var values = vector.getMultipleInputRegisters(address, length, unitID);
+            const values = vector.getMultipleInputRegisters(address, length, unitID);
             if (values.length === length) {
                 for (var i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValues(i, values);
                 }
             } else {
-                var error = new Error("Requested address length and response length do not match");
+                const error = new Error("Requested address length and response length do not match");
                 callback(error);
             }
         }
@@ -415,13 +416,13 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
     else if (vector.getInputRegister) {
 
         for (i = 0; i < length; i++) {
-            var cb = buildCb(i);
+            const cb = buildCb(i);
             try {
                 if (vector.getInputRegister.length === 3) {
                     vector.getInputRegister(address + i, unitID, cb);
                 }
                 else {
-                    var promiseOrValue = vector.getInputRegister(address + i, unitID);
+                    const promiseOrValue = vector.getInputRegister(address + i, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
@@ -443,21 +444,21 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
  * @private
  */
 function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var state = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const state = requestBuffer.readUInt16BE(4);
 
     if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(8);
+    const responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(state, 4);
 
     if (vector.setCoil) {
-        var callbackInvoked = false;
-        var cb = function(err) {
+        let callbackInvoked = false;
+        const cb = function(err) {
             if (err) {
                 if (!callbackInvoked) {
                     callbackInvoked = true;
@@ -480,7 +481,7 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
                 vector.setCoil(address, state === 0xff00, unitID, cb);
             }
             else {
-                var promiseOrValue = vector.setCoil(address, state === 0xff00, unitID);
+                const promiseOrValue = vector.setCoil(address, state === 0xff00, unitID);
                 _handlePromiseOrValue(promiseOrValue, cb);
             }
         }
@@ -501,21 +502,21 @@ function _handleWriteCoil(requestBuffer, vector, unitID, callback) {
  * @private
  */
 function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var value = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const value = requestBuffer.readUInt16BE(4);
 
     if (_errorRequestBufferLength(requestBuffer)) {
         return;
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(8);
+    const responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(value, 4);
 
     if (vector.setRegister) {
-        var callbackInvoked = false;
-        var cb = function(err) {
+        let callbackInvoked = false;
+        const cb = function(err) {
             if (err) {
                 if (!callbackInvoked) {
                     callbackInvoked = true;
@@ -538,7 +539,7 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
                 vector.setRegister(address, value, unitID, cb);
             }
             else {
-                var promiseOrValue = vector.setRegister(address, value, unitID);
+                const promiseOrValue = vector.setRegister(address, value, unitID);
                 _handlePromiseOrValue(promiseOrValue, cb);
             }
         } catch(err) {
@@ -558,8 +559,8 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
  * @private
  */
 function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
     // if length is bad, ignore message
     if (requestBuffer.length !== 7 + Math.ceil(length / 8) + 2) {
@@ -567,13 +568,13 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(8);
+    const responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(length, 4);
 
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(/* i - not used at the moment */) {
+    let callbackInvoked = false;
+    let cbCount = 0;
+    const buildCb = function(/* i - not used at the moment */) {
         return function(err) {
             if (err) {
                 if (!callbackInvoked) {
@@ -602,7 +603,7 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
         });
 
     if (vector.setCoilArray) {
-        var state = [];
+        const state = [];
 
         for (i = 0; i < length; i++) {
             cb = buildCb(i);
@@ -654,8 +655,8 @@ function _handleForceMultipleCoils(requestBuffer, vector, unitID, callback) {
  * @private
  */
 function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) {
-    var address = requestBuffer.readUInt16BE(2);
-    var length = requestBuffer.readUInt16BE(4);
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
     // if length is bad, ignore message
     if (requestBuffer.length !== (7 + length * 2 + 2)) {
@@ -663,14 +664,14 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
     }
 
     // build answer
-    var responseBuffer = Buffer.alloc(8);
+    const responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(length, 4);
 
     // write registers
-    var callbackInvoked = false;
-    var cbCount = 0;
-    var buildCb = function(/* i - not used at the moment */) {
+    let callbackInvoked = false;
+    let cbCount = 0;
+    const buildCb = function(/* i - not used at the moment */) {
         return function(err) {
             if (err) {
                 if (!callbackInvoked) {
@@ -730,7 +731,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
                     vector.setRegister(address + i, value, unitID, cb);
                 }
                 else {
-                    var promiseOrValue = vector.setRegister(address + i, value, unitID);
+                    const promiseOrValue = vector.setRegister(address + i, value, unitID);
                     _handlePromiseOrValue(promiseOrValue, cb);
                 }
             }
@@ -752,7 +753,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
  * @private
  */
 function _handleMEI(requestBuffer, vector, unitID, callback) {
-    var MEIType = requestBuffer[2];
+    const MEIType = requestBuffer[2];
     switch(parseInt(MEIType)) {
         case 14:
             _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback);
@@ -782,8 +783,8 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
         return;
     }
 
-    var readDeviceIDCode = requestBuffer.readUInt8(3);
-    var objectID = requestBuffer.readUInt8(4);
+    const readDeviceIDCode = requestBuffer.readUInt8(3);
+    let objectID = requestBuffer.readUInt8(4);
 
     // Basic request parameters checks
     switch(readDeviceIDCode) {
@@ -815,7 +816,7 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
     }
 
     // Filling mandatory basic device identification objects
-    var objects = {
+    const objects = {
         0x00: "undefined",
         0x01: "undefined",
         0x02: "undefined"
@@ -831,16 +832,16 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
             objects[0x02] = pkg.version;
     }
 
-    var promiseOrValue = vector.readDeviceIdentification(unitID);
+    const promiseOrValue = vector.readDeviceIdentification(unitID);
     _handlePromiseOrValue(promiseOrValue, function(err, value) {
         if(err) {
             callback(err);
             return;
         }
 
-        var userObjects = value;
+        const userObjects = value;
 
-        for(var o of Object.keys(userObjects)) {
+        for(const o of Object.keys(userObjects)) {
             const i = parseInt(o);
             if(!isNaN(i) && i >= 0 && i <= 255)
                 objects[i] = userObjects[o];
@@ -856,12 +857,12 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
             objectID = 0x00;
         }
 
-        var ids = [];
-        var totalLength = 2 + MEI14HeaderLen + 2; // UnitID + FC + MEI14Header + CRC
-        var lastID = 0;
-        var conformityLevel = 0x81;
+        const ids = [];
+        let totalLength = 2 + MEI14HeaderLen + 2; // UnitID + FC + MEI14Header + CRC
+        let lastID = 0;
+        let conformityLevel = 0x81;
 
-        var supportedIDs = Object.keys(objects);
+        const supportedIDs = Object.keys(objects);
 
         // Filtering of objects and Conformity level determination
         for(var id of supportedIDs) {
@@ -909,9 +910,9 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
         }
 
         ids.sort((a, b) => parseInt(a) - parseInt(b));
-        var responseBuffer = Buffer.alloc(totalLength);
+        const responseBuffer = Buffer.alloc(totalLength);
 
-        var i = 2;
+        let i = 2;
         i = responseBuffer.writeUInt8(14, i);                                   // MEI type
         i = responseBuffer.writeUInt8(readDeviceIDCode, i);
         i = responseBuffer.writeUInt8(conformityLevel, i);

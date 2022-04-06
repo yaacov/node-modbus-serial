@@ -1,16 +1,16 @@
 "use strict";
 /* eslint-disable no-ternary */
 
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var SerialPort = require("serialport").SerialPort;
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const SerialPort = require("serialport").SerialPort;
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require("../utils/crc16");
-var calculateLrc = require("./../utils/lrc");
+const crc16 = require("../utils/crc16");
+const calculateLrc = require("./../utils/lrc");
 
 /* TODO: const should be set once, maybe */
-var MIN_DATA_LENGTH = 6;
+const MIN_DATA_LENGTH = 6;
 
 /**
  * Ascii encode a 'request' buffer and return it. This includes removing
@@ -26,7 +26,7 @@ function _asciiEncodeRequestBuffer(buf) {
     buf.writeUInt8(calculateLrc(buf.slice(0, -2)), buf.length - 2);
 
     // create a new buffer of the correct size
-    var bufAscii = Buffer.alloc(buf.length * 2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
+    const bufAscii = Buffer.alloc(buf.length * 2 + 1); // 1 byte start delimit + x2 data as ascii encoded + 2 lrc + 2 end delimit
 
     // create the ascii payload
 
@@ -51,18 +51,18 @@ function _asciiEncodeRequestBuffer(buf) {
 function _asciiDecodeResponseBuffer(bufAscii) {
 
     // create a new buffer of the correct size (based on ascii encoded buffer length)
-    var bufDecoded = Buffer.alloc((bufAscii.length - 1) / 2);
+    const bufDecoded = Buffer.alloc((bufAscii.length - 1) / 2);
 
     // decode into new buffer (removing delimiters at start and end)
-    for (var i = 0; i < (bufAscii.length - 3) / 2; i++) {
+    for (let i = 0; i < (bufAscii.length - 3) / 2; i++) {
         bufDecoded.write(String.fromCharCode(bufAscii.readUInt8(i * 2 + 1), bufAscii.readUInt8(i * 2 + 2)), i, 1, "hex");
     }
 
     // check the lrc is true
-    var lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
+    const lrcIn = bufDecoded.readUInt8(bufDecoded.length - 2);
     if(calculateLrc(bufDecoded.slice(0, -2)) !== lrcIn) {
         // return null if lrc error
-        var calcLrc = calculateLrc(bufDecoded.slice(0, -2));
+        const calcLrc = calculateLrc(bufDecoded.slice(0, -2));
 
         modbusSerialDebug({ action: "LRC error", LRC: lrcIn.toString(16), calcLRC: calcLrc.toString(16) });
         return null;
@@ -107,7 +107,7 @@ class AsciiPort extends EventEmitter {
     constructor(path, options) {
         super();
 
-        var modbus = this;
+        const modbus = this;
 
         // options
         options = options || {};
@@ -140,7 +140,7 @@ class AsciiPort extends EventEmitter {
             modbusSerialDebug(JSON.stringify({ action: "receive serial ascii port strings", data: data, buffer: modbus._buffer }));
 
             // check buffer for start delimiter
-            var sdIndex = modbus._buffer.indexOf(modbus._startOfSlaveFrameChar);
+            const sdIndex = modbus._buffer.indexOf(modbus._startOfSlaveFrameChar);
             if(sdIndex === -1) {
                 // if not there, reset the buffer and return
                 modbus._buffer = Buffer.from("");
@@ -153,14 +153,14 @@ class AsciiPort extends EventEmitter {
             // do we have the complete message (i.e. are the end delimiters there)
             if(modbus._buffer.includes("\r\n", 1, "ascii") === true) {
                 // check there is no excess data after end delimiters
-                var edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
+                const edIndex = modbus._buffer.indexOf(0x0A); // ascii for '\n'
                 if(edIndex !== modbus._buffer.length - 1) {
                     // if there is, remove it
                     modbus._buffer = modbus._buffer.slice(0, edIndex + 1);
                 }
 
                 // we have what looks like a complete ascii encoded response message, so decode
-                var _data = _asciiDecodeResponseBuffer(modbus._buffer);
+                const _data = _asciiDecodeResponseBuffer(modbus._buffer);
                 modbusSerialDebug({ action: "got EOM", data: _data, buffer: modbus._buffer });
                 if(_data !== null) {
 
@@ -219,7 +219,7 @@ class AsciiPort extends EventEmitter {
             return;
         }
 
-        var length = null;
+        let length = null;
 
         // remember current unit and command
         this._id = data[0];
@@ -251,7 +251,7 @@ class AsciiPort extends EventEmitter {
         }
 
         // ascii encode buffer
-        var _encodedData = _asciiEncodeRequestBuffer(data);
+        const _encodedData = _asciiEncodeRequestBuffer(data);
 
         // send buffer to slave
         this._client.write(_encodedData);

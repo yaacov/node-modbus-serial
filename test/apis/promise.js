@@ -1,22 +1,22 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var ModbusRTU = require("../../index");
-var TestPort = ModbusRTU.TestPort;
-var testPort = new TestPort();
-var modbusRTU = new ModbusRTU(testPort);
+const ModbusRTU = require("../../index");
+const TestPort = ModbusRTU.TestPort;
+const testPort = new TestPort();
+const modbusRTU = new ModbusRTU(testPort);
 
-var expect = require("chai").expect;
+const expect = require("chai").expect;
 
 describe("Promise", function() {
 
     describe("Functions", function() {
         it("should bind promise functions on modbusRTU", function() {
-            var address = 1;
-            var arg = 1;
-            var value = 1;
-            var deviceIdCode = 1;
-            var objectId = 2;
+            const address = 1;
+            const arg = 1;
+            const value = 1;
+            const deviceIdCode = 1;
+            const objectId = 2;
 
             modbusRTU.open();
             expect(modbusRTU.readCoils(address, arg)).to.be.instanceOf(Promise);
@@ -32,7 +32,7 @@ describe("Promise", function() {
 
     describe("#setID", function() {
         it("should set a unit id on modubusRtu instance", function() {
-            var someId = 1;
+            const someId = 1;
             modbusRTU.setID(someId);
             expect(modbusRTU._unitID).to.be.equal(someId);
         });
@@ -40,7 +40,7 @@ describe("Promise", function() {
 
     describe("#getID", function() {
         it("should return the unit id of modubusRtu instance", function() {
-            var someId = 1;
+            const someId = 1;
             modbusRTU._unitID = someId;
             expect(modbusRTU.getID()).to.be.equal(someId);
         });
@@ -48,7 +48,7 @@ describe("Promise", function() {
 
     describe("#setTimeout", function() {
         it("should set a timeout on modubusRtu instance", function() {
-            var timeout = 1000;
+            const timeout = 1000;
             modbusRTU.setTimeout(timeout);
             expect(modbusRTU._timeout).to.be.equal(timeout);
         });

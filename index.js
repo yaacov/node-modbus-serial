@@ -18,22 +18,22 @@
 /* Add bit operation functions to Buffer
  */
 require("./utils/buffer_bit")();
-var crc16 = require("./utils/crc16");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const crc16 = require("./utils/crc16");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
 
-var PORT_NOT_OPEN_MESSAGE = "Port Not Open";
-var PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
+const PORT_NOT_OPEN_MESSAGE = "Port Not Open";
+const PORT_NOT_OPEN_ERRNO = "ECONNREFUSED";
 
-var BAD_ADDRESS_MESSAGE = "Bad Client Address";
-var BAD_ADDRESS_ERRNO = "ECONNREFUSED";
+const BAD_ADDRESS_MESSAGE = "Bad Client Address";
+const BAD_ADDRESS_ERRNO = "ECONNREFUSED";
 
-var TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
-var TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
+const TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
+const TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
 
-var modbusErrorMessages = [
+const modbusErrorMessages = [
     "Unknown error",
     "Illegal function (device does not support this read/write function)",
     "Illegal data address (register not supported by device)",
@@ -43,27 +43,27 @@ var modbusErrorMessages = [
     "Slave device busy (retry request again later)"
 ];
 
-var PortNotOpenError = function() {
+const PortNotOpenError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = PORT_NOT_OPEN_MESSAGE;
     this.errno = PORT_NOT_OPEN_ERRNO;
 };
 
-var BadAddressError = function() {
+const BadAddressError = function() {
     Error.captureStackTrace(this, this.constructor);
     this.name = this.constructor.name;
     this.message = BAD_ADDRESS_MESSAGE;
     this.errno = BAD_ADDRESS_ERRNO;
 };
 
-var TransactionTimedOutError = function() {
+const TransactionTimedOutError = function() {
     this.name = this.constructor.name;
     this.message = TRANSACTION_TIMED_OUT_MESSAGE;
     this.errno = TRANSACTION_TIMED_OUT_ERRNO;
 };
 
-var SerialPortError = function() {
+const SerialPortError = function() {
     this.name = this.constructor.name;
     this.message = null;
     this.errno = "ECONNREFUSED";
@@ -86,13 +86,13 @@ var SerialPortError = function() {
  * @param {Function} next the function to call next.
  */
 function _readFC2(data, next) {
-    var length = data.readUInt8(2);
-    var contents = [];
+    const length = data.readUInt8(2);
+    const contents = [];
 
-    for (var i = 0; i < length; i++) {
-        var reg = data[i + 3];
+    for (let i = 0; i < length; i++) {
+        let reg = data[i + 3];
 
-        for (var j = 0; j < 8; j++) {
+        for (let j = 0; j < 8; j++) {
             contents.push((reg & 1) === 1);
             reg = reg >> 1;
         }
@@ -110,11 +110,11 @@ function _readFC2(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC4(data, next) {
-    var length = data.readUInt8(2);
-    var contents = [];
+    const length = data.readUInt8(2);
+    const contents = [];
 
-    for (var i = 0; i < length; i += 2) {
-        var reg = data.readUInt16BE(i + 3);
+    for (let i = 0; i < length; i += 2) {
+        const reg = data.readUInt16BE(i + 3);
         contents.push(reg);
     }
 
@@ -130,8 +130,8 @@ function _readFC4(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC5(data, next) {
-    var dataAddress = data.readUInt16BE(2);
-    var state = data.readUInt16BE(4);
+    const dataAddress = data.readUInt16BE(2);
+    const state = data.readUInt16BE(4);
 
     if (next)
         next(null, { "address": dataAddress, "state": (state === 0xff00) });
@@ -145,8 +145,8 @@ function _readFC5(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC6(data, next) {
-    var dataAddress = data.readUInt16BE(2);
-    var value = data.readUInt16BE(4);
+    const dataAddress = data.readUInt16BE(2);
+    const value = data.readUInt16BE(4);
 
     if (next)
         next(null, { "address": dataAddress, "value": value });
@@ -160,8 +160,8 @@ function _readFC6(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC16(data, next) {
-    var dataAddress = data.readUInt16BE(2);
-    var length = data.readUInt16BE(4);
+    const dataAddress = data.readUInt16BE(2);
+    const length = data.readUInt16BE(4);
 
     if (next)
         next(null, { "address": dataAddress, "length": length });
@@ -175,10 +175,10 @@ function _readFC16(data, next) {
  * @param {Function} next
  */
 function _readFC20(data,  next) {
-    var fileRespLength = parseInt(data.readUInt8(2));
-    var result = [];
-    for (var i = 5; i < fileRespLength + 5; i++) {
-        var reg = data.readUInt8(i);
+    const fileRespLength = parseInt(data.readUInt8(2));
+    const result = [];
+    for (let i = 5; i < fileRespLength + 5; i++) {
+        const reg = data.readUInt8(i);
         result.push(reg);
     }
     if(next)
@@ -194,18 +194,18 @@ function _readFC20(data,  next) {
  * @param {Function} next the function to call next.
  */
 function _readFC43(data, modbus, next) {
-    var address = parseInt(data.readUInt8(0));
-    var readDeviceIdCode = parseInt(data.readUInt8(3));
-    var conformityLevel = parseInt(data.readUInt8(4));
-    var moreFollows = parseInt(data.readUInt8(5));
-    var nextObjectId = parseInt(data.readUInt8(6));
-    var numOfObjects = parseInt(data.readUInt8(7));
+    const address = parseInt(data.readUInt8(0));
+    const readDeviceIdCode = parseInt(data.readUInt8(3));
+    const conformityLevel = parseInt(data.readUInt8(4));
+    const moreFollows = parseInt(data.readUInt8(5));
+    const nextObjectId = parseInt(data.readUInt8(6));
+    const numOfObjects = parseInt(data.readUInt8(7));
 
-    var startAt = 8;
-    var result = {};
-    for (var i = 0; i < numOfObjects; i++) {
-        var objectId = parseInt(data.readUInt8(startAt));
-        var objectLength = parseInt(data.readUInt8(startAt + 1));
+    let startAt = 8;
+    const result = {};
+    for (let i = 0; i < numOfObjects; i++) {
+        const objectId = parseInt(data.readUInt8(startAt));
+        const objectLength = parseInt(data.readUInt8(startAt + 1));
         const startOfData = startAt + 2;
         result[objectId] = data.toString("ascii", startOfData, startOfData + objectLength);
         startAt = startOfData + objectLength;
@@ -230,7 +230,7 @@ function _readFC43(data, modbus, next) {
  * @private
  */
 function _writeBufferToPort(buffer, transactionId) {
-    var transaction = this._transactions[transactionId];
+    const transaction = this._transactions[transactionId];
 
     if (transaction) {
         transaction._timeoutFired = false;
@@ -261,7 +261,7 @@ function _startTimeout(duration, transaction) {
     return setTimeout(function() {
         transaction._timeoutFired = true;
         if (transaction.next) {
-            var err = new TransactionTimedOutError();
+            const err = new TransactionTimedOutError();
             if (transaction.request && transaction.responses) {
                 err.modbusRequest = transaction.request;
                 err.modbusResponses = transaction.responses;
@@ -288,11 +288,11 @@ function _cancelTimeout(timeoutHandle) {
  * @private
  */
 function _onReceive(data) {
-    var modbus = this;
-    var error;
+    const modbus = this;
+    let error;
 
     // set locale helpers variables
-    var transaction = modbus._transactions[modbus._port._transactionIdRead];
+    const transaction = modbus._transactions[modbus._port._transactionIdRead];
 
     // the _transactionIdRead can be missing, ignore wrong transaction it's
     if (!transaction) {
@@ -305,7 +305,7 @@ function _onReceive(data) {
     }
 
     /* What do we do next? */
-    var next = function(err, res) {
+    const next = function(err, res) {
         if (transaction.next) {
             /* Include request/response data if enabled */
             if (transaction.request && transaction.responses) {
@@ -350,7 +350,7 @@ function _onReceive(data) {
     /* check message CRC
      * if CRC is bad raise an error
      */
-    var crcIn = data.readUInt16LE(data.length - 2);
+    const crcIn = data.readUInt16LE(data.length - 2);
     if (crcIn !== crc16(data.slice(0, -2))) {
         error = "CRC error";
         next(new Error(error));
@@ -358,14 +358,14 @@ function _onReceive(data) {
     }
 
     // if crc is OK, read address and function code
-    var address = data.readUInt8(0);
-    var code = data.readUInt8(1);
+    const address = data.readUInt8(0);
+    const code = data.readUInt8(1);
 
     /* check for modbus exception
      */
     if (data.length >= 5 &&
         code === (0x80 | transaction.nextCode)) {
-        var errorCode = data.readUInt8(2);
+        const errorCode = data.readUInt8(2);
         if (transaction.next) {
             error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
             error.modbusCode = errorCode;
@@ -455,7 +455,7 @@ function _onReceive(data) {
  * @private
  */
 function _onError(e) {
-    var err = new SerialPortError();
+    const err = new SerialPortError();
     err.message = e.message;
     err.stack = e.stack;
     this.emit("error", err);
@@ -493,7 +493,7 @@ class ModbusRTU extends EventEmitter {
      *      of failure.
      */
     open(callback) {
-        var modbus = this;
+        const modbus = this;
 
         // open the serial port
         modbus._port.open(function(error) {
@@ -624,8 +624,8 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var codeLength = 6;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 6;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -683,8 +683,8 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var codeLength = 6;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 6;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -719,7 +719,7 @@ class ModbusRTU extends EventEmitter {
             return;
         }
 
-        var code = 5;
+        const code = 5;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -729,8 +729,8 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var codeLength = 6;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 6;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -770,7 +770,7 @@ class ModbusRTU extends EventEmitter {
             return;
         }
 
-        var code = 6;
+        const code = 6;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -780,8 +780,8 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -821,8 +821,8 @@ class ModbusRTU extends EventEmitter {
             return;
         }
 
-        var code = 15;
-        var i = 0;
+        const code = 15;
+        let i = 0;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -832,9 +832,9 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var dataBytes = Math.ceil(array.length / 8);
-        var codeLength = 7 + dataBytes;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const dataBytes = Math.ceil(array.length / 8);
+        const codeLength = 7 + dataBytes;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -883,7 +883,7 @@ class ModbusRTU extends EventEmitter {
             return;
         }
 
-        var code = 16;
+        const code = 16;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -893,14 +893,14 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        var dataLength = array.length;
+        let dataLength = array.length;
         if (Buffer.isBuffer(array)) {
             // if array is a buffer it has double length
             dataLength = array.length / 2;
         }
 
-        var codeLength = 7 + 2 * dataLength;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 7 + 2 * dataLength;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
@@ -912,7 +912,7 @@ class ModbusRTU extends EventEmitter {
         if (Buffer.isBuffer(array)) {
             array.copy(buf, 7);
         } else {
-            for (var i = 0; i < dataLength; i++) {
+            for (let i = 0; i < dataLength; i++) {
                 buf.writeUInt16BE(array[i], 7 + 2 * i);
             }
         }
@@ -940,10 +940,10 @@ class ModbusRTU extends EventEmitter {
             return;
         }
         // function code defaults to 20
-        var code = 20;
-        var codeLength = 10;
-        var byteCount = 7;
-        var chunck = 100;
+        const code = 20;
+        const codeLength = 10;
+        const byteCount = 7;
+        const chunck = 100;
 
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
@@ -951,7 +951,7 @@ class ModbusRTU extends EventEmitter {
             lengthUnknown: true,
             next: next
         };
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
         buf.writeUInt8(byteCount, 2);
@@ -978,7 +978,7 @@ class ModbusRTU extends EventEmitter {
             return;
         }
 
-        var code = 0x2B; // 43
+        const code = 0x2B; // 43
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -987,8 +987,8 @@ class ModbusRTU extends EventEmitter {
             lengthUnknown: true,
             next: next
         };
-        var codeLength = 5;
-        var buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        const codeLength = 5;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
         buf.writeUInt8(0x0E, 2); // 16 MEI Type

@@ -4,7 +4,7 @@ const { bluetooth } = require("webbluetooth");
 const ModbusRTU = require("../index");
 
 async function run() {
-    var client = new ModbusRTU();
+    const client = new ModbusRTU();
 
     await client.connectBle({
         bluetooth,

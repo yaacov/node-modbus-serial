@@ -14,26 +14,26 @@
  * ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION, ARISING OUT OF
  * OR IN CONNECTION WITH THE USE OR PERFORMANCE OF  THIS SOFTWARE.
  */
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var net = require("net");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const net = require("net");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var HOST = "127.0.0.1";
-var UNIT_ID = 255; // listen to all adresses
-var MODBUS_PORT = 502;
+const HOST = "127.0.0.1";
+const UNIT_ID = 255; // listen to all adresses
+const MODBUS_PORT = 502;
 
 // Not really its official length, but we parse UnitID as part of PDU
 const MBAP_LEN = 6;
 
 /* Get Handlers
  */
-var handlers = require("./servertcp_handler");
+const handlers = require("./servertcp_handler");
 
 /* Add bit operation functions to Buffer
  */
 require("../utils/buffer_bit")();
-var crc16 = require("../utils/crc16");
+const crc16 = require("../utils/crc16");
 
 /**
  * Helper function for sending debug objects.
@@ -76,11 +76,9 @@ function _serverDebug(text, unitID, functionCode, responseBuffer) {
  */
 function _callbackFactory(unitID, functionCode, sockWriter) {
     return function cb(err, responseBuffer) {
-        var crc;
-
         // If we have an error.
         if (err) {
-            var errorCode = 0x04; // slave device failure
+            let errorCode = 0x04; // slave device failure
             if (!isNaN(err.modbusErrorCode)) {
                 errorCode = err.modbusErrorCode;
             }
@@ -104,7 +102,7 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
         responseBuffer.writeUInt8(functionCode, 1);
 
         // Add crc
-        crc = crc16(responseBuffer.slice(0, -2));
+        const crc = crc16(responseBuffer.slice(0, -2));
         responseBuffer.writeUInt16LE(crc, responseBuffer.length - 2);
 
         // Call callback function
@@ -123,17 +121,15 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
  * @private
  */
 function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
-    var cb;
-
     // Check requestBuffer length
     if (!requestBuffer || requestBuffer.length < MBAP_LEN) {
         modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
         return;
     }
 
-    var unitID = requestBuffer[0];
-    var functionCode = requestBuffer[1];
-    var crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
+    const unitID = requestBuffer[0];
+    let functionCode = requestBuffer[1];
+    const crc = requestBuffer[requestBuffer.length - 2] + requestBuffer[requestBuffer.length - 1] * 0x100;
 
     // if crc is bad, ignore message
     if (crc !== crc16(requestBuffer.slice(0, -2))) {
@@ -148,7 +144,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
     }
 
     modbusSerialDebug("request for function code " + functionCode);
-    cb = _callbackFactory(unitID, functionCode, sockWriter);
+    const cb = _callbackFactory(unitID, functionCode, sockWriter);
 
     switch (parseInt(functionCode)) {
         case 1:
@@ -176,12 +172,12 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
         case 43:
             handlers.handleMEI(requestBuffer, vector, unitID, cb);
             break;
-        default:
-            var errorCode = 0x01; // illegal function
+        default: {
+            const errorCode = 0x01; // illegal function
 
             // set an error response
             functionCode = parseInt(functionCode) | 0x80;
-            var responseBuffer = Buffer.alloc(3 + 2);
+            const responseBuffer = Buffer.alloc(3 + 2);
             responseBuffer.writeUInt8(errorCode, 2);
 
             modbusSerialDebug({
@@ -190,6 +186,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
             });
 
             cb({ modbusErrorCode: errorCode }, responseBuffer);
+        }
     }
 }
 
@@ -204,7 +201,7 @@ class ServerTCP extends EventEmitter {
     constructor(vector, options) {
         super();
 
-        var modbus = this;
+        const modbus = this;
         options = options || {};
 
         // create a tcp server
@@ -217,13 +214,13 @@ class ServerTCP extends EventEmitter {
         });
 
         // create a server unit id
-        var serverUnitID = options.unitID || UNIT_ID;
+        const serverUnitID = options.unitID || UNIT_ID;
 
         // remember open sockets
         modbus.socks = new Map();
 
         modbus._server.on("connection", function(sock) {
-            var recvBuffer = Buffer.from([]);
+            let recvBuffer = Buffer.from([]);
             modbus.socks.set(sock, 0);
 
             modbusSerialDebug({
@@ -246,26 +243,26 @@ class ServerTCP extends EventEmitter {
 
                 while(recvBuffer.length > MBAP_LEN) {
                     const transactionsId = recvBuffer.readUInt16BE(0);
-                    var pduLen = recvBuffer.readUInt16BE(4);
+                    const pduLen = recvBuffer.readUInt16BE(4);
 
                     // Check the presence of the full request (MBAP + PDU)
                     if(recvBuffer.length - MBAP_LEN < pduLen)
                         break;
 
                     // remove mbap and add crc16
-                    var requestBuffer = Buffer.alloc(pduLen + 2);
+                    const requestBuffer = Buffer.alloc(pduLen + 2);
                     recvBuffer.copy(requestBuffer, 0, MBAP_LEN, MBAP_LEN + pduLen);
 
                     // Move receive buffer on
                     recvBuffer = recvBuffer.slice(MBAP_LEN + pduLen);
 
-                    var crc = crc16(requestBuffer.slice(0, -2));
+                    const crc = crc16(requestBuffer.slice(0, -2));
                     requestBuffer.writeUInt16LE(crc, requestBuffer.length - 2);
 
                     modbusSerialDebug({ action: "receive", data: requestBuffer, requestBufferLength: requestBuffer.length });
                     modbusSerialDebug(JSON.stringify({ action: "receive", data: requestBuffer }));
 
-                    var sockWriter = function(err, responseBuffer) {
+                    const sockWriter = function(err, responseBuffer) {
                         if (err) {
                             modbus.emit("error", err);
                             return;
@@ -274,7 +271,7 @@ class ServerTCP extends EventEmitter {
                         // send data back
                         if (responseBuffer) {
                             // remove crc and add mbap
-                            var outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
+                            const outTcp = Buffer.alloc(responseBuffer.length + 6 - 2);
                             outTcp.writeUInt16BE(transactionsId, 0);
                             outTcp.writeUInt16BE(0, 2);
                             outTcp.writeUInt16BE(responseBuffer.length - 2, 4);

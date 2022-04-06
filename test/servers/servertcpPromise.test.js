@@ -1,15 +1,15 @@
 "use strict";
 /* eslint-disable no-undef, no-console */
 
-var expect = require("chai").expect;
-var net = require("net");
-var TcpServer = require("./../../servers/servertcp");
+const expect = require("chai").expect;
+const net = require("net");
+const TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server Promise", function() {
-    var serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
-        var vector = {
+        const vector = {
             getInputRegister: function(addr) {
                 return new Promise(function(resolve) {
                     setTimeout(function() {
@@ -107,7 +107,7 @@ describe("Modbus TCP Server Promise", function() {
 
     describe("socket connection error", function() {
         it("should receive an error event on socket closed by client", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
                 client.destroy();
 
                 serverTCP.emit("socketError");
@@ -124,7 +124,7 @@ describe("Modbus TCP Server Promise", function() {
 
     describe("large client request", function() {
         it("should handle a large request without crash successfully (FC1)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060101003EFFFF", "hex"));
             });
@@ -137,7 +137,7 @@ describe("Modbus TCP Server Promise", function() {
         });
 
         it("should handle a large request without crash successfully (FC3)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060103003EFFFF", "hex"));
             });
@@ -150,7 +150,7 @@ describe("Modbus TCP Server Promise", function() {
         });
 
         it("should handle a large request without crash successfully (FC4)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8514 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060104003EFFFF", "hex"));
             });

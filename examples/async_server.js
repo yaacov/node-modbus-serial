@@ -1,9 +1,9 @@
 /* eslint-disable no-console, no-unused-vars, spaced-comment */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var vector = {
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+const vector = {
     getInputRegister: function(addr, unitID) {
         // Synchronous handling
         return addr;
@@ -59,7 +59,7 @@ var vector = {
 
 // set the server to answer for modbus requests
 console.log("ModbusTCP listening on modbus://0.0.0.0:8502");
-var serverTCP = new ModbusRTU.ServerTCP(vector, {
+const serverTCP = new ModbusRTU.ServerTCP(vector, {
     host: "0.0.0.0",
     port: 8502,
     debug: true,

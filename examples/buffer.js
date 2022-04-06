@@ -1,9 +1,9 @@
 /* eslint-disable no-console, spaced-comment */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var client = new ModbusRTU();
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+const client = new ModbusRTU();
 
 // open connection to a serial port
 //client.connectRTUBuffered("/dev/ttyUSB0", {baudRate: 9600})
@@ -27,9 +27,9 @@ function setClient() {
 function run() {
     client.readInputRegisters(4, 12)
         .then(function(d) {
-            var floatA = d.buffer.readFloatBE(0);
-            var floatB = d.buffer.readFloatBE(4);
-            var floatC = d.buffer.readFloatBE(8);
+            const floatA = d.buffer.readFloatBE(0);
+            const floatB = d.buffer.readFloatBE(4);
+            const floatC = d.buffer.readFloatBE(8);
             console.log("Receive:", floatA, floatB, floatC); })
         .catch(function(e) {
             console.log(e.message); })

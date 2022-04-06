@@ -11,25 +11,25 @@
 
 //==============================================================
 // create an empty modbus client
-var ModbusRTU   = require ("modbus-serial");
-var client      = new ModbusRTU();
+const ModbusRTU   = require ("modbus-serial");
+const client      = new ModbusRTU();
 
-var mbsStatus   = "Initializing...";    // holds a status of Modbus
+let mbsStatus   = "Initializing...";    // holds a status of Modbus
 
 // Modbus 'state' constants
-var MBS_STATE_INIT          = "State init";
-var MBS_STATE_IDLE          = "State idle";
-var MBS_STATE_NEXT          = "State next";
-var MBS_STATE_GOOD_READ     = "State good (read)";
-var MBS_STATE_FAIL_READ     = "State fail (read)";
-var MBS_STATE_GOOD_CONNECT  = "State good (port)";
-var MBS_STATE_FAIL_CONNECT  = "State fail (port)";
+const MBS_STATE_INIT          = "State init";
+const MBS_STATE_IDLE          = "State idle";
+const MBS_STATE_NEXT          = "State next";
+const MBS_STATE_GOOD_READ     = "State good (read)";
+const MBS_STATE_FAIL_READ     = "State fail (read)";
+const MBS_STATE_GOOD_CONNECT  = "State good (port)";
+const MBS_STATE_FAIL_CONNECT  = "State fail (port)";
 
 // Modbus configuration values
-var mbsId       = 1;
-var mbsScan     = 1000;
-var mbsTimeout  = 5000;
-var mbsState    = MBS_STATE_INIT;
+const mbsId       = 1;
+const mbsScan     = 1000;
+const mbsTimeout  = 5000;
+let mbsState    = MBS_STATE_INIT;
 
 // Upon SerialPort error
 client.on("error", function(error) {
@@ -38,7 +38,7 @@ client.on("error", function(error) {
 
 
 //==============================================================
-var connectClient = function()
+const connectClient = function()
 {
     // set requests parameters
     client.setID      (mbsId);
@@ -62,7 +62,7 @@ var connectClient = function()
 
 
 //==============================================================
-var readModbusData = function()
+const readModbusData = function()
 {
     // try to read data
     client.readHoldingRegisters (5, 1)
@@ -82,9 +82,9 @@ var readModbusData = function()
 
 
 //==============================================================
-var runModbus = function()
+const runModbus = function()
 {
-    var nextAction;
+    let nextAction;
 
     switch (mbsState)
     {

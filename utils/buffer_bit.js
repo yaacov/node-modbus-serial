@@ -18,7 +18,7 @@
 /**
  * Adds Bit Operations to Buffer
  */
-var addBufferBitOp = function() {
+const addBufferBitOp = function() {
 
     /**
      * Add set one bit in a Buffer prototype.
@@ -28,12 +28,12 @@ var addBufferBitOp = function() {
      * @param {number} offset, the byte offset.
      */
     Buffer.prototype.writeBit = function(value, bit, offset) {
-        var byteOffset = parseInt(bit / 8 + offset);
-        var bitOffset = bit % 8;
-        var bitMask = 0x1 << bitOffset;
+        const byteOffset = parseInt(bit / 8 + offset);
+        const bitOffset = bit % 8;
+        const bitMask = 0x1 << bitOffset;
 
         // get byte from buffer
-        var byte = this.readUInt8(byteOffset);
+        let byte = this.readUInt8(byteOffset);
 
         // set bit on / off
         if (value) {
@@ -55,12 +55,12 @@ var addBufferBitOp = function() {
      * @return {boolean} the state of the bit.
      */
     Buffer.prototype.readBit = function(bit, offset) {
-        var byteOffset = parseInt(bit / 8 + offset);
-        var bitOffset = bit % 8;
-        var bitMask = 0x1 << bitOffset;
+        const byteOffset = parseInt(bit / 8 + offset);
+        const bitOffset = bit % 8;
+        const bitMask = 0x1 << bitOffset;
 
         // get byte from buffer
-        var byte = this.readUInt8(byteOffset);
+        const byte = this.readUInt8(byteOffset);
 
         // check bit state
         return (byte & bitMask) === bitMask;

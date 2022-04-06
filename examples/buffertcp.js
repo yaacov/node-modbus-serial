@@ -1,9 +1,9 @@
 /* eslint-disable no-console, spaced-comment */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var client = new ModbusRTU();
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+const client = new ModbusRTU();
 
 // NPort Gateway 801D NetPort
 client.connectTcpRTUBuffered("127.0.0.1", { port: 8502 })

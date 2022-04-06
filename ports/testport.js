@@ -1,15 +1,15 @@
 /* eslint-disable class-methods-use-this */
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const modbusSerialDebug = require("debug")("modbus-serial");
 
 /* Add bit operation functions to Buffer
  */
 require("../utils/buffer_bit")();
-var crc16 = require("../utils/crc16");
+const crc16 = require("../utils/crc16");
 
-var MIN_DATA_LENGTH = 7;
+const MIN_DATA_LENGTH = 7;
 
 class TestPort extends EventEmitter {
     /**
@@ -70,21 +70,21 @@ class TestPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        var buffer = null;
-        var length = null;
-        var address = null;
-        var value = null;
-        var state = null;
-        var i = null;
+        let buffer = null;
+        let length = null;
+        let address = null;
+        let value = null;
+        let state = null;
+        let i = null;
 
         if(data.length < MIN_DATA_LENGTH) {
             modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
 
-        var unitNumber = data[0];
-        var functionCode = data[1];
-        var crc = data[data.length - 2] + data[data.length - 1] * 0x100;
+        const unitNumber = data[0];
+        const functionCode = data[1];
+        let crc = data[data.length - 2] + data[data.length - 1] * 0x100;
         // if crc is bad, ignore message
         if (crc !== crc16(data.slice(0, -2))) {
             return;

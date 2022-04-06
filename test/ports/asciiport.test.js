@@ -1,23 +1,23 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
-var LONG_MSG = "010380018301830183018301830183018301830183018301830183018301830\
+const LONG_MSG = "010380018301830183018301830183018301830183018301830183018301830\
 1830183018301830183018301830183018301830183018301830183018301830183018301830183\
 0183018301830183018301830183018301830183018301830183018301830183018301830183018\
 3018301830183018301830183018301830183018346e0";
 
 describe("Modbus Ascii port", function() {
-    var port;
+    let port;
 
     before(function() {
-        var mock = require("./../mocks/SerialPortMock");
+        const mock = require("./../mocks/SerialPortMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("serialport", mock);
-        var AsciiPort = require("./../../ports/asciiport");
+        const AsciiPort = require("./../../ports/asciiport");
         port = new AsciiPort(
             "/dev/null",
             { startOfSlaveFrameChar: 0x3E }  // optional slave frame char ('>')
@@ -106,7 +106,7 @@ describe("Modbus Ascii port", function() {
                 port.write(Buffer.from("010300000040443A", "hex"));
                 setTimeout(function() {
                     port._client.receive(Buffer.from(">", "ascii"));
-                    for (var i = 0; i < (LONG_MSG.length - 4); i += 2) {
+                    for (let i = 0; i < (LONG_MSG.length - 4); i += 2) {
                         port._client.receive(Buffer.from(LONG_MSG.slice(i, i + 2), "ascii"));
                     }
                     port._client.receive(Buffer.from("7C", "ascii"));

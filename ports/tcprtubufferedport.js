@@ -1,20 +1,20 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var net = require("net");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const net = require("net");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require("../utils/crc16");
+const crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
-var EXCEPTION_LENGTH = 3;
-var MIN_DATA_LENGTH = 6;
-var MIN_MBAP_LENGTH = 6;
-var MAX_TRANSACTIONS = 64; // maximum transaction to wait for
-var MAX_BUFFER_LENGTH = 256;
-var CRC_LENGTH = 2;
+const EXCEPTION_LENGTH = 3;
+const MIN_DATA_LENGTH = 6;
+const MIN_MBAP_LENGTH = 6;
+const MAX_TRANSACTIONS = 64; // maximum transaction to wait for
+const MAX_BUFFER_LENGTH = 256;
+const CRC_LENGTH = 2;
 
-var MODBUS_PORT = 502;
+const MODBUS_PORT = 502;
 
 class TcpRTUBufferedPort extends EventEmitter {
     /**
@@ -31,7 +31,7 @@ class TcpRTUBufferedPort extends EventEmitter {
     constructor(ip, options) {
         super();
 
-        var modbus = this;
+        const modbus = this;
         modbus.openFlag = false;
         modbus.callback = null;
         modbus._transactionIdWrite = 1;
@@ -63,7 +63,7 @@ class TcpRTUBufferedPort extends EventEmitter {
 
         // handle callback - call a callback function only once, for the first event
         // it will triger
-        var handleCallback = function(had_error) {
+        const handleCallback = function(had_error) {
             if (modbus.callback) {
                 modbus.callback(had_error);
                 modbus.callback = null;
@@ -86,7 +86,7 @@ class TcpRTUBufferedPort extends EventEmitter {
             });
 
             // check if buffer include a complete modbus answer
-            var bufferLength = modbus._buffer.length;
+            let bufferLength = modbus._buffer.length;
 
             // check data length
             if (bufferLength < MIN_MBAP_LENGTH) return;
@@ -101,12 +101,12 @@ class TcpRTUBufferedPort extends EventEmitter {
             if (bufferLength < MIN_MBAP_LENGTH + EXCEPTION_LENGTH) return;
 
             // loop and check length-sized buffer chunks
-            var maxOffset = bufferLength - MIN_MBAP_LENGTH;
-            for (var i = 0; i <= maxOffset; i++) {
+            const maxOffset = bufferLength - MIN_MBAP_LENGTH;
+            for (let i = 0; i <= maxOffset; i++) {
                 modbus._transactionIdRead = modbus._buffer.readUInt16BE(i);
-                var protocolID = modbus._buffer.readUInt16BE(i + 2);
-                var msgLength = modbus._buffer.readUInt16BE(i + 4);
-                var cmd = modbus._buffer[i + 7];
+                const protocolID = modbus._buffer.readUInt16BE(i + 2);
+                const msgLength = modbus._buffer.readUInt16BE(i + 4);
+                const cmd = modbus._buffer[i + 7];
 
                 modbusSerialDebug({
                     protocolID: protocolID,
@@ -170,18 +170,18 @@ class TcpRTUBufferedPort extends EventEmitter {
      * @private
      */
     _emitData(start, length) {
-        var modbus = this;
-        var data = modbus._buffer.slice(start, start + length);
+        const modbus = this;
+        const data = modbus._buffer.slice(start, start + length);
 
         // cut the buffer
         modbus._buffer = modbus._buffer.slice(start + length);
 
         if (data.length > 0) {
-            var buffer = Buffer.alloc(data.length + CRC_LENGTH);
+            const buffer = Buffer.alloc(data.length + CRC_LENGTH);
             data.copy(buffer, 0);
 
             // add crc
-            var crc = crc16(buffer.slice(0, -CRC_LENGTH));
+            const crc = crc16(buffer.slice(0, -CRC_LENGTH));
             buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
             modbus.emit("data", buffer);
@@ -253,7 +253,7 @@ class TcpRTUBufferedPort extends EventEmitter {
         }
 
         // remove crc and add mbap
-        var buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
+        const buffer = Buffer.alloc(data.length + MIN_MBAP_LENGTH - CRC_LENGTH);
         buffer.writeUInt16BE(this._transactionIdWrite, 0);
         buffer.writeUInt16BE(0, 2);
         buffer.writeUInt16BE(data.length - CRC_LENGTH, 4);
