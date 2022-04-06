@@ -6,8 +6,8 @@
  * @return {number} the calculated LRC.
  */
 module.exports = function lrc(buffer) {
-    var lrc = 0;
-    for (var i = 0; i < buffer.length; i++) {
+    let lrc = 0;
+    for (let i = 0; i < buffer.length; i++) {
         lrc += buffer[i] & 0xFF;
     }
 

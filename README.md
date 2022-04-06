@@ -92,8 +92,8 @@ This module has not been tested on every single version of NodeJS. For best resu
 ###### Read and Write
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");
-var client = new ModbusRTU();
+const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
 
 // open connection to a serial port
 client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600 }, write);
@@ -173,8 +173,8 @@ getMetersValue(metersIdList);
 ###### Logger Serial
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");
-var client = new ModbusRTU();
+const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
 
 // open connection to a serial port
 client.connectRTUBuffered("/dev/ttyUSB0", { baudRate: 9600 });
@@ -192,8 +192,8 @@ setInterval(function() {
 ###### Logger TCP
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");
-var client = new ModbusRTU();
+const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
 
 // open connection to a tcp line
 client.connectTCP("127.0.0.1", { port: 8502 });
@@ -211,8 +211,8 @@ setInterval(function() {
 ###### Logger UDP
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");
-var client = new ModbusRTU();
+const ModbusRTU = require("modbus-serial");
+const client = new ModbusRTU();
 
 // open connection to a udp line
 client.connectUDP("127.0.0.1", { port: 8502 });
@@ -230,8 +230,8 @@ setInterval(function() {
 ###### ModbusTCP Server
 ``` javascript
 // create an empty modbus client
-var ModbusRTU = require("modbus-serial");
-var vector = {
+const ModbusRTU = require("modbus-serial");
+const vector = {
     getInputRegister: function(addr, unitID) {
         // Synchronous handling
         return addr;
@@ -275,7 +275,7 @@ var vector = {
 
 // set the server to answer for modbus requests
 console.log("ModbusTCP listening on modbus://0.0.0.0:8502");
-var serverTCP = new ModbusRTU.ServerTCP(vector, { host: "0.0.0.0", port: 8502, debug: true, unitID: 1 });
+const serverTCP = new ModbusRTU.ServerTCP(vector, { host: "0.0.0.0", port: 8502, debug: true, unitID: 1 });
 
 serverTCP.on("socketError", function(err){
     // Handle socket error if needed, can be ignored
@@ -286,8 +286,8 @@ serverTCP.on("socketError", function(err){
 ###### Read and Write Modbus ASCII
 ``` javascript
 // create an empty modbus client
-var Modbus = require("modbus-serial");
-var client = new Modbus();
+const Modbus = require("modbus-serial");
+const client = new Modbus();
 
 // open connection to a serial port
 client.connectAsciiSerial(

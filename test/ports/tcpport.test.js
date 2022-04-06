@@ -1,18 +1,18 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
 describe("Modbus TCP port", function() {
-    var port;
+    let port;
 
     before(function() {
-        var mock = require("./../mocks/netMock");
+        const mock = require("./../mocks/netMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("net", mock);
-        var TcpPort = require("./../../ports/tcpport");
+        const TcpPort = require("./../../ports/tcpport");
         port = new TcpPort("127.0.0.1", { port: 9999 });
     });
 

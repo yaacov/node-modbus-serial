@@ -1,15 +1,15 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var dgram = require("dgram");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const dgram = require("dgram");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
-var crc16 = require("../utils/crc16");
+const crc16 = require("../utils/crc16");
 
 /* TODO: const should be set once, maybe */
-var MIN_DATA_LENGTH = 6;
+const MIN_DATA_LENGTH = 6;
 
-var C701_PORT = 0x7002;
+const C701_PORT = 0x7002;
 
 /**
  * Check if a buffer chunk can be a Modbus answer or modbus exception.
@@ -24,7 +24,7 @@ function _checkData(modbus, buf) {
     if (buf.length !== modbus._length && buf.length !== 5) return false;
 
     // calculate crc16
-    var crcIn = buf.readUInt16LE(buf.length - 2);
+    const crcIn = buf.readUInt16LE(buf.length - 2);
 
     // check buffer unit-id, command and crc
     return (buf[0] === modbus._id &&
@@ -43,7 +43,7 @@ class UdpPort extends EventEmitter {
     constructor(ip, options) {
         super();
 
-        var modbus = this;
+        const modbus = this;
         this.ip = ip;
         this.openFlag = false;
 
@@ -56,7 +56,7 @@ class UdpPort extends EventEmitter {
 
         // wait for answer
         this._client.on("message", function(data) {
-            var buffer = null;
+            let buffer = null;
 
             // check expected length
             if (modbus.length < 6) return;
@@ -149,7 +149,7 @@ class UdpPort extends EventEmitter {
             return;
         }
 
-        var length = null;
+        let length = null;
 
         // remember current unit and command
         this._id = data[0];
@@ -180,7 +180,7 @@ class UdpPort extends EventEmitter {
         }
 
         // build C701 header
-        var buffer = Buffer.alloc(data.length + 116);
+        const buffer = Buffer.alloc(data.length + 116);
         buffer.fill(0);
         buffer.writeUInt16LE(600, 2);           // C701 magic for serial bridge
         buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)

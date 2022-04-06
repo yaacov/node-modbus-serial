@@ -1,15 +1,15 @@
 "use strict";
 /* eslint-disable no-undef, no-console */
 
-var expect = require("chai").expect;
-var net = require("net");
-var TcpServer = require("./../../servers/servertcp");
+const expect = require("chai").expect;
+const net = require("net");
+const TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server (no serverID)", function() {
-    var serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
-        var vector = {
+        const vector = {
             getInputRegister: function(addr) {
                 return addr;
             },
@@ -96,7 +96,7 @@ describe("Modbus TCP Server (no serverID)", function() {
 
     describe("socket connection error", function() {
         it("should receive an error event on socket closed by client", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 client.destroy();
 
                 serverTCP.emit("socketError");
@@ -114,7 +114,7 @@ describe("Modbus TCP Server (no serverID)", function() {
 
     describe("large client request", function() {
         it("should handle a large request without crash successfully (FC1)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060101003EFFFF", "hex"));
             });
@@ -129,7 +129,7 @@ describe("Modbus TCP Server (no serverID)", function() {
         });
 
         it("should handle a large request without crash successfully (FC3)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060103003EFFFF", "hex"));
             });
@@ -144,7 +144,7 @@ describe("Modbus TCP Server (no serverID)", function() {
         });
 
         it("should handle a large request without crash successfully (FC4)", function(done) {
-            var client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
                 // request 65535 registers at once
                 client.write(Buffer.from("0001000000060104003EFFFF", "hex"));
             });
@@ -163,10 +163,10 @@ describe("Modbus TCP Server (no serverID)", function() {
 });
 
 describe("Modbus TCP Server (serverID = requestID)", function() {
-    var serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
-        var vector = {
+        const vector = {
             setCoil: function(addr, value) {
                 console.log("\tset coil", addr, value);
                 return;
@@ -198,10 +198,10 @@ describe("Modbus TCP Server (serverID = requestID)", function() {
 });
 
 describe("Modbus TCP Server (serverID != requestID)", function() {
-    var serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP; // eslint-disable-line no-unused-vars
 
     before(function() {
-        var vector = {
+        const vector = {
             setCoil: function(addr, value) {
                 console.log("\tset coil", addr, value);
                 return;
@@ -216,7 +216,7 @@ describe("Modbus TCP Server (serverID != requestID)", function() {
 
     describe("function code handler", function() {
         it("should receive a no Modbus TCP message for wrong unitID", function(done) {
-            var timeout;
+            let timeout;
             this.timeout(1000 + 100);
 
             const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {

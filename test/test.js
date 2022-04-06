@@ -1,13 +1,13 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var ModbusRTU = require("../index");
-var TestPort = ModbusRTU.TestPort;
-var testPort = new TestPort();
-var modbusRTU = new ModbusRTU(testPort);
+const ModbusRTU = require("../index");
+const TestPort = ModbusRTU.TestPort;
+const testPort = new TestPort();
+const modbusRTU = new ModbusRTU(testPort);
 
-var sinon = require("sinon");
-var expect = require("chai").expect;
+const sinon = require("sinon");
+const expect = require("chai").expect;
 
 describe("ModbusRTU", function() {
 
@@ -388,8 +388,8 @@ describe("ModbusRTU", function() {
         });
 
         describe("Timeout", function() {
-            var timeout = 1000;
-            var clock;
+            const timeout = 1000;
+            let clock;
             beforeEach(function() {
                 clock = sinon.useFakeTimers();
             });

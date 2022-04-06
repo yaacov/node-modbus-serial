@@ -1,11 +1,11 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
 describe("Modbus TCP RTU buffered port", function() {
-    var port;
+    let port;
 
     function send(buffers) {
         port.open(function() {
@@ -17,11 +17,11 @@ describe("Modbus TCP RTU buffered port", function() {
     }
 
     before(function() {
-        var mock = require("./../mocks/netMock");
+        const mock = require("./../mocks/netMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("net", mock);
-        var TcpRTUBufferedPort = require("./../../ports/tcprtubufferedport");
+        const TcpRTUBufferedPort = require("./../../ports/tcprtubufferedport");
         port = new TcpRTUBufferedPort("127.0.0.1", { port: 9999 });
     });
 

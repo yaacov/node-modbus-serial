@@ -22,10 +22,10 @@
  * @return a function that calls function "f" and return a promise.
  * @private
  */
-var _convert = function(f) {
-    var converted = function(address, arg, next) {
-        var client = this;
-        var id = this._unitID;
+const _convert = function(f) {
+    const converted = function(address, arg, next) {
+        const client = this;
+        const id = this._unitID;
 
         /* the function check for a callback
          * if we have a callback, use it
@@ -36,7 +36,7 @@ var _convert = function(f) {
             f.bind(client)(id, address, arg, next);
         } else {
             // o/w use  a promise
-            var promise = new Promise(function(resolve, reject) {
+            const promise = new Promise(function(resolve, reject) {
                 function cb(err, data) {
                     if (err) {
                         reject(err);
@@ -60,9 +60,9 @@ var _convert = function(f) {
  *
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
-var addPromiseAPI = function(Modbus) {
+const addPromiseAPI = function(Modbus) {
 
-    var cl = Modbus.prototype;
+    const cl = Modbus.prototype;
 
     // set/get unitID
     cl.setID = function(id) {this._unitID = Number(id);};

@@ -1,18 +1,18 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
 describe("Modbus UDP port", function() {
-    var port;
+    let port;
 
     before(function() {
-        var mock = require("../mocks/dgramMock");
+        const mock = require("../mocks/dgramMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("dgram", mock);
-        var UdpPort = require("../../ports/udpport");
+        const UdpPort = require("../../ports/udpport");
         port = new UdpPort("127.0.0.1", { port: 9999 });
     });
 

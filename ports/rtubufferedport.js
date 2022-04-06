@@ -1,17 +1,17 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var SerialPort = require("serialport").SerialPort;
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const SerialPort = require("serialport").SerialPort;
+const modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
-var EXCEPTION_LENGTH = 5;
-var MIN_DATA_LENGTH = 6;
-var MAX_BUFFER_LENGTH = 256;
-var CRC_LENGTH = 2;
-var READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
-var LENGTH_UNKNOWN = "unknown";
-var BITS_TO_NUM_OF_OBJECTS = 7;
+const EXCEPTION_LENGTH = 5;
+const MIN_DATA_LENGTH = 6;
+const MAX_BUFFER_LENGTH = 256;
+const CRC_LENGTH = 2;
+const READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
+const LENGTH_UNKNOWN = "unknown";
+const BITS_TO_NUM_OF_OBJECTS = 7;
 
 // Helper function -> Bool
 // BIT | TYPE
@@ -19,16 +19,16 @@ var BITS_TO_NUM_OF_OBJECTS = 7;
 // 9 | length of OBJECTID
 // 10 -> n | the object
 // 10 + n + 1 | new object id
-var calculateFC43Length = function(buffer, numObjects, i, bufferLength) {
-    var result = { hasAllData: true };
-    var currentByte = 8 + i; // current byte starts at object id.
+const calculateFC43Length = function(buffer, numObjects, i, bufferLength) {
+    const result = { hasAllData: true };
+    let currentByte = 8 + i; // current byte starts at object id.
     if (numObjects > 0) {
-        for (var j = 0; j < numObjects; j++) {
+        for (let j = 0; j < numObjects; j++) {
             if (bufferLength < currentByte) {
                 result.hasAllData = false;
                 break;
             }
-            var objLength = buffer[currentByte + 1];
+            const objLength = buffer[currentByte + 1];
             if (!objLength) {
                 result.hasAllData = false;
                 break;
@@ -57,7 +57,7 @@ class RTUBufferedPort extends EventEmitter {
     constructor(path, options) {
         super();
 
-        var self = this;
+        const self = this;
 
         // options
         if (typeof(options) === "undefined") options = {};
@@ -87,8 +87,8 @@ class RTUBufferedPort extends EventEmitter {
             modbusSerialDebug({ action: "receive serial rtu buffered port", data: data, buffer: self._buffer });
 
             // check if buffer include a complete modbus answer
-            var expectedLength = self._length;
-            var bufferLength = self._buffer.length;
+            const expectedLength = self._length;
+            let bufferLength = self._buffer.length;
 
 
             // check data length
@@ -104,11 +104,11 @@ class RTUBufferedPort extends EventEmitter {
             }
 
             // loop and check length-sized buffer chunks
-            var maxOffset = bufferLength - EXCEPTION_LENGTH;
+            const maxOffset = bufferLength - EXCEPTION_LENGTH;
 
-            for (var i = 0; i <= maxOffset; i++) {
-                var unitId = self._buffer[i];
-                var functionCode = self._buffer[i + 1];
+            for (let i = 0; i <= maxOffset; i++) {
+                const unitId = self._buffer[i];
+                const functionCode = self._buffer[i + 1];
 
                 if (unitId !== self._id) continue;
 
@@ -116,8 +116,8 @@ class RTUBufferedPort extends EventEmitter {
                     if (bufferLength <= BITS_TO_NUM_OF_OBJECTS + i) {
                         return;
                     }
-                    var numObjects = self._buffer[7 + i];
-                    var result = calculateFC43Length(self._buffer, numObjects, i, bufferLength);
+                    const numObjects = self._buffer[7 + i];
+                    const result = calculateFC43Length(self._buffer, numObjects, i, bufferLength);
                     if (result.hasAllData) {
                         self._emitData(i, result.bufLength);
                         return;
@@ -156,7 +156,7 @@ class RTUBufferedPort extends EventEmitter {
      * @private
      */
     _emitData(start, length) {
-        var buffer = this._buffer.slice(start, start + length);
+        const buffer = this._buffer.slice(start, start + length);
         modbusSerialDebug({ action: "emit data serial rtu buffered port", buffer: buffer });
         this.emit("data", buffer);
         this._buffer = this._buffer.slice(start + length);
@@ -192,7 +192,7 @@ class RTUBufferedPort extends EventEmitter {
             return;
         }
 
-        var length = null;
+        let length = null;
 
         // remember current unit and command
         this._id = data[0];

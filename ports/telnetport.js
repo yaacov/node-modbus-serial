@@ -1,14 +1,14 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
-var net = require("net");
-var modbusSerialDebug = require("debug")("modbus-serial");
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
+const net = require("net");
+const modbusSerialDebug = require("debug")("modbus-serial");
 
 /* TODO: const should be set once, maybe */
-var EXCEPTION_LENGTH = 5;
-var MIN_DATA_LENGTH = 6;
+const EXCEPTION_LENGTH = 5;
+const MIN_DATA_LENGTH = 6;
 
-var TELNET_PORT = 2217;
+const TELNET_PORT = 2217;
 
 class TelnetPort extends EventEmitter {
     /**
@@ -21,7 +21,7 @@ class TelnetPort extends EventEmitter {
     constructor(ip, options) {
         super();
 
-        var self = this;
+        const self = this;
         this.ip = ip;
         this.openFlag = false;
         this.callback = null;
@@ -43,7 +43,7 @@ class TelnetPort extends EventEmitter {
 
         // handle callback - call a callback function only once, for the first event
         // it will triger
-        var handleCallback = function(had_error) {
+        const handleCallback = function(had_error) {
             if (self.callback) {
                 self.callback(had_error);
                 self.callback = null;
@@ -69,8 +69,8 @@ class TelnetPort extends EventEmitter {
             self._buffer = Buffer.concat([self._buffer, data]);
 
             // check if buffer include a complete modbus answer
-            var expectedLength = self._length;
-            var bufferLength = self._buffer.length;
+            const expectedLength = self._length;
+            const bufferLength = self._buffer.length;
             modbusSerialDebug(
                 "on data expected length:" +
                     expectedLength +
@@ -95,10 +95,10 @@ class TelnetPort extends EventEmitter {
             if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
 
             // loop and check length-sized buffer chunks
-            var maxOffset = bufferLength - EXCEPTION_LENGTH;
-            for (var i = 0; i <= maxOffset; i++) {
-                var unitId = self._buffer[i];
-                var functionCode = self._buffer[i + 1];
+            const maxOffset = bufferLength - EXCEPTION_LENGTH;
+            for (let i = 0; i <= maxOffset; i++) {
+                const unitId = self._buffer[i];
+                const functionCode = self._buffer[i + 1];
 
                 if (unitId !== self._id) continue;
 
@@ -227,7 +227,7 @@ class TelnetPort extends EventEmitter {
             return;
         }
 
-        var length = null;
+        let length = null;
 
         // remember current unit and command
         this._id = data[0];

@@ -1,18 +1,18 @@
 "use strict";
 /* eslint-disable no-undef */
 
-var expect = require("chai").expect;
-var mockery = require("mockery");
+const expect = require("chai").expect;
+const mockery = require("mockery");
 
 describe("Modbus UDP port", function() {
-    var port;
+    let port;
 
     before(function() {
-        var mock = require("./../mocks/dgramMock");
+        const mock = require("./../mocks/dgramMock");
         mockery.resetCache();
         mockery.enable({ warnOnReplace: false, useCleanCache: true, warnOnUnregistered: false });
         mockery.registerMock("dgram", mock);
-        var UdpPort = require("./../../ports/c701port");
+        const UdpPort = require("./../../ports/c701port");
         port = new UdpPort("127.0.0.1", { port: 9999 });
     });
 
@@ -58,7 +58,7 @@ describe("Modbus UDP port", function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
 
                 if (port._client._data.slice(-8).equals(Buffer.from("1103006B00037687", "hex"))) {
-                    var buffer = Buffer.alloc(116 + 11).fill(0);
+                    const buffer = Buffer.alloc(116 + 11).fill(0);
                     buffer.writeUInt16LE(602, 2);           // C701 magic for serial bridge
                     buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)
                     buffer.writeUInt16LE(0, 38);            // expected serial answer length
@@ -81,7 +81,7 @@ describe("Modbus UDP port", function() {
                 port.write(Buffer.from("1103006B00037687", "hex"));
 
                 if (port._client._data.slice(-8).equals(Buffer.from("1103006B00037687", "hex"))) {
-                    var buffer = Buffer.alloc(116 + 5).fill(0);
+                    const buffer = Buffer.alloc(116 + 5).fill(0);
                     buffer.writeUInt16LE(602, 2);           // C701 magic for serial bridge
                     buffer.writeUInt16LE(0, 36);            // C701 RS485 connector (0..2)
                     buffer.writeUInt16LE(0, 38);            // expected serial answer length

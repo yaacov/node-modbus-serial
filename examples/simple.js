@@ -1,11 +1,11 @@
 /* eslint-disable no-console, spaced-comment */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var client = new ModbusRTU();
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+const client = new ModbusRTU();
 
-var networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
+const networkErrors = ["ESOCKETTIMEDOUT", "ETIMEDOUT", "ECONNRESET", "ECONNREFUSED", "EHOSTUNREACH"];
 
 // open connection to a serial port
 //client.connectRTUBuffered("/dev/ttyUSB0", { hupcl: false, dsrdtr: false })

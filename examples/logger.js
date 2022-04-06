@@ -1,13 +1,13 @@
 /* eslint-disable no-console, spaced-comment */
 
 // create an empty modbus client
-//var ModbusRTU = require("modbus-serial");
-var ModbusRTU = require("../index");
-var client = new ModbusRTU();
-var timeoutRunRef = null;
-var timeoutConnectRef = null;
+//let ModbusRTU = require("modbus-serial");
+const ModbusRTU = require("../index");
+let client = new ModbusRTU();
+let timeoutRunRef = null;
+let timeoutConnectRef = null;
 
-var networkErrors = [
+const networkErrors = [
     "ESOCKETTIMEDOUT",
     "ETIMEDOUT",
     "ECONNRESET",

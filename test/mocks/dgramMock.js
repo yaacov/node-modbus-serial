@@ -1,6 +1,6 @@
 "use strict";
-var events = require("events");
-var EventEmitter = events.EventEmitter || events;
+const events = require("events");
+const EventEmitter = events.EventEmitter || events;
 
 class Socket extends EventEmitter {
     connect(port, host, connectListener) {
