@@ -166,8 +166,6 @@ class TcpPort extends EventEmitter {
         this.callback = callback;
         // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
         this._client.end();
-
-        this.removeAllListeners();
     }
 
     /**
