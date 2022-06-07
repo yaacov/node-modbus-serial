@@ -1,3 +1,5 @@
+import { Socket } from 'net';
+
 export class ModbusRTU {
   constructor(port?: any);
 
@@ -32,10 +34,14 @@ export class ModbusRTU {
   connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
   connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
   connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
-  linkTCP(socket: string, options: TcpPortOptions, next: Function): void;
-  linkTcpRTUBuffered(socket: string, options: TcpRTUPortOptions, next: Function): void;
-  linkTelnet(socket: string, options: TelnetPortOptions, next: Function): void;
-  connectRTUSocket(socket: string, next: Function): void;
+  linkTCP(socket: Socket, options: TcpPortOptions, next: Function): void;
+  linkTCP(socket: Socket, options: TcpPortOptions): Promise<void>;
+  linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions, next: Function): void;
+  linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions): Promise<void>;
+  linkTelnet(socket: Socket, options: TelnetPortOptions, next: Function): void;
+  linkTelnet(socket: Socket, options: TelnetPortOptions): Promise<void>;
+  connectRTUSocket(socket: Socket, next: Function): void;
+  connectRTUSocket(socket: Socket): Promise<void>;
 
   // Promise API
   setID(id: number): void;
