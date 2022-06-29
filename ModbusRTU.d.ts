@@ -59,6 +59,7 @@ export class ModbusRTU {
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
 
   on(event: 'close', listener: () => unknown): this;
+  readDeviceIdentification(deviceIdCode: number, objectId: number): Promise<ReadDeviceIdentificationResult>;
 
   isOpen: boolean;
 }
@@ -90,6 +91,11 @@ export interface WriteRegisterResult {
 export interface WriteMultipleResult {
   address: number;
   length: number;
+}
+
+export interface ReadDeviceIdentificationResult { 
+  data: string[];
+  conformityLevel: number;
 }
 
 export interface SerialPortOptions {
