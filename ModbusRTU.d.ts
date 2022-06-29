@@ -58,6 +58,8 @@ export class ModbusRTU {
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
 
+  on(event: 'close', listener: () => unknown): this;
+
   isOpen: boolean;
 }
 
