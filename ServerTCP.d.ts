@@ -48,7 +48,7 @@ interface IServerOptions {
 }
 
 export declare interface ServerTCP {
-    on(event: 'SocketError', listener: FCallback): this;
+    on(event: 'socketError', listener: FCallback): this;
     on(event: 'error', listener: FCallback): this;
     on(event: 'initialized', listener: FCallback): this;
 }
