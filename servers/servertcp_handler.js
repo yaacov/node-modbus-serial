@@ -704,8 +704,11 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
         for (i = 0; i < length; i++) {
             cb = buildCb(i);
 
-            value.push(requestBuffer.readUInt16BE(7 + i * 2));
-            _handlePromiseOrValue(value, cb);
+            try {
+                value.push(requestBuffer.readUInt16BE(7 + i * 2));
+            } catch (error) {
+                cb(error)
+            }
         }
 
         try {
@@ -713,7 +716,8 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
                 vector.setRegisterArray(address, value, unitID, cb);
             }
             else {
-                vector.setRegisterArray(address, value, unitID);
+                var promiseOrValue = vector.setRegisterArray(address, value, unitID);
+                _handlePromiseOrValue(promiseOrValue, cb);
             }
         }
         catch (err) {
