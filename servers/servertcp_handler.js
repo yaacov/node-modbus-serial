@@ -707,7 +707,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
             try {
                 value.push(requestBuffer.readUInt16BE(7 + i * 2));
             } catch (error) {
-                cb(error)
+                cb(error);
             }
         }
 
