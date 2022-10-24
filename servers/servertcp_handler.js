@@ -670,27 +670,22 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 
     // write registers
     let callbackInvoked = false;
-    let cbCount = 0;
-    const buildCb = function(/* i - not used at the moment */) {
-        return function(err) {
-            if (err) {
-                if (!callbackInvoked) {
-                    callbackInvoked = true;
-                    callback(err);
-                }
-
-                return;
-            }
-
-            cbCount = cbCount + 1;
-
-            if (cbCount === length && !callbackInvoked) {
-                modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
-
+    const cb = function(err) {
+        if (err) {
+            if (!callbackInvoked) {
                 callbackInvoked = true;
-                callback(null, responseBuffer);
+                callback(err);
             }
-        };
+
+            return;
+        }
+
+        if (!callbackInvoked) {
+            modbusSerialDebug({ action: "FC16 response", responseBuffer: responseBuffer });
+
+            callbackInvoked = true;
+            callback(null, responseBuffer);
+        }
     };
 
     if (length === 0)
@@ -701,19 +696,17 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
     if (vector.setRegisterArray) {
         value = [];
 
-        for (i = 0; i < length; i++) {
-            cb = buildCb(i);
-
-            value.push(requestBuffer.readUInt16BE(7 + i * 2));
-            _handlePromiseOrValue(value, cb);
-        }
-
         try {
+            for (i = 0; i < length; i++) {
+                value.push(requestBuffer.readUInt16BE(7 + i * 2));
+            }
+
             if (vector.setRegisterArray.length === 4) {
                 vector.setRegisterArray(address, value, unitID, cb);
             }
             else {
-                vector.setRegisterArray(address, value, unitID);
+                var promiseOrValue = vector.setRegisterArray(address, value, unitID);
+                _handlePromiseOrValue(promiseOrValue, cb);
             }
         }
         catch (err) {
@@ -723,10 +716,9 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
         var value;
 
         for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            value = requestBuffer.readUInt16BE(7 + i * 2);
-
             try {
+                value = requestBuffer.readUInt16BE(7 + i * 2);
+
                 if (vector.setRegister.length === 4) {
                     vector.setRegister(address + i, value, unitID, cb);
                 }
