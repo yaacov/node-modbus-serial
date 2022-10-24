@@ -716,10 +716,9 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
         var value;
 
         for (var i = 0; i < length; i++) {
-            var cb = buildCb(i);
-            value = requestBuffer.readUInt16BE(7 + i * 2);
-
             try {
+                value = requestBuffer.readUInt16BE(7 + i * 2);
+
                 if (vector.setRegister.length === 4) {
                     vector.setRegister(address + i, value, unitID, cb);
                 }
