@@ -670,7 +670,7 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 
     // write registers
     let callbackInvoked = false;
-    const cb = function (err) {
+    const cb = function(err) {
         if (err) {
             if (!callbackInvoked) {
                 callbackInvoked = true;
