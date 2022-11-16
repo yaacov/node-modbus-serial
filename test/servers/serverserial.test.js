@@ -67,8 +67,7 @@ describe("Modbus Serial Server (no serverID)", function() {
                 path: "/tmp/ptyp0",
                 baudRate: 9600
             });
-            // 00010000000601050005ff00
-            //             01050001ff00ddfa
+
             port.write(Buffer.from("01050001ff00ddfa", "hex"));
 
             port.on("data", function(data) {
@@ -89,8 +88,7 @@ describe("Modbus Serial Server (no serverID)", function() {
                 path: "/tmp/ptyp0",
                 baudRate: 9600
             });
-            // 000100000006010700000000
-            //             01070001ff00ddfa
+
             // FC07 - unhandled function
             port.write(Buffer.from("01070001ff00ddfa", "hex"));
 
@@ -108,10 +106,8 @@ describe("Modbus Serial Server (no serverID)", function() {
                 path: "/tmp/ptyp0",
                 baudRate: 9600
             });
+
             // FC03 to error triggering address
-            // 0103003E0001
-            // 0001000000060103003E0001
-            //             01070001ff00ddfa
             port.write(Buffer.from("0103003E0001ddfa", "hex"));
 
             port.on("data", function(data) {
