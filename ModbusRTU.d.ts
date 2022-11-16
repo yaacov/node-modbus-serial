@@ -1,7 +1,8 @@
 import { Socket } from 'net';
-
+import TestPort from './ports/testport';
 export class ModbusRTU {
   constructor(port?: any);
+  static TestPort: typeof TestPort
 
   open(callback: Function): void;
   close(callback: Function): void;
@@ -93,7 +94,7 @@ export interface WriteMultipleResult {
   length: number;
 }
 
-export interface ReadDeviceIdentificationResult { 
+export interface ReadDeviceIdentificationResult {
   data: string[];
   conformityLevel: number;
 }
