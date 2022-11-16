@@ -11,8 +11,10 @@
  * sudo chown user:user /tmp/ttyp0 /tmp/ptyp0
  */
 
+const { MockBinding } = require("@serialport/binding-mock");
+const { SerialPortStream } = require("@serialport/stream");
 const expect = require("chai").expect;
-const { SerialPort } = require("serialport");
+// const { SerialPort } = require("serialport");
 const ServerSerial = require("./../../servers/serverserial");
 
 // FYI, maximum length for requests.
@@ -23,8 +25,9 @@ const ServerSerial = require("./../../servers/serverserial");
 
 describe("Modbus Serial Server (no serverID)", function() {
     let serverSerial; // eslint-disable-line no-unused-vars
+    let clientSerial; // eslint-disable-line no-unused-vars
 
-    before(function() {
+    beforeEach(function() {
         const vector = {
             getInputRegister: function(addr) {
                 return addr;
@@ -50,32 +53,49 @@ describe("Modbus Serial Server (no serverID)", function() {
                 return;
             }
         };
+
+        MockBinding.createPort("/dev/server", { echo: true, record: true });
+        MockBinding.createPort("/dev/client", { echo: true, record: true });
+
+        clientSerial = new SerialPortStream({
+            binding: MockBinding,
+            path: "/dev/client",
+            baudRate: 9600
+        });
+
         serverSerial = new ServerSerial(vector, {
-            port: "/tmp/ttyp0",
-            debug: true,
-            unitID: 1
+            binding: MockBinding,
+            port: "/dev/server",
+            portResponse: clientSerial,
+            debug: true
         });
     });
 
-    after(function() {
+    afterEach(function() {
         serverSerial.close();
     });
 
     describe("function code handler", function() {
         it("should receive a valid Modbus Serial message", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
-            port.write(Buffer.from("01050001ff00ddfa", "hex"));
+            clientSerial.write(Buffer.from("01050001ff00ddfa", "hex"));
 
-            port.on("data", function(data) {
-                // FC05 - valid responce
-                expect(data.toString("hex")).to.equal("01050001ff00ddfa");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // FC05 - valid responce
+                    expect(data.toString("hex")).to.equal("01050001ff00ddfa");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
@@ -84,38 +104,50 @@ describe("Modbus Serial Server (no serverID)", function() {
 
     describe("modbus exception handler", function() {
         it("should receive a valid unhandled function Modbus Serial message", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // FC07 - unhandled function
-            port.write(Buffer.from("01070001ff00ddfa", "hex"));
+            clientSerial.write(Buffer.from("01070001ff00ddfa", "hex"));
 
-            port.on("data", function(data) {
-                // A valid error message, code 0x01 - Illegal fanction
-                expect(data.toString("hex")).to.equal("0187018230");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // A valid error message, code 0x01 - Illegal fanction
+                    expect(data.toString("hex")).to.equal("0187018230");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
         it("should receive a valid slave failure Modbus Serial message", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // FC03 to error triggering address
-            port.write(Buffer.from("0103003E0001ddfa", "hex"));
+            clientSerial.write(Buffer.from("0103003E0001ddfa", "hex"));
 
-            port.on("data", function(data) {
-                // A valid error message, code 0x04 - Slave failure
-                expect(data.toString("hex")).to.equal("01830440f3");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // A valid error message, code 0x04 - Slave failure
+                    expect(data.toString("hex")).to.equal("01830440f3");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
@@ -124,56 +156,74 @@ describe("Modbus Serial Server (no serverID)", function() {
 
     describe("large client request", function() {
         it("should handle a large request without crash successfully (FC1)", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // request `maximum number` + 1 of coil addresses at once
-            port.write(Buffer.from("0101000007f9fe78", "hex"));
+            clientSerial.write(Buffer.from("0101000007f9fe78", "hex"));
 
-            port.on("data", function(data) {
-                // A valid error message, code 0x04 - Slave failure
-                expect(data.toString("hex")).to.equal("0181044193");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // A valid error message, code 0x04 - Slave failure
+                    expect(data.toString("hex")).to.equal("0181044193");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
         it("should handle a large request without crash successfully (FC3)", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // request `maximum number` + 1 of holding addresses at once
-            port.write(Buffer.from("010300000080446a", "hex"));
+            clientSerial.write(Buffer.from("010300000080446a", "hex"));
 
-            port.on("data", function(data) {
-                // A valid error message, code 0x04 - Slave failure
-                expect(data.toString("hex")).to.equal("01830440f3");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // A valid error message, code 0x04 - Slave failure
+                    expect(data.toString("hex")).to.equal("01830440f3");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
         it("should handle a large request without crash successfully (FC4)", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // request `maximum number` + 1 of input addresses at once
-            port.write(Buffer.from("010400000080f1aa", "hex"));
+            clientSerial.write(Buffer.from("010400000080f1aa", "hex"));
 
-            port.on("data", function(data) {
-                // A valid error message, code 0x04 - Slave failure
-                expect(data.toString("hex")).to.equal("01840442c3");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
 
-                port.close();
-                done();
+                    // A valid error message, code 0x04 - Slave failure
+                    expect(data.toString("hex")).to.equal("01840442c3");
+
+                    clientSerial.close();
+                    done();
+                }
             });
         });
 
@@ -183,6 +233,7 @@ describe("Modbus Serial Server (no serverID)", function() {
 
 describe("Modbus Serial Server (serverID = requestID)", function() {
     let serverSerial; // eslint-disable-line no-unused-vars
+    let clientSerial; // eslint-disable-line no-unused-vars
 
     before(function() {
         const vector = {
@@ -191,8 +242,20 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
                 return;
             }
         };
+
+        MockBinding.createPort("/dev/server", { echo: true, record: true });
+        MockBinding.createPort("/dev/client", { echo: true, record: true });
+
+        clientSerial = new SerialPortStream({
+            binding: MockBinding,
+            path: "/dev/client",
+            baudRate: 9600
+        });
+
         serverSerial = new ServerSerial(vector, {
-            port: "/tmp/ttyp0",
+            binding: MockBinding,
+            port: "/dev/server",
+            portResponse: clientSerial,
             debug: true,
             unitID: 4
         });
@@ -204,20 +267,25 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
 
     describe("function code handler", function() {
         it("should receive a valid Modbus Serial message", function(done) {
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // FC05 - force single coil, to on 0xff00
-            port.write(Buffer.from("04050001ff00ddaf", "hex"));
+            clientSerial.write(Buffer.from("04050001ff00ddaf", "hex"));
 
-            port.on("data", function(data) {
-                // FC05 - valid responce
-                expect(data.toString("hex")).to.equal("04050001ff00ddaf");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
+                    // FC05 - valid responce
+                    expect(data.toString("hex")).to.equal("04050001ff00ddaf");
 
-                port.close();
-                done();
+                    clientSerial.close();
+                    done();
+                }
             });
         });
     });
@@ -225,6 +293,7 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
 
 describe("Modbus Serial Server (serverID != requestID)", function() {
     let serverSerial; // eslint-disable-line no-unused-vars
+    let clientSerial; // eslint-disable-line no-unused-vars
 
     before(function() {
         const vector = {
@@ -233,8 +302,20 @@ describe("Modbus Serial Server (serverID != requestID)", function() {
                 return;
             }
         };
+
+        MockBinding.createPort("/dev/server", { echo: true, record: true });
+        MockBinding.createPort("/dev/client", { echo: true, record: true });
+
+        clientSerial = new SerialPortStream({
+            binding: MockBinding,
+            path: "/dev/client",
+            baudRate: 9600
+        });
+
         serverSerial = new ServerSerial(vector, {
-            port: "/tmp/ttyp0",
+            binding: MockBinding,
+            port: "/dev/server",
+            portResponse: clientSerial,
             debug: true,
             unitID: 4
         });
@@ -248,23 +329,29 @@ describe("Modbus Serial Server (serverID != requestID)", function() {
         it("should receive a no Modbus Serial message for wrong unitID", function(done) {
             this.timeout(1000 + 100);
 
-            const port = new SerialPort({
-                path: "/tmp/ptyp0",
-                baudRate: 9600
-            });
+            let awaitingResponse = false;
 
             // FC05 - force single coil on unitID 3, to on 0xff00
-            port.write(Buffer.from("03050001ff00ddaf", "hex"));
+            clientSerial.write(Buffer.from("03050001ff00ddaf", "hex"));
             function cleanup() {
-                port.close();
+                clientSerial.close();
                 done();
             }
             const timeout = setTimeout(cleanup, 1000);
 
-            port.on("data", function() {
-                clearTimeout(timeout);
-                port.close();
-                expect.fail("Shouldn't have received data - we specified wrong unitID.");
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    // Client request forwarded to server
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    // Client received response
+                    awaitingResponse = false;
+
+                    clearTimeout(timeout);
+                    clientSerial.close();
+                    expect.fail("Shouldn't have received data - we specified wrong unitID.");
+                }
             });
         });
     });

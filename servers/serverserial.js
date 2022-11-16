@@ -209,8 +209,8 @@ class ServerSerial extends EventEmitter {
             path: options.port || PORT,
             baudRate: options.baudrate || BAUDRATE,
             debug: options.debug || false,
-            unitID: options.unitID || 1,
-            Binding: options.binding || null
+            unitID: options.unitID || 255,
+            binding: options.binding || null
         });
 
         // Open errors will be emitted as an error event
@@ -275,7 +275,7 @@ class ServerSerial extends EventEmitter {
                         modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                         // write to port
-                        modbus._server.write(responseBuffer);
+                        (options.portResponse || modbus._server).write(responseBuffer);
                     }
                 };
 
@@ -298,6 +298,10 @@ class ServerSerial extends EventEmitter {
             modbus.emit("socketError", err);
         });
 
+    }
+
+    getPort() {
+        return this._server;
     }
 
     /**
