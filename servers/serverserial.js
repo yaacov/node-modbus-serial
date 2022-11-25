@@ -204,14 +204,16 @@ class ServerSerial extends EventEmitter {
         const modbus = this;
         options = options || {};
 
-        // create a serial server
-        modbus._server = new SerialPort({
+        const optionsWithBinding = {
             path: options.port || PORT,
             baudRate: options.baudrate || BAUDRATE,
             debug: options.debug || false,
-            unitID: options.unitID || 255,
-            binding: options.binding || null
-        });
+            unitID: options.unitID || 255
+        };
+        if (options.binding) optionsWithBinding.binding = options.binding;
+
+        // create a serial server
+        modbus._server = new SerialPort(optionsWithBinding);
 
         // Open errors will be emitted as an error event
         modbus._server.on("error", function(err) {
