@@ -1,4 +1,4 @@
-import * as EventEmitter from "events";
+import {EventEmitter} from "events";
 export class TestPort extends EventEmitter {
   isOpen: () => boolean;
   open: (callback: (...args: any[]) => any) => void;
