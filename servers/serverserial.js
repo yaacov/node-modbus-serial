@@ -192,7 +192,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
 
 class ServerSerial extends EventEmitter {
     /**
-     * Class making ModbusTCP server.
+     * Class making ModbusRTU server.
      *
      * @param vector - vector of server functions (see examples/server.js)
      * @param options - server options (host (IP), port, debug (true/false), unitID)
@@ -204,16 +204,13 @@ class ServerSerial extends EventEmitter {
         const modbus = this;
         options = options || {};
 
-        const optionsWithBinding = {
-            path: options.port || PORT,
-            baudRate: options.baudrate || BAUDRATE,
-            debug: options.debug || false,
-            unitID: options.unitID || 255
-        };
-        if (options.binding) optionsWithBinding.binding = options.binding;
-
         // create a serial server
-        modbus._server = new SerialPort(optionsWithBinding);
+        modbus._server = new SerialPort({
+            path: options?.path ?? PORT,
+            baudRate: options?.baudRate ?? BAUDRATE,
+            debug: options?.debug ?? false,
+            unitID: options?.unitID ?? 255
+        });
 
         // Open errors will be emitted as an error event
         modbus._server.on("error", function(err) {
