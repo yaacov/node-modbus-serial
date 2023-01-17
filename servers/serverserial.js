@@ -18,6 +18,7 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const modbusSerialDebug = require("debug")("modbus-serial");
 const { SerialPort } = require("serialport");
+const ServerSerialPipeHandler = require("./serverserial_pipe_handler");
 
 const PORT = "/dev/tty";
 const BAUDRATE = 9600;
@@ -192,7 +193,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
 
 class ServerSerial extends EventEmitter {
     /**
-     * Class making ModbusTCP server.
+     * Class making ModbusRTU server.
      *
      * @param vector - vector of server functions (see examples/server.js)
      * @param options - server options (host (IP), port, debug (true/false), unitID)
@@ -205,15 +206,24 @@ class ServerSerial extends EventEmitter {
         options = options || {};
 
         const optionsWithBinding = {
-            path: options.port || PORT,
-            baudRate: options.baudrate || BAUDRATE,
+            path: options.path || options.port || PORT,
+            baudRate: options.baudRate || options.baudrate || BAUDRATE,
             debug: options.debug || false,
             unitID: options.unitID || 255
         };
+
+        const optionsWithSerialPortTimeoutParser = {
+            maxBufferSize: options.maxBufferSize || 65536,
+            interval: options.interval || 30
+        };
+
         if (options.binding) optionsWithBinding.binding = options.binding;
 
         // create a serial server
-        modbus._server = new SerialPort(optionsWithBinding);
+        modbus._serverPath = new SerialPort(optionsWithBinding);
+
+        // create a serial server with a timeout parser
+        modbus._server = modbus._serverPath.pipe(new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser));
 
         // Open errors will be emitted as an error event
         modbus._server.on("error", function(err) {
@@ -277,7 +287,7 @@ class ServerSerial extends EventEmitter {
                         modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                         // write to port
-                        (options.portResponse || modbus._server).write(responseBuffer);
+                        (options.portResponse || modbus._serverPath).write(responseBuffer);
                     }
                 };
 
@@ -317,7 +327,7 @@ class ServerSerial extends EventEmitter {
         // close the net port if exist
         if (modbus._server) {
             modbus._server.removeAllListeners("data");
-            modbus._server.close(callback);
+            modbus._serverPath.close(callback);
 
             modbus.socks.forEach(function(e, sock) {
                 sock.destroy();
