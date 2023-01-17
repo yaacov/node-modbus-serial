@@ -327,7 +327,7 @@ class ServerSerial extends EventEmitter {
         // close the net port if exist
         if (modbus._server) {
             modbus._server.removeAllListeners("data");
-            modbus._server.close(callback);
+            modbus._serverPath.close(callback);
 
             modbus.socks.forEach(function(e, sock) {
                 sock.destroy();
