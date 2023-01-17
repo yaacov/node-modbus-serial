@@ -1,7 +1,7 @@
 const stream = require("stream");
 
 class ServerSerialPipeHandler extends stream.Transform {
-    constructor ({ maxBufferSize = 65536, interval, ...transformOptions }) {
+    constructor({ maxBufferSize = 65536, interval, transformOptions }) {
         super(transformOptions);
         if (!interval) {
             throw new TypeError("\"interval\" is required");
