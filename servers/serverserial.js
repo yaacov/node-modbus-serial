@@ -18,7 +18,7 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const modbusSerialDebug = require("debug")("modbus-serial");
 const { SerialPort } = require("serialport");
-const ServerSerialPipeHandler = require("./serverserial_pipe_handler")
+const ServerSerialPipeHandler = require("./serverserial_pipe_handler");
 
 const PORT = "/dev/tty";
 const BAUDRATE = 9600;
@@ -206,18 +206,18 @@ class ServerSerial extends EventEmitter {
         options = options || {};
 
         const optionsWithBinding = {
-            path: options?.path ?? options?.port ?? PORT,
-            baudRate: options?.baudRate ?? options?.baudrate ?? BAUDRATE,
-            debug: options?.debug ?? false,
-            unitID: options?.unitID ?? 255
-        }
+            path: options.path || options.port || PORT,
+            baudRate: options.baudRate || options.baudrate || BAUDRATE,
+            debug: options.debug || false,
+            unitID: options.unitID || 255
+        };
 
         const optionsWithSerialPortTimeoutParser = {
-            maxBufferSize: options?.maxBufferSize ?? 65536,
-            interval: options?.interval ?? 30,
-        }
+            maxBufferSize: options.maxBufferSize || 65536,
+            interval: options.interval || 30
+        };
 
-        if (options?.binding) optionsWithBinding.binding = options.binding;
+        if (options.binding) optionsWithBinding.binding = options.binding;
 
         // create a serial server
         modbus._serverPath = new SerialPort(optionsWithBinding);

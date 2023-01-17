@@ -4,19 +4,19 @@ class ServerSerialPipeHandler extends stream.Transform {
     constructor ({ maxBufferSize = 65536, interval, ...transformOptions }) {
         super(transformOptions);
         if (!interval) {
-            throw new TypeError('"interval" is required');
+            throw new TypeError("\"interval\" is required");
         }
-        if (typeof interval !== 'number' || Number.isNaN(interval)) {
-            throw new TypeError('"interval" is not a number');
+        if (typeof interval !== "number" || Number.isNaN(interval)) {
+            throw new TypeError("\"interval\" is not a number");
         }
         if (interval < 1) {
-            throw new TypeError('"interval" is not greater than 0');
+            throw new TypeError("\"interval\" is not greater than 0");
         }
-        if (typeof maxBufferSize !== 'number' || Number.isNaN(maxBufferSize)) {
-            throw new TypeError('"maxBufferSize" is not a number');
+        if (typeof maxBufferSize !== "number" || Number.isNaN(maxBufferSize)) {
+            throw new TypeError("\"maxBufferSize\" is not a number");
         }
         if (maxBufferSize < 1) {
-            throw new TypeError('"maxBufferSize" is not greater than 0');
+            throw new TypeError("\"maxBufferSize\" is not greater than 0");
         }
         this.maxBufferSize = maxBufferSize;
         this.currentPacket = Buffer.from([]);
