@@ -223,7 +223,7 @@ class ServerSerial extends EventEmitter {
         modbus._serverPath = new SerialPort(optionsWithBinding);
 
         // create a serial server with a timeout parser
-        modbus._server = new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser);
+        modbus._server = modbus._serverPath.pipe(new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser));
 
         // Open errors will be emitted as an error event
         modbus._server.on("error", function(err) {
