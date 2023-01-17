@@ -18,7 +18,6 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const modbusSerialDebug = require("debug")("modbus-serial");
 const { SerialPort } = require("serialport");
-const { InterByteTimeoutParser } = require("@serialport/parser-inter-byte-timeout");
 
 const PORT = "/dev/tty";
 const BAUDRATE = 9600;
@@ -205,15 +204,17 @@ class ServerSerial extends EventEmitter {
         const modbus = this;
         options = options || {};
 
-        // create a serial server
-        modbus._serverPath = new SerialPort({
-            path: options?.path ?? PORT,
-            baudRate: options?.baudRate ?? BAUDRATE,
+        const optionsWithBinding = {
+            path: options?.path ?? options?.port ?? PORT,
+            baudRate: options?.baudRate ?? options?.baudrate ?? BAUDRATE,
             debug: options?.debug ?? false,
             unitID: options?.unitID ?? 255
-        });
+        }
 
-        modbus._server = modbus._serverPath.pipe(new InterByteTimeoutParser({ interval:30 }))
+        if (options?.binding) optionsWithBinding.binding = options.binding;
+
+        // create a serial server
+        modbus._server = new SerialPort(optionsWithBinding);
 
         // Open errors will be emitted as an error event
         modbus._server.on("error", function(err) {
