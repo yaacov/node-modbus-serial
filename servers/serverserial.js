@@ -287,7 +287,7 @@ class ServerSerial extends EventEmitter {
                         modbusSerialDebug(JSON.stringify({ action: "send string", data: responseBuffer }));
 
                         // write to port
-                        (options.portResponse || modbus._server).write(responseBuffer);
+                        (options.portResponse || modbus._serverPath).write(responseBuffer);
                     }
                 };
 
