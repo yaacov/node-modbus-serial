@@ -221,10 +221,10 @@ class ServerSerial extends EventEmitter {
         if (options.binding) optionsWithBinding.binding = options.binding;
 
         // Assign extra parameters in serialport
-        const optionsWithBindinsg = Object.assign({}, serialportOptions, optionsWithBinding);
+        const optionsWithBindingandSerialport = Object.assign({}, serialportOptions, optionsWithBinding);
 
         // create a serial server
-        modbus._serverPath = new SerialPort(optionsWithBindinsg);
+        modbus._serverPath = new SerialPort(optionsWithBindingandSerialport);
 
         // create a serial server with a timeout parser
         modbus._server = modbus._serverPath.pipe(new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser));
