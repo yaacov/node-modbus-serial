@@ -313,7 +313,7 @@ class ServerSerial extends EventEmitter {
     }
 
     getPort() {
-        return this._server;
+        return this._serverPath;
     }
 
     /**
