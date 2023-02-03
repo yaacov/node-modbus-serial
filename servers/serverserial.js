@@ -197,9 +197,10 @@ class ServerSerial extends EventEmitter {
      *
      * @param vector - vector of server functions (see examples/server.js)
      * @param options - server options (host (IP), port, debug (true/false), unitID)
+     * @param serialportOptions - additional parameters for serialport options
      * @constructor
      */
-    constructor(vector, options) {
+    constructor(vector, options, serialportOptions) {
         super();
 
         const modbus = this;
@@ -219,8 +220,11 @@ class ServerSerial extends EventEmitter {
 
         if (options.binding) optionsWithBinding.binding = options.binding;
 
+        // Assign extra parameters in serialport
+        const optionsWithBindinsg = Object.assign({}, serialportOptions, optionsWithBinding);
+
         // create a serial server
-        modbus._serverPath = new SerialPort(optionsWithBinding);
+        modbus._serverPath = new SerialPort(optionsWithBindinsg);
 
         // create a serial server with a timeout parser
         modbus._server = modbus._serverPath.pipe(new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser));
