@@ -514,7 +514,7 @@ class ModbusRTU extends EventEmitter {
                 modbus._port.on("data", modbus._onReceive);
 
                 /* On serial port error
-                 * (re-)register the error listner function
+                 * (re-)register the error listener function
                  */
                 modbus._port.removeListener("error", modbus._onError);
                 modbus._port.on("error", modbus._onError);
@@ -564,7 +564,7 @@ class ModbusRTU extends EventEmitter {
     }
 
     /**
-     * Destory the serial port
+     * Destroy the serial port
      *
      * @param {Function} callback the function to call next on close success
      *      or failure.

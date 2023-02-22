@@ -1,6 +1,6 @@
 # modbus-serial
 
-A pure JavaScript implemetation of MODBUS-RTU (Serial and TCP) for NodeJS.
+A pure JavaScript implementation of MODBUS-RTU (Serial and TCP) for NodeJS.
 
 [![NPM download](https://img.shields.io/npm/dm/modbus-serial.svg)](http://www.npm-stats.com/~packages/modbus-serial)
 [![NPM version](https://badge.fury.io/js/modbus-serial.png)](http://badge.fury.io/js/modbus-serial)
@@ -141,7 +141,7 @@ const getMetersValue = async (meters) => {
         // if error, handle them here (it should not)
         console.log(e)
     } finally {
-        // after get all data from salve repeate it again
+        // after get all data from slave, repeat it again
         setImmediate(() => {
             getMetersValue(metersIdList);
         })
