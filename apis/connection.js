@@ -89,6 +89,8 @@ const addConnctionAPI = function(Modbus) {
      * @param {Function} next the function to call next.
      */
     cl.connectTCP = function(ip, options, next) {
+        this._enron = options.enron;
+
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;

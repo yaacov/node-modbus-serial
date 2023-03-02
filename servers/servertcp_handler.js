@@ -28,7 +28,24 @@ const modbusSerialDebug = require("debug")("modbus-serial");
 function _errorRequestBufferLength(requestBuffer) {
 
     if (requestBuffer.length !== 8) {
-        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be >= 8");
+        modbusSerialDebug("request Buffer length " + requestBuffer.length + " is wrong - has to be == 8");
+        return true;
+    }
+
+    return false; // length is okay - no error
+}
+
+/**
+ * Check the length of request Buffer for length of 8.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @returns {boolean} - if error it is true, otherwise false
+ * @private
+ */
+function _errorRequestBufferLengthEnron(requestBuffer) {
+
+    if (requestBuffer.length !== 10) {
+        modbusSerialDebug("request (Enron) Buffer length " + requestBuffer.length + " is wrong - has to be == 10");
         return true;
     }
 
@@ -188,6 +205,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
  * @private
  */
 function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
+    const valueSize = 2;
     const address = requestBuffer.readUInt16BE(2);
     const length = requestBuffer.readUInt16BE(4);
 
@@ -196,9 +214,9 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
     }
 
     // build answer
-    const responseBuffer = Buffer.alloc(3 + length * 2 + 2);
+    const responseBuffer = Buffer.alloc(3 + (length * valueSize) + 2);
     try {
-        responseBuffer.writeUInt8(length * 2, 2);
+        responseBuffer.writeUInt8(length * valueSize, 2);
     }
     catch (err) {
         callback(err);
@@ -220,7 +238,7 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
             cbCount = cbCount + 1;
 
-            responseBuffer.writeUInt16BE(value, 3 + i * 2);
+            responseBuffer.writeUInt16BE(value, 3 + (i * valueSize));
 
             if (cbCount === length && !callbackInvoked) {
                 modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
@@ -306,8 +324,143 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
             }
         }
     }
+}
 
+/**
+ * Function to handle FC3 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
+ * @private
+ */
+function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, callback) {
+    const valueSize = 4;
+    const address = requestBuffer.readUInt16BE(2);
+    const length = requestBuffer.readUInt16BE(4);
 
+    // Fall back to 16 bit for short integer variables
+    if (address >= 3001 && address <= 3999) {
+        return _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback);
+    }
+
+    if (_errorRequestBufferLength(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    const responseBuffer = Buffer.alloc(3 + (length * valueSize) + 2);
+    try {
+        responseBuffer.writeUInt8(length * valueSize, 2);
+    }
+    catch (err) {
+        callback(err);
+        return;
+    }
+
+    let callbackInvoked = false;
+    let cbCount = 0;
+    const buildCb = function(i) {
+        return function(err, value) {
+            if (err) {
+                if (!callbackInvoked) {
+                    callbackInvoked = true;
+                    callback(err);
+                }
+
+                return;
+            }
+
+            cbCount = cbCount + 1;
+
+            responseBuffer.writeUInt32BE(value, 3 + (i * valueSize));
+
+            if (cbCount === length && !callbackInvoked) {
+                modbusSerialDebug({ action: "FC3 response", responseBuffer: responseBuffer });
+
+                callbackInvoked = true;
+                callback(null, responseBuffer);
+            }
+        };
+    };
+
+    if (length === 0)
+        callback({
+            modbusErrorCode: 0x02, // Illegal address
+            msg: "Invalid length"
+        });
+
+    // read registers
+    function tryAndHandlePromiseOrValue(i, values) {
+        const cb = buildCb(i);
+        try {
+            const promiseOrValue = values[i];
+            _handlePromiseOrValue(promiseOrValue, cb);
+        }
+        catch (err) {
+            cb(err);
+        }
+    }
+
+    if (vector.getMultipleHoldingRegisters && length > 1) {
+
+        if (vector.getMultipleHoldingRegisters.length === 4) {
+            vector.getMultipleHoldingRegisters(address, length, unitID, function(err, values) {
+                if (!err && values.length !== length) {
+                    const error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                } else if (err) {
+                    const cb = buildCb(i);
+                    try {
+                        cb(err); // no need to use value array if there is an error
+                    }
+                    catch (ex) {
+                        cb(ex);
+                    }
+                }
+                else {
+                    for (var i = 0; i < length; i++) {
+                        const cb = buildCb(i);
+                        try {
+                            cb(err, values[i]);
+                        }
+                        catch (ex) {
+                            cb(ex);
+                        }
+                    }
+                }
+            });
+        } else {
+            const values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            if (values.length === length) {
+                for (i = 0; i < length; i++) {
+                    tryAndHandlePromiseOrValue(i, values);
+                }
+            } else {
+                const error = new Error("Requested address length and response length do not match");
+                callback(error);
+            }
+        }
+
+    }
+    else if (vector.getHoldingRegister) {
+        for (var i = 0; i < length; i++) {
+            const cb = buildCb(i);
+            try {
+                if (vector.getHoldingRegister.length === 3) {
+                    vector.getHoldingRegister(address + i, unitID, cb);
+                } else {
+                    const promiseOrValue = vector.getHoldingRegister(address + i, unitID);
+                    _handlePromiseOrValue(promiseOrValue, cb);
+                }
+            }
+            catch (err) {
+                cb(err);
+            }
+        }
+    }
 }
 
 /**
@@ -513,6 +666,68 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
     const responseBuffer = Buffer.alloc(8);
     responseBuffer.writeUInt16BE(address, 2);
     responseBuffer.writeUInt16BE(value, 4);
+
+    if (vector.setRegister) {
+        let callbackInvoked = false;
+        const cb = function(err) {
+            if (err) {
+                if (!callbackInvoked) {
+                    callbackInvoked = true;
+                    callback(err);
+                }
+
+                return;
+            }
+
+            if (!callbackInvoked) {
+                modbusSerialDebug({ action: "FC6 response", responseBuffer: responseBuffer });
+
+                callbackInvoked = true;
+                callback(null, responseBuffer);
+            }
+        };
+
+        try {
+            if (vector.setRegister.length === 4) {
+                vector.setRegister(address, value, unitID, cb);
+            }
+            else {
+                const promiseOrValue = vector.setRegister(address, value, unitID);
+                _handlePromiseOrValue(promiseOrValue, cb);
+            }
+        } catch(err) {
+            cb(err);
+        }
+    }
+}
+
+/**
+ * Function to handle FC6 (Enron) request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
+ * @private
+ */
+function _handleWriteSingleRegisterEnron(requestBuffer, vector, unitID, callback) {
+    const address = requestBuffer.readUInt16BE(2);
+    const value = requestBuffer.readUInt32BE(4);
+
+    // Fall back to 16 bit for short integer variables
+    if (address >= 3001 && address <= 3999) {
+        return _handleWriteSingleRegister(requestBuffer, vector, unitID, callback);
+    }
+
+    if (_errorRequestBufferLengthEnron(requestBuffer)) {
+        return;
+    }
+
+    // build answer
+    const responseBuffer = Buffer.alloc(10);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt32BE(value, 4);
 
     if (vector.setRegister) {
         let callbackInvoked = false;
@@ -932,9 +1147,11 @@ function _handleReadDeviceIdentification(requestBuffer, vector, unitID, callback
 module.exports = {
     readCoilsOrInputDiscretes: _handleReadCoilsOrInputDiscretes,
     readMultipleRegisters: _handleReadMultipleRegisters,
+    readMultipleRegistersEnron: _handleReadMultipleRegistersEnron,
     readInputRegisters: _handleReadInputRegisters,
     writeCoil: _handleWriteCoil,
     writeSingleRegister: _handleWriteSingleRegister,
+    writeSingleRegisterEnron: _handleWriteSingleRegisterEnron,
     forceMultipleCoils: _handleForceMultipleCoils,
     writeMultipleRegisters: _handleWriteMultipleRegisters,
     handleMEI: _handleMEI

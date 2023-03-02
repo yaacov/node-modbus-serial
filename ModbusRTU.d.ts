@@ -1,7 +1,7 @@
 import { Socket } from 'net';
 import { TestPort } from "./TestPort";
 export class ModbusRTU {
-  constructor(port?: any);
+  constructor(port?: any, enron?: any);
   static TestPort: typeof TestPort
 
   open(callback: Function): void;
@@ -53,10 +53,12 @@ export class ModbusRTU {
   readCoils(dataAddress: number, length: number): Promise<ReadCoilResult>;
   readDiscreteInputs(dataAddress: number, length: number): Promise<ReadCoilResult>;
   readHoldingRegisters(dataAddress: number, length: number): Promise<ReadRegisterResult>;
+  readRegistersEnron(dataAddress: number, length: number): Promise<ReadRegisterResult>;
   readInputRegisters(dataAddress: number, length: number): Promise<ReadRegisterResult>;
   writeCoil(dataAddress: number, state: boolean): Promise<WriteCoilResult>;
   writeCoils(dataAddress: number, states: Array<boolean>): Promise<WriteMultipleResult>;
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
+  writeRegisterEnron(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
 
   on(event: 'close', listener: () => unknown): this;

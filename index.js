@@ -109,12 +109,32 @@ function _readFC2(data, next) {
  * @param {Buffer} data the data buffer to parse.
  * @param {Function} next the function to call next.
  */
-function _readFC4(data, next) {
+function _readFC3or4(data, next) {
     const length = data.readUInt8(2);
     const contents = [];
 
     for (let i = 0; i < length; i += 2) {
         const reg = data.readUInt16BE(i + 3);
+        contents.push(reg);
+    }
+
+    if (next)
+        next(null, { "data": contents, "buffer": data.slice(3, 3 + length) });
+}
+
+/**
+ * Parse the data for a Modbus (Enron) -
+ * Read Registers (FC=04, 03)
+ *
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
+ */
+function _readFC3or4Enron(data, next) {
+    const length = data.readUInt8(2);
+    const contents = [];
+
+    for (let i = 0; i < length; i += 4) {
+        const reg = data.readUInt32BE(i + 3);
         contents.push(reg);
     }
 
@@ -423,7 +443,11 @@ function _onReceive(data) {
         case 4:
             // Read Input Registers (FC=04)
             // Read Holding Registers (FC=03)
-            _readFC4(data, next);
+            if (modbus._enron && !(transaction.nextDataAddress >= 3001 && transaction.nextDataAddress <= 3999)) {
+                _readFC3or4Enron(data, next);
+            } else {
+                _readFC3or4(data, next);
+            }
             break;
         case 5:
             // Force Single Coil
@@ -466,12 +490,16 @@ class ModbusRTU extends EventEmitter {
      * Class making ModbusRTU calls fun and easy.
      *
      * @param {SerialPort} port the serial port to use.
+     * @param {Boolean} enron flag to specify enron mode.
      */
-    constructor(port) {
+    constructor(port, enron) {
         super();
 
         // the serial port to use
         this._port = port;
+
+        // whether to be an enron server
+        this._enron = enron;
 
         // state variables
         this._transactions = {};
@@ -675,11 +703,15 @@ class ModbusRTU extends EventEmitter {
         // function code defaults to 4
         code = code || 4;
 
+        let valueSize = 2;
+        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) valueSize = 4;
+
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
+            nextDataAddress: dataAddress,
             nextCode: code,
-            nextLength: 3 + 2 * length + 2,
+            nextLength: 3 + (valueSize * length) + 2,
             next: next
         };
 
@@ -772,15 +804,21 @@ class ModbusRTU extends EventEmitter {
 
         const code = 6;
 
+        let valueSize = 8;
+        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) valueSize = 10;
+
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
+            nextDataAddress: dataAddress,
             nextCode: code,
-            nextLength: 8,
+            nextLength: valueSize,
             next: next
         };
 
-        const codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + 2B value
+        let codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + (2B value | 4B value (enron))
+        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) codeLength = 8;
+
         const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
@@ -789,6 +827,8 @@ class ModbusRTU extends EventEmitter {
 
         if (Buffer.isBuffer(value)) {
             value.copy(buf, 4);
+        } else if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) {
+            buf.writeUInt32BE(value, 4);
         } else {
             buf.writeUInt16BE(value, 4);
         }
