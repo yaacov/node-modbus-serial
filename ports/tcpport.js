@@ -26,7 +26,6 @@ class TcpPort extends EventEmitter {
      */
     constructor(ip, options) {
         super();
-
         const modbus = this;
         this.openFlag = false;
         this.callback = null;

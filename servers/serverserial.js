@@ -118,10 +118,11 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
  * @param {Buffer} requestBuffer - request Buffer from client
  * @param {object} vector - vector of functions for read and write
  * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @param {object} options - the options object
  * @returns undefined
  * @private
  */
-function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
+function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, options) {
     // Check requestBuffer length
     if (!requestBuffer || requestBuffer.length < ADDR_LEN) {
         modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
@@ -153,7 +154,11 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
             handlers.readCoilsOrInputDiscretes(requestBuffer, vector, unitID, cb, functionCode);
             break;
         case 3:
-            handlers.readMultipleRegisters(requestBuffer, vector, unitID, cb);
+            if (options && options.enron) {
+                handlers.readMultipleRegistersEnron(requestBuffer, vector, unitID, options.enronTables, cb);
+            } else {
+                handlers.readMultipleRegisters(requestBuffer, vector, unitID, cb);
+            }
             break;
         case 4:
             handlers.readInputRegisters(requestBuffer, vector, unitID, cb);
@@ -162,7 +167,11 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter) {
             handlers.writeCoil(requestBuffer, vector, unitID, cb);
             break;
         case 6:
-            handlers.writeSingleRegister(requestBuffer, vector, unitID, cb);
+            if (options && options.enron) {
+                handlers.writeSingleRegisterEnron(requestBuffer, vector, unitID, options.enronTables, cb);
+            } else {
+                handlers.writeSingleRegister(requestBuffer, vector, unitID, cb);
+            }
             break;
         case 15:
             handlers.forceMultipleCoils(requestBuffer, vector, unitID, cb);
@@ -196,7 +205,7 @@ class ServerSerial extends EventEmitter {
      * Class making ModbusRTU server.
      *
      * @param vector - vector of server functions (see examples/server.js)
-     * @param options - server options (host (IP), port, debug (true/false), unitID)
+     * @param options - server options (host (IP), port, debug (true/false), unitID, enron? (true/false), enronTables? (object))
      * @param serialportOptions - additional parameters for serialport options
      * @constructor
      */
@@ -301,7 +310,8 @@ class ServerSerial extends EventEmitter {
                         requestBuffer,
                         vector,
                         serverUnitID,
-                        sockWriter
+                        sockWriter,
+                        options
                     ),
                     0
                 );
