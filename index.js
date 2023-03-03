@@ -173,6 +173,21 @@ function _readFC6(data, next) {
 }
 
 /**
+ * Parse the data for a Modbus (Enron) -
+ * Preset Single Registers (FC=06)
+ *
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
+ */
+function _readFC6Enron(data, next) {
+    const dataAddress = data.readUInt16BE(2);
+    const value = data.readUInt32BE(4);
+
+    if (next)
+        next(null, { "address": dataAddress, "value": value });
+}
+
+/**
  * Parse the data for a Modbus -
  * Preset Multiple Registers (FC=15, 16)
  *
@@ -475,7 +490,11 @@ function _onReceive(data) {
             break;
         case 6:
             // Preset Single Register
-            _readFC6(data, next);
+            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                _readFC6Enron(data, next);
+            } else {
+                _readFC6(data, next);
+            }
             break;
         case 15:
         case 16:
@@ -720,7 +739,9 @@ class ModbusRTU extends EventEmitter {
         code = code || 4;
 
         let valueSize = 2;
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) valueSize = 4;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+            valueSize = 4;
+        }
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -821,7 +842,9 @@ class ModbusRTU extends EventEmitter {
         const code = 6;
 
         let valueSize = 8;
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) valueSize = 10;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+            valueSize = 10;
+        }
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -833,7 +856,9 @@ class ModbusRTU extends EventEmitter {
         };
 
         let codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + (2B value | 4B value (enron))
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) codeLength = 8;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+            codeLength = 8;
+        }
 
         const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 

@@ -322,6 +322,11 @@ const addConnctionAPI = function(Modbus) {
      * @param {Function} next the function to call next.
      */
     cl.connectRTUBuffered = function(path, options, next) {
+        if (options) {
+            this._enron = options.enron;
+            this._enronTables = options.enronTables;
+        }
+
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
