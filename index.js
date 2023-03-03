@@ -720,7 +720,7 @@ class ModbusRTU extends EventEmitter {
         code = code || 4;
 
         let valueSize = 2;
-        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) valueSize = 4;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) valueSize = 4;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -821,7 +821,7 @@ class ModbusRTU extends EventEmitter {
         const code = 6;
 
         let valueSize = 8;
-        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) valueSize = 10;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) valueSize = 10;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
@@ -833,7 +833,7 @@ class ModbusRTU extends EventEmitter {
         };
 
         let codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + (2B value | 4B value (enron))
-        if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) codeLength = 8;
+        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) codeLength = 8;
 
         const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
@@ -843,7 +843,7 @@ class ModbusRTU extends EventEmitter {
 
         if (Buffer.isBuffer(value)) {
             value.copy(buf, 4);
-        } else if (this._enron && !(dataAddress >= 3001 && dataAddress <= 3999)) {
+        } else if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
             buf.writeUInt32BE(value, 4);
         } else {
             buf.writeUInt16BE(value, 4);
