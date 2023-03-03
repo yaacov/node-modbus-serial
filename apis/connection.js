@@ -57,6 +57,11 @@ const addConnctionAPI = function(Modbus) {
      * @param {Function} next the function to call next.
      */
     cl.connectRTU = function(path, options, next) {
+        if (options) {
+            this._enron = options.enron;
+            this._enronTables = options.enronTables;
+        }
+
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {
             next = options;
@@ -85,11 +90,14 @@ const addConnctionAPI = function(Modbus) {
      * Connect to a communication port, using TcpPort.
      *
      * @param {string} ip the ip of the TCP Port - required.
-     * @param {Object} options - the serial port options - optional.
+     * @param {Object} options - the TCP port options - optional.
      * @param {Function} next the function to call next.
      */
     cl.connectTCP = function(ip, options, next) {
-        this._enron = options.enron;
+        if (options) {
+            this._enron = options.enron;
+            this._enronTables = options.enronTables;
+        }
 
         // check if we have options
         if (typeof next === "undefined" && typeof options === "function") {

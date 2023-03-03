@@ -394,6 +394,26 @@ function _onReceive(data) {
         return;
     }
 
+    /* check enron options are valid
+     */
+    if (modbus._enron) {
+        const example = {
+            enronTables: {
+                booleanRange: [1001, 1999],
+                shortRange: [3001, 3999],
+                longRange: [5001, 5999],
+                floatRange: [7001, 7999]
+            }
+        };
+
+        if (typeof modbus._enronTables === "undefined" ||
+                modbus._enronTables.shortRange.length !== 2 ||
+                modbus._enronTables.shortRange[0] >= modbus._enronTables.shortRange[1]) {
+            next(new Error("Enron table definition missing from options. Example: " + JSON.stringify(example)));
+            return;
+        }
+    }
+
     /* check message length
      * if we do not expect this data
      * raise an error
@@ -443,7 +463,7 @@ function _onReceive(data) {
         case 4:
             // Read Input Registers (FC=04)
             // Read Holding Registers (FC=03)
-            if (modbus._enron && !(transaction.nextDataAddress >= 3001 && transaction.nextDataAddress <= 3999)) {
+            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
                 _readFC3or4Enron(data, next);
             } else {
                 _readFC3or4(data, next);
@@ -490,16 +510,12 @@ class ModbusRTU extends EventEmitter {
      * Class making ModbusRTU calls fun and easy.
      *
      * @param {SerialPort} port the serial port to use.
-     * @param {Boolean} enron flag to specify enron mode.
      */
-    constructor(port, enron) {
+    constructor(port) {
         super();
 
         // the serial port to use
         this._port = port;
-
-        // whether to be an enron server
-        this._enron = enron;
 
         // state variables
         this._transactions = {};

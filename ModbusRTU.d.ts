@@ -1,7 +1,7 @@
 import { Socket } from 'net';
 import { TestPort } from "./TestPort";
 export class ModbusRTU {
-  constructor(port?: any, enron?: any);
+  constructor(port?: any);
   static TestPort: typeof TestPort
 
   open(callback: Function): void;

@@ -332,17 +332,18 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
+ * @param enronTables - The enron tables definition
  * @param {function} callback - callback to be invoked passing {Buffer} response
  * @returns undefined
  * @private
  */
-function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, callback) {
+function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronTables, callback) {
     const valueSize = 4;
     const address = requestBuffer.readUInt16BE(2);
     const length = requestBuffer.readUInt16BE(4);
 
     // Fall back to 16 bit for short integer variables
-    if (address >= 3001 && address <= 3999) {
+    if (address >= enronTables.shortRange[0] && address <= enronTables.shortRange[1]) {
         return _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback);
     }
 
@@ -707,16 +708,17 @@ function _handleWriteSingleRegister(requestBuffer, vector, unitID, callback) {
  * @param requestBuffer - request Buffer from client
  * @param vector - vector of functions for read and write
  * @param unitID - Id of the requesting unit
+ * @param enronTables - The enron tables definition
  * @param {function} callback - callback to be invoked passing {Buffer} response
  * @returns undefined
  * @private
  */
-function _handleWriteSingleRegisterEnron(requestBuffer, vector, unitID, callback) {
+function _handleWriteSingleRegisterEnron(requestBuffer, vector, unitID, enronTables, callback) {
     const address = requestBuffer.readUInt16BE(2);
     const value = requestBuffer.readUInt32BE(4);
 
     // Fall back to 16 bit for short integer variables
-    if (address >= 3001 && address <= 3999) {
+    if (address >= enronTables.shortRange[0] && address <= enronTables.shortRange[1]) {
         return _handleWriteSingleRegister(requestBuffer, vector, unitID, callback);
     }
 

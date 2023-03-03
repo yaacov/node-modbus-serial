@@ -156,7 +156,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
             break;
         case 3:
             if (options.enron) {
-                handlers.readMultipleRegistersEnron(requestBuffer, vector, unitID, cb);
+                handlers.readMultipleRegistersEnron(requestBuffer, vector, unitID, options.enronTables, cb);
             } else {
                 handlers.readMultipleRegisters(requestBuffer, vector, unitID, cb);
             }
@@ -169,7 +169,7 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
             break;
         case 6:
             if (options.enron) {
-                handlers.writeSingleRegisterEnron(requestBuffer, vector, unitID, cb);
+                handlers.writeSingleRegisterEnron(requestBuffer, vector, unitID, options.enronTables, cb);
             } else {
                 handlers.writeSingleRegister(requestBuffer, vector, unitID, cb);
             }
@@ -206,7 +206,7 @@ class ServerTCP extends EventEmitter {
      * Class making ModbusTCP server.
      *
      * @param vector - vector of server functions (see examples/server.js)
-     * @param options - server options (host (IP), port, debug (true/false), unitID, enron?)
+     * @param options - server options (host (IP), port, debug (true/false), unitID, enron? (true/false), enronTables? (object))
      * @constructor
      */
     constructor(vector, options) {
@@ -214,7 +214,6 @@ class ServerTCP extends EventEmitter {
 
         const modbus = this;
         options = options || {};
-        modbus._enron = options.enron;
 
         // create a tcp server
         modbus._server = net.createServer();

@@ -35,7 +35,19 @@ describe("Modbus TCP Server (Enron)", function() {
                 return values;
             }
         };
-        serverTCP = new TcpServer(vector, { host: "0.0.0.0", unitId: 1, port: 8512, debug: true, enron: true });
+        serverTCP = new TcpServer(vector, {
+            host: "0.0.0.0",
+            unitId: 1,
+            port: 8512,
+            debug: true,
+            enron: true,
+            enronTables: {
+                booleanRange: [1001, 1999],
+                shortRange: [3001, 3999],
+                longRange: [5001, 5999],
+                floatRange: [7001, 7999]
+            }
+        });
         modbusClient = new Modbus();
     });
 
@@ -82,7 +94,19 @@ describe("Modbus TCP Server (Enron)", function() {
                     .then(read);
             }
 
-            modbusClient.connectTCP("0.0.0.0", { port: 8512, enron: true }, write);
+            modbusClient.connectTCP(
+                "0.0.0.0",
+                {
+                    port: 8512,
+                    enron: true,
+                    enronTables: {
+                        booleanRange: [1001, 1999],
+                        shortRange: [3001, 3999],
+                        longRange: [5001, 5999],
+                        floatRange: [7001, 7999]
+                    }
+                },
+                write);
             modbusClient.setID(1);
         });
     });
@@ -99,7 +123,68 @@ describe("Modbus TCP Server (Enron)", function() {
                 done();
             }
 
-            modbusClient.connectTCP("0.0.0.0", { port: 8512, enron: true }, write);
+            modbusClient.connectTCP(
+                "0.0.0.0",
+                {
+                    port: 8512,
+                    enron: true,
+                    enronTables: {
+                        booleanRange: [1001, 1999],
+                        shortRange: [3001, 3999],
+                        longRange: [5001, 5999],
+                        floatRange: [7001, 7999]
+                    }
+                },
+                write);
+            modbusClient.setID(1);
+        });
+    });
+
+    describe("function code handler", function() {
+        it("should receive exception when enron is chosen but no table is defined in options", function(done) {
+            const address = 5001;
+            const value = 305419896;
+
+            async function write() {
+                await chai.expect(modbusClient.writeRegisterEnron(address, value))
+                    .to.eventually
+                    .be.rejectedWith(Error);
+                done();
+            }
+
+            modbusClient.connectTCP(
+                "0.0.0.0",
+                {
+                    port: 8512,
+                    enron: true
+                },
+                write);
+            modbusClient.setID(1);
+        });
+    });
+
+    describe("function code handler", function() {
+        it("should receive exception when enron is chosen but no valid table-shortRange is defined in options", function(done) {
+            const address = 5001;
+            const value = 305419896;
+
+            async function write() {
+                await chai.expect(modbusClient.writeRegisterEnron(address, value))
+                    .to.eventually
+                    .be.rejectedWith(Error);
+                done();
+            }
+
+            modbusClient.connectTCP(
+                "0.0.0.0",
+                {
+                    port: 8512,
+                    enron: true,
+                    enronTables: {
+                        shortRange: [4, 3] // Should be [start, end], not [end, start]
+                    }
+                },
+                write);
             modbusClient.setID(1);
         });
     });
