@@ -203,6 +203,30 @@ function _readFC16(data, next) {
 }
 
 /**
+ * Parse the data for a Modbus -
+ * Report server ID (FC=17)
+ *
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
+ */
+function _readFC17(data, next) {
+    const length = parseInt(data.readUInt8(2));
+    const serverId = parseInt(data.readUInt8(3));
+    const running = data.readUInt8(4) === 0xFF;
+    let additionalData;
+    if (length > 2) {
+        additionalData = Buffer.alloc(length - 2);
+        // copy additional data
+        data.copy(additionalData, 0, 5, data.length - 2);
+    } else {
+        additionalData = Buffer.alloc(0);
+    }
+
+    if (next)
+        next(null, { serverId: serverId, running: running, additionalData: additionalData });
+}
+
+/**
  * Parse  the data fro Modbus -
  * Read File Records
  *
@@ -501,6 +525,9 @@ function _onReceive(data) {
             // Force Multiple Coils
             // Preset Multiple Registers
             _readFC16(data, next);
+            break;
+        case 17:
+            _readFC17(data, next);
             break;
         case 20:
             _readFC20(data, transaction.next);
@@ -1004,6 +1031,43 @@ class ModbusRTU extends EventEmitter {
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
+
+    /**
+     * Write a Modbus "Report Server ID" (FC=17) to serial port.
+     *
+     * @param {number} address the slave unit address.
+     * @param {Function} next the function to call next.
+     */
+    writeFC17(address, da, l, next) {
+        // check port is actually open before attempting write
+        if (this.isOpen !== true) {
+            if (next) next(new PortNotOpenError());
+            return;
+        }
+
+        const code = 17;
+
+        // set state variables
+        this._transactions[this._port._transactionIdWrite] = {
+            nextAddress: address,
+            nextCode: code,
+            lengthUnknown: true,
+            next: next
+        };
+
+        const codeLength = 2;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+
+        buf.writeUInt8(address, 0);
+        buf.writeUInt8(code, 1);
+
+        // add crc bytes to buffer
+        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+
+        // write buffer to serial port
+        _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+    }
+
 
     /**
      * Write  mODBUS "Read Device Identification" (FC=20) to serial port
