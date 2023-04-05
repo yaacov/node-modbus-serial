@@ -63,6 +63,7 @@ export class ModbusRTU {
 
   on(event: 'close', listener: () => unknown): this;
   readDeviceIdentification(deviceIdCode: number, objectId: number): Promise<ReadDeviceIdentificationResult>;
+  reportServerID(deviceIdCode: number): Promise<ReportServerIDResult>;
 
   isOpen: boolean;
 }
@@ -99,6 +100,12 @@ export interface WriteMultipleResult {
 export interface ReadDeviceIdentificationResult {
   data: string[];
   conformityLevel: number;
+}
+
+export interface ReportServerIDResult {
+  serverId: number;
+  running: boolean;
+  additionalData: Buffer;
 }
 
 export interface SerialPortOptions {

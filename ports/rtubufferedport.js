@@ -7,9 +7,11 @@ const modbusSerialDebug = require("debug")("modbus-serial");
 /* TODO: const should be set once, maybe */
 const EXCEPTION_LENGTH = 5;
 const MIN_DATA_LENGTH = 6;
+const MIN_WRITE_DATA_LENGTH = 4;
 const MAX_BUFFER_LENGTH = 256;
 const CRC_LENGTH = 2;
 const READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
+const REPORT_SERVER_ID_FUNCTION_CODE = 17;
 const LENGTH_UNKNOWN = "unknown";
 const BITS_TO_NUM_OF_OBJECTS = 7;
 
@@ -122,6 +124,10 @@ class RTUBufferedPort extends EventEmitter {
                         self._emitData(i, result.bufLength);
                         return;
                     }
+                } else if (functionCode === self._cmd && functionCode === REPORT_SERVER_ID_FUNCTION_CODE) {
+                    const contentLength = self._buffer[i + 2];
+                    self._emitData(i, contentLength + 5); // length + serverID + status + contentLength + CRC
+                    return;
                 } else {
                     if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
                         self._emitData(i, expectedLength);
@@ -187,8 +193,8 @@ class RTUBufferedPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        if(data.length < MIN_DATA_LENGTH) {
-            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
+        if(data.length < MIN_WRITE_DATA_LENGTH) {
+            modbusSerialDebug("expected length of data is to small - minimum is " + MIN_WRITE_DATA_LENGTH);
             return;
         }
 
@@ -215,6 +221,10 @@ class RTUBufferedPort extends EventEmitter {
             case 15:
             case 16:
                 this._length = 6 + 2;
+                break;
+            case 17:
+                // response is device specific
+                this._length = LENGTH_UNKNOWN;
                 break;
             case 43:
                 // this function is super special

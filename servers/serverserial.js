@@ -179,6 +179,9 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
         case 16:
             handlers.writeMultipleRegisters(requestBuffer, vector, unitID, cb);
             break;
+        case 17:
+            handlers.reportServerID(requestBuffer, vector, unitID, cb);
+            break;
         case 43:
             handlers.handleMEI(requestBuffer, vector, unitID, cb);
             break;

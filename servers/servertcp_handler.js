@@ -952,6 +952,62 @@ function _handleWriteMultipleRegisters(requestBuffer, vector, unitID, callback) 
 }
 
 /**
+ * Function to handle FC17 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
+ * @private
+ */
+function _handleReportServerID(requestBuffer, vector, unitID, callback) {
+    if(!vector.reportServerID) {
+        callback({ modbusErrorCode: 0x01 });
+        return;
+    }
+
+    // build answer
+    const promiseOrValue = vector.reportServerID(unitID);
+    _handlePromiseOrValue(promiseOrValue, function(err, value) {
+        if(err) {
+            callback(err);
+            return;
+        }
+        if (!value) {
+            callback({ modbusErrorCode: 0x01, msg: "Report Server ID not supported by device" });
+            return;
+        }
+        if (!value.id || !value.running) {
+            callback({ modbusErrorCode: 0x04, msg: "Invalid content provided for Report Server ID: " + JSON.stringify(value) });
+            return;
+        }
+        const id = value.id;
+        const running = value.running;
+        const additionalData = value.additionalData;
+        let contentLength = 2; // serverID + Running
+        if (additionalData) {
+            contentLength += additionalData.length;
+        }
+        const totalLength = 3 + contentLength + 2; // UnitID + FC + Byte-Count + Content-Length + CRC
+
+        let i = 2;
+        const responseBuffer = Buffer.alloc(totalLength);
+        i = responseBuffer.writeUInt8(contentLength, i);
+        i = responseBuffer.writeUInt8(id, i);
+        if (running === true) {
+            i = responseBuffer.writeUInt8(0xFF, i);
+        } else {
+            i += 1;
+        }
+        if (additionalData) {
+            additionalData.copy(responseBuffer, i);
+        }
+        callback(null, responseBuffer);
+    });
+}
+
+/**
  * Function to handle FC43 request.
  *
  * @param requestBuffer - request Buffer from client
@@ -1156,5 +1212,6 @@ module.exports = {
     writeSingleRegisterEnron: _handleWriteSingleRegisterEnron,
     forceMultipleCoils: _handleForceMultipleCoils,
     writeMultipleRegisters: _handleWriteMultipleRegisters,
+    reportServerID: _handleReportServerID,
     handleMEI: _handleMEI
 };
