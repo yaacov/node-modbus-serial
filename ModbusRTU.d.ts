@@ -1,8 +1,12 @@
 import { Socket } from 'net';
 import { TestPort } from "./TestPort";
+import { PortInfo } from '@serialport/bindings-cpp';
+
 export class ModbusRTU {
   constructor(port?: any);
   static TestPort: typeof TestPort
+
+  static getPorts(): Promise<PortInfo[]>
 
   open(callback: Function): void;
   close(callback: Function): void;
