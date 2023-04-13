@@ -23,13 +23,13 @@ interface IServiceVector {
         ((addr: number, unitID: number) => Promise<number>) |
         ((addr: number, unitID: number) => number);
     getMultipleInputRegisters?:
-        ((addr: number, length: number, unitID: number, cb: FCallbackVal<number>) => void) |
-        ((addr: number, length: number, unitID: number) => Promise<number>) |
-        ((addr: number, length: number, unitID: number) => number);
+        ((addr: number, length: number, unitID: number, cb: FCallbackVal<number[]>) => void) |
+        ((addr: number, length: number, unitID: number) => Promise<number[]>) |
+        ((addr: number, length: number, unitID: number) => number[]);
     getMultipleHoldingRegisters?: 
-        ((addr: number, length: number, unitID: number, cb: FCallbackVal<number>) => void) |
-        ((addr: number, length: number, unitID: number) => Promise<number>) |
-        ((addr: number, length: number, unitID: number) => number);
+        ((addr: number, length: number, unitID: number, cb: FCallbackVal<number[]>) => void) |
+        ((addr: number, length: number, unitID: number) => Promise<number[]>) |
+        ((addr: number, length: number, unitID: number) => number[]);
     setCoil?: 
         ((addr: number, value: boolean, unitID: number, cb: FCallback) => void) |
         ((addr: number, value: boolean, unitID: number) => Promise<void>) |
@@ -38,6 +38,10 @@ interface IServiceVector {
         ((addr: number, value: number, unitID: number, cb: FCallback) => void) |
         ((addr: number, value: number, unitID: number) => Promise<void>) |
         ((addr: number, value: number, unitID: number) => void)
+	setRegisterArray?:
+        ((addr: number, value: number[], unitID: number, cb: FCallback) => void) |
+        ((addr: number, value: number[], unitID: number) => Promise<void>) |
+        ((addr: number, value: number[], unitID: number) => void);
 }
 
 interface IServerOptions {
