@@ -45,8 +45,8 @@ export class ModbusRTU {
   linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions): Promise<void>;
   linkTelnet(socket: Socket, options: TelnetPortOptions, next: Function): void;
   linkTelnet(socket: Socket, options: TelnetPortOptions): Promise<void>;
-  connectRTUSocket(socket: Socket, next: Function): void;
-  connectRTUSocket(socket: Socket): Promise<void>;
+  connectRTUSocket(socket: Socket, options: SocketOptions, next: Function): void;
+  connectRTUSocket(socket: Socket, options: SocketOptions): Promise<void>;
 
   // Promise API
   setID(id: number): void;
@@ -150,6 +150,9 @@ export interface TcpRTUPortOptions {
   port?: number;
   localAddress?: string;
   family?: number;
+}
+
+export interface SocketOptions {
 }
 
 export interface TelnetPortOptions {
