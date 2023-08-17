@@ -251,8 +251,6 @@ class Server extends EventEmitter {
                 recvBuffer = Buffer.concat([recvBuffer, data], recvBuffer.length + data.length);
 
                 while(recvBuffer.length > RTU_META_LENGTH) {
-                    const messageSize = recvBuffer.length - RTU_META_LENGTH;
-
                     // Check the presence of the full message, unitID, FC, Data Address, Data payload
                     if(recvBuffer.length < RTU_META_LENGTH + 5)
                         break;
