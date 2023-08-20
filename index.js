@@ -351,191 +351,301 @@ function _onReceive(data) {
     const modbus = this;
     let error;
 
-    // set locale helpers variables
-    const transaction = modbus._transactions[modbus._port._transactionIdRead];
-
-    // the _transactionIdRead can be missing, ignore wrong transaction it's
-    if (!transaction) {
-        return;
-    }
-
-    if (transaction.responses) {
-        /* Stash what we received */
-        transaction.responses.push(Uint8Array.prototype.slice.call(data));
-    }
-
-    /* What do we do next? */
-    const next = function(err, res) {
-        if (transaction.next) {
-            /* Include request/response data if enabled */
-            if (transaction.request && transaction.responses) {
-                if (err) {
-                    err.modbusRequest = transaction.request;
-                    err.modbusResponses = transaction.responses;
-                }
-
-                if (res) {
-                    res.request = transaction.request;
-                    res.responses = transaction.responses;
-                }
-            }
-
-            /* Pass the data on */
-            return transaction.next(err, res);
-        }
-    };
-
-    /* cancel the timeout */
-    _cancelTimeout(transaction._timeoutHandle);
-    transaction._timeoutHandle = undefined;
-
-    /* check if the timeout fired */
-    if (transaction._timeoutFired === true) {
-        // we have already called back with an error, so don't generate a new callback
-        return;
-    }
-
-    /* check incoming data
-     */
-
-    /* check minimal length
-     */
-    if (!transaction.lengthUnknown && data.length < 5) {
-        error = "Data length error, expected " +
-            transaction.nextLength + " got " + data.length;
-        next(new Error(error));
-        return;
-    }
-
-    /* check message CRC
-     * if CRC is bad raise an error
-     */
-    const crcIn = data.readUInt16LE(data.length - 2);
-    if (crcIn !== crc16(data.slice(0, -2))) {
-        error = "CRC error";
-        next(new Error(error));
-        return;
-    }
-
-    // if crc is OK, read address and function code
-    const address = data.readUInt8(0);
-    const code = data.readUInt8(1);
-
-    /* check for modbus exception
-     */
-    if (data.length >= 5 &&
-        code === (0x80 | transaction.nextCode)) {
-        const errorCode = data.readUInt8(2);
-        if (transaction.next) {
-            error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
-            error.modbusCode = errorCode;
-            next(error);
-        }
-        return;
-    }
+    let next;
 
     /* check enron options are valid
      */
-    if (modbus._enron) {
-        const example = {
-            enronTables: {
-                booleanRange: [1001, 1999],
-                shortRange: [3001, 3999],
-                longRange: [5001, 5999],
-                floatRange: [7001, 7999]
-            }
-        };
+    function validateEnron() {
+        if (modbus._enron) {
+            const example = {
+                enronTables: {
+                    booleanRange: [1001, 1999],
+                    shortRange: [3001, 3999],
+                    longRange: [5001, 5999],
+                    floatRange: [7001, 7999]
+                }
+            };
 
-        if (typeof modbus._enronTables === "undefined" ||
-                modbus._enronTables.shortRange.length !== 2 ||
-                modbus._enronTables.shortRange[0] >= modbus._enronTables.shortRange[1]) {
-            next(new Error("Enron table definition missing from options. Example: " + JSON.stringify(example)));
-            return;
+            if (typeof modbus._enronTables === "undefined" ||
+                    modbus._enronTables.shortRange.length !== 2 ||
+                    modbus._enronTables.shortRange[0] >= modbus._enronTables.shortRange[1]) {
+                next(new Error("Enron table definition missing from options. Example: " + JSON.stringify(example)));
+                return;
+            }
         }
     }
 
-    /* check message length
-     * if we do not expect this data
-     * raise an error
-     */
-    if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
-        error = "Data length error, expected " +
-            transaction.nextLength + " got " + data.length;
-        next(new Error(error));
-        return;
-    }
+    if (modbus._encapsulatedRTU === true) {
+        let finished = false;
+        let dataLength = data.readUInt8(2);
+        let transaction = modbus._transactions[modbus._port._transactionIdRead];
+        modbus._port._transactionIdRead += 1;
 
-    /* check message address
-     * if we do not expect this message
-     * raise an error
-     */
-    if (address !== transaction.nextAddress) {
-        error = "Unexpected data error, expected " +
-              "address " + transaction.nextAddress + " got " + address;
-        if (transaction.next)
-            next(new Error(error));
-        return;
-    }
-
-    /* check message code
-     * if we do not expect this message
-     * raise an error
-     */
-    if (code !== transaction.nextCode) {
-        error = "Unexpected data error, expected " +
-            "code " + transaction.nextCode + " got " + code;
-        if (transaction.next)
-            next(new Error(error));
-        return;
-    }
-
-    /* parse incoming data
-     */
-
-    switch (code) {
-        case 1:
-        case 2:
-            // Read Coil Status (FC=01)
-            // Read Input Status (FC=02)
-            _readFC2(data, next);
-            break;
-        case 3:
-        case 4:
-            // Read Input Registers (FC=04)
-            // Read Holding Registers (FC=03)
-            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
-                _readFC3or4Enron(data, next);
-            } else {
-                _readFC3or4(data, next);
+        /* What do we do next? */
+        next = function(err, res) {
+            if (transaction && transaction.next) {
+                return transaction.next(err, res);
             }
-            break;
-        case 5:
-            // Force Single Coil
-            _readFC5(data, next);
-            break;
-        case 6:
-            // Preset Single Register
-            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
-                _readFC6Enron(data, next);
-            } else {
-                _readFC6(data, next);
+        };
+
+        validateEnron();
+
+        let messageBuf;
+        let offset = 0;
+
+        while (!finished) {
+            // do stuff
+            messageBuf = Buffer.alloc(dataLength + 5);
+
+            data.copy(messageBuf, 0, offset, offset + dataLength + 5);
+
+            const crcIn = messageBuf.readUInt16LE(messageBuf.length - 2);
+
+            if (crcIn !== crc16(messageBuf.slice(0, -2))) {
+                error = "CRC error";
+                return;
             }
-            break;
-        case 15:
-        case 16:
-            // Force Multiple Coils
-            // Preset Multiple Registers
-            _readFC16(data, next);
-            break;
-        case 17:
-            _readFC17(data, next);
-            break;
-        case 20:
-            _readFC20(data, transaction.next);
-            break;
-        case 43:
-            // read device identification
-            _readFC43(data, modbus, next);
+
+            // if crc is OK, read address and function code
+            const address = messageBuf.readUInt8(0);
+            const code = messageBuf.readUInt8(1);
+
+            /* check for modbus exception
+            */
+            if (messageBuf.length >= 5 &&
+                code === (0x80 | code)) {
+                const errorCode = messageBuf.readUInt8(2);
+                error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
+                error.modbusCode = errorCode;
+                return;
+            }
+
+            switch (code) {
+                case 1:
+                case 2:
+                    // Read Coil Status (FC=01)
+                    // Read Input Status (FC=02)
+                    _readFC2(messageBuf, next);
+                    break;
+                case 3:
+                case 4:
+                    // Read Input Registers (FC=04)
+                    // Read Holding Registers (FC=03)
+                    if (modbus._enron && !(address >= modbus._enronTables.shortRange[0] && address <= modbus._enronTables.shortRange[1])) {
+                        _readFC3or4Enron(messageBuf, next);
+                    } else {
+                        _readFC3or4(messageBuf, next);
+                    }
+                    break;
+                case 5:
+                    // Force Single Coil
+                    _readFC5(messageBuf, next);
+                    break;
+                case 6:
+                    // Preset Single Register
+                    if (modbus._enron && !(address >= modbus._enronTables.shortRange[0] && address <= modbus._enronTables.shortRange[1])) {
+                        _readFC6Enron(messageBuf, next);
+                    } else {
+                        _readFC6(messageBuf, next);
+                    }
+                    break;
+                case 15:
+                case 16:
+                    // Force Multiple Coils
+                    // Preset Multiple Registers
+                    _readFC16(messageBuf, next);
+                    break;
+                case 17:
+                    _readFC17(messageBuf, next);
+                    break;
+                case 20:
+                    _readFC20(messageBuf, transaction.next);
+                    break;
+                case 43:
+                    // read device identification
+                    _readFC43(messageBuf, modbus, next);
+            }
+
+            // move on to next
+            offset += 5 + dataLength;
+            if (offset + 2 > data.length) {
+                finished = true;
+            } else {
+                dataLength = data.readUInt8(offset + 2);
+
+                transaction = modbus._transactions[modbus._port._transactionIdRead];
+                modbus._port._transactionIdRead += 1;
+            }
+        }
+    } else {
+        // set locale helpers variables
+        const transaction = modbus._transactions[modbus._port._transactionIdRead];
+
+        // the _transactionIdRead can be missing, ignore wrong transaction it's
+        if (!transaction) {
+            return;
+        }
+
+        if (transaction.responses) {
+            /* Stash what we received */
+            transaction.responses.push(Uint8Array.prototype.slice.call(data));
+        }
+
+        /* What do we do next? */
+        next = function(err, res) {
+            if (transaction.next) {
+                /* Include request/response data if enabled */
+                if (transaction.request && transaction.responses) {
+                    if (err) {
+                        err.modbusRequest = transaction.request;
+                        err.modbusResponses = transaction.responses;
+                    }
+
+                    if (res) {
+                        res.request = transaction.request;
+                        res.responses = transaction.responses;
+                    }
+                }
+
+                /* Pass the data on */
+                return transaction.next(err, res);
+            }
+        };
+
+        validateEnron();
+
+        /* cancel the timeout */
+        _cancelTimeout(transaction._timeoutHandle);
+        transaction._timeoutHandle = undefined;
+
+        /* check if the timeout fired */
+        if (transaction._timeoutFired === true) {
+            // we have already called back with an error, so don't generate a new callback
+            return;
+        }
+
+        /* check incoming data
+        */
+
+        /* check minimal length
+        */
+        if (!transaction.lengthUnknown && data.length < 5) {
+            error = "Data length error, expected " +
+                transaction.nextLength + " got " + data.length;
+            next(new Error(error));
+            return;
+        }
+
+        /* check message CRC
+         * if CRC is bad raise an error
+         */
+        const crcIn = data.readUInt16LE(data.length - 2);
+        if (crcIn !== crc16(data.slice(0, -2))) {
+            error = "CRC error";
+            next(new Error(error));
+            return;
+        }
+
+        // if crc is OK, read address and function code
+        const address = data.readUInt8(0);
+        const code = data.readUInt8(1);
+
+        /* check for modbus exception
+         */
+        if (data.length >= 5 &&
+            code === (0x80 | transaction.nextCode)) {
+            const errorCode = data.readUInt8(2);
+            if (transaction.next) {
+                error = new Error("Modbus exception " + errorCode + ": " + (modbusErrorMessages[errorCode] || "Unknown error"));
+                error.modbusCode = errorCode;
+                next(error);
+            }
+            return;
+        }
+
+        /* check message length
+         * if we do not expect this data
+         * raise an error
+         */
+        if (!transaction.lengthUnknown && data.length !== transaction.nextLength) {
+            error = "Data length error, expected " +
+                transaction.nextLength + " got " + data.length;
+            next(new Error(error));
+            return;
+        }
+
+        /* check message address
+         * if we do not expect this message
+         * raise an error
+         */
+        if (address !== transaction.nextAddress) {
+            error = "Unexpected data error, expected " +
+                  "address " + transaction.nextAddress + " got " + address;
+            if (transaction.next)
+                next(new Error(error));
+            return;
+        }
+
+        /* check message code
+         * if we do not expect this message
+         * raise an error
+         */
+        if (code !== transaction.nextCode) {
+            error = "Unexpected data error, expected " +
+                "code " + transaction.nextCode + " got " + code;
+            if (transaction.next)
+                next(new Error(error));
+            return;
+        }
+
+        /* parse incoming data
+         */
+
+        switch (code) {
+            case 1:
+            case 2:
+                // Read Coil Status (FC=01)
+                // Read Input Status (FC=02)
+                _readFC2(data, next);
+                break;
+            case 3:
+            case 4:
+                // Read Input Registers (FC=04)
+                // Read Holding Registers (FC=03)
+                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                    _readFC3or4Enron(data, next);
+                } else {
+                    _readFC3or4(data, next);
+                }
+                break;
+            case 5:
+                // Force Single Coil
+                _readFC5(data, next);
+                break;
+            case 6:
+                // Preset Single Register
+                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                    _readFC6Enron(data, next);
+                } else {
+                    _readFC6(data, next);
+                }
+                break;
+            case 15:
+            case 16:
+                // Force Multiple Coils
+                // Preset Multiple Registers
+                _readFC16(data, next);
+                break;
+            case 17:
+                _readFC17(data, next);
+                break;
+            case 20:
+                _readFC20(data, transaction.next);
+                break;
+            case 43:
+                // read device identification
+                _readFC43(data, modbus, next);
+        }
     }
 }
 
@@ -770,13 +880,12 @@ class ModbusRTU extends EventEmitter {
         if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
             valueSize = 4;
         }
-
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
             nextDataAddress: dataAddress,
             nextCode: code,
-            nextLength: 3 + (valueSize * length) + 2,
+            nextLength: 3 + (valueSize * length) + 2, // response size: unitID, FC, length, data, CRC
             next: next
         };
 
@@ -793,6 +902,8 @@ class ModbusRTU extends EventEmitter {
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        this._port._transactionIdWrite += 1;
     }
 
     /**
@@ -1172,6 +1283,7 @@ module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
 module.exports.C701Port = require("./ports/c701port");
 
+module.exports.Server = require("./servers/server");
 module.exports.ServerTCP = require("./servers/servertcp");
 module.exports.ServerSerial = require("./servers/serverserial");
 module.exports.default = module.exports;

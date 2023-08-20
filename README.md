@@ -65,7 +65,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC4 "Read Input Registers" | `readInputRegisters(addr, len) ` |
 | FC5 "Force Single Coil" | `writeCoil(coil, binary) //NOT setCoil` |
 | FC6 "Preset Single Register" | `writeRegister(addr, value)` |
- | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
+| FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
 
@@ -84,8 +84,9 @@ This module has not been tested on every single version of NodeJS. For best resu
 
 ###### Server
 
-* modbus-TCP (ServerTCP): Over TCP/IP line.
-
+* modbus-TCP ServerTCP(): Encapsulated TCP/IP.
+* modbus-RTU Server(): RTU over TCP/IP Socket.
+* modbus-Serial ServerSerial(): Over serial.
 
 #### Examples
 

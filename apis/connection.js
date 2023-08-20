@@ -60,6 +60,7 @@ const addConnctionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._encapsulatedRTU = options.encapsulatedRTU;
         }
 
         // check if we have options
@@ -97,6 +98,7 @@ const addConnctionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._encapsulatedRTU = options.encapsulatedRTU;
         }
 
         // check if we have options
@@ -325,6 +327,7 @@ const addConnctionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._encapsulatedRTU = options.encapsulatedRTU;
         }
 
         // check if we have options
@@ -382,7 +385,24 @@ const addConnctionAPI = function(Modbus) {
      * @param {socket} socket the socket to connect to - required.
      * @param {Function} next the function to call next.
      */
-    cl.connectRTUSocket = function(socket, next) {
+    cl.connectRTUSocket = function(socket, options, next) {
+        if (options) {
+            this._enron = options.enron;
+            this._enronTables = options.enronTables;
+            this._encapsulatedRTU = options.encapsulatedRTU;
+        }
+
+        // check if we have options
+        if (typeof next === "undefined" && typeof options === "function") {
+            next = options;
+            options = {};
+        }
+
+        // check if we have options
+        if (typeof options === "undefined") {
+            options = {};
+        }
+
         const thisModbus = this;
         this._port = socket;
         this._port.open = function(callback) {
