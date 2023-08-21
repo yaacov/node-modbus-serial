@@ -68,6 +68,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)`, `writeRegistersEnron(addr, valueAry)`* |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
+
 \* See examples/server_enron.js for enron configuration example.
 ###### Client Serial:
 
