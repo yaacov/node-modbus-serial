@@ -68,6 +68,9 @@ describe("Modbus Serial Server (no serverID)", function() {
             port: "/dev/server",
             portResponse: clientSerial,
             debug: true
+        },
+        {
+            baudRate: 9600
         });
     });
 
@@ -258,6 +261,9 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
             portResponse: clientSerial,
             debug: true,
             unitID: 4
+        },
+        {
+            baudRate: 9600
         });
     });
 
@@ -318,6 +324,9 @@ describe("Modbus Serial Server (serverID != requestID)", function() {
             portResponse: clientSerial,
             debug: true,
             unitID: 4
+        },
+        {
+            baudRate: 9600
         });
     });
 
