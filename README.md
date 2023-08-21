@@ -228,7 +228,7 @@ setInterval(function() {
 }, 1000);
 ```
 ----
-###### ModbusTCP Server
+###### Modbus TCP Server
 ``` javascript
 // create an empty modbus client
 const ModbusRTU = require("modbus-serial");
@@ -279,6 +279,91 @@ console.log("ModbusTCP listening on modbus://0.0.0.0:8502");
 const serverTCP = new ModbusRTU.ServerTCP(vector, { host: "0.0.0.0", port: 8502, debug: true, unitID: 1 });
 
 serverTCP.on("socketError", function(err){
+    // Handle socket error if needed, can be ignored
+    console.error(err);
+});
+```
+----
+###### Modbus Serial Server
+``` javascript
+const ModbusRTU = require("..");
+
+const holdingRegisters = {};
+const coils = {};
+const inputRegisters = {};
+const discreteInputs = {};
+
+const vector = {
+    getInputRegister: function(addr) {
+        return inputRegisters[addr];
+    },
+    getMultipleInputRegisters: function(startAddr, length) {
+        const values = [];
+        for (let i = 0; i < length; i++) {
+            values[i] = inputRegisters[startAddr + i];
+        }
+        return values;
+    },
+    getDiscreteInput: function(addr) {
+        return discreteInputs[addr];
+    },
+    getHoldingRegister: function(addr) {
+        return holdingRegisters[addr];
+    },
+    setRegister: function(addr, value) {
+        holdingRegisters[addr] = value;
+        return;
+    },
+    getMultipleHoldingRegisters: function(startAddr, length) {
+        const values = [];
+        for (let i = 0; i < length; i++) {
+            values[i] = holdingRegisters[startAddr + i];
+        }
+        return values;
+    },
+    getCoil: function(addr) {
+        return coils[addr];
+    },
+    setCoil: function(addr, value) {
+        coils[addr] = value;
+        return coils[addr];
+    },
+    readDeviceIdentification: function() {
+        return {
+            0x00: "MyVendorName",
+            0x01: "MyProductCode",
+            0x02: "MyMajorMinorRevision",
+            0x05: "MyModelName",
+            0x97: "MyExtendedObject1",
+            0xab: "MyExtendedObject2"
+        };
+    }
+};
+
+// set the server to answer for modbus requests
+const serverSerial = new ModbusRTU.ServerSerial(
+    vector,
+    {
+        port: "/tmp/ttyp0",
+        debug: true,
+        unitID: 1
+        // enron: true,
+        // enronTables: {
+        //     booleanRange: [1001, 1999],
+        //     shortRange: [3001, 3999],
+        //     longRange: [5001, 5999],
+        //     floatRange: [7001, 7999]
+        // }
+    },
+    {
+        baudRate: 9600,
+        dataBits: 8,
+        stopBits: 1,
+        parity: "even"
+    }
+);
+
+serverSerial.on("error", function(err) {
     // Handle socket error if needed, can be ignored
     console.error(err);
 });
