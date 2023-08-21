@@ -61,14 +61,14 @@ This module has not been tested on every single version of NodeJS. For best resu
 |-------|----------|
 | FC1 "Read Coil Status" | `readCoils(coil, len)` |
 | FC2 "Read Input Status" | `readDiscreteInputs(addr, arg)` |
-| FC3 "Read Holding Registers" | `readHoldingRegisters(addr, len) ` |
+| FC3 "Read Holding Registers" | `readHoldingRegisters(addr, len)`, `readRegistersEnron(addr, len)`* |
 | FC4 "Read Input Registers" | `readInputRegisters(addr, len) ` |
 | FC5 "Force Single Coil" | `writeCoil(coil, binary) //NOT setCoil` |
 | FC6 "Preset Single Register" | `writeRegister(addr, value)` |
 | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
-| FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
+| FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)`, `writeRegistersEnron(addr, valueAry)`* |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
-
+\* See examples/server_enron.js for enron configuration example.
 ###### Client Serial:
 
 * modbus-RTU (SerialPort): Over serial line [require node serialport].
