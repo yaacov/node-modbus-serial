@@ -30,17 +30,17 @@
     "eslint": "^8.12.0",
     "gulp": "^4.0.2",
     "gulp-clean": "^0.4.0",
-    "gulp-jsdoc3": "^2.0.0",
-    "mocha": "^6.2.1",
+    "gulp-jsdoc3": "^3.0.0",
+    "mocha": "^10.2.0",
     "mocha-eslint": "^7.0.0",
     "mockery": "^2.1.0",
     "pump": "^3.0.0",
-    "sinon": "^7.5.0",
-    "web-bluetooth-mock": "^1.0.2",
-    "webbluetooth": "^2.1.0"
+    "sinon": "^15.2.0",
+    "web-bluetooth-mock": "^1.2.0",
+    "webbluetooth": "^3.1.0"
   },
   "dependencies": {
-    "debug": "^4.1.1",
-    "serialport": "^11.0.0"
+    "debug": "^4.3.1",
+    "serialport": "^12.0.0"
   }
 }
