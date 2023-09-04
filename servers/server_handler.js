@@ -271,7 +271,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
 
         if (vector.getMultipleHoldingRegisters.length === 4) {
             vector.getMultipleHoldingRegisters(address, length, unitID, function(err, values) {
-                console.log("getMultipleHoldingRegisters === 4", address.toString(10), length.toString(10));
                 if (!err && values.length !== length) {
                     const error = new Error("Requested address length and response length do not match");
                     callback(error);
@@ -297,7 +296,6 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
-            console.log("getMultipleHoldingRegisters", address.toString(10), length.toString(10));
             const values = vector.getMultipleHoldingRegisters(address, length, unitID);
             if (values.length === length) {
                 for (i = 0; i < length; i++) {
@@ -411,7 +409,6 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
 
         if (vector.getMultipleHoldingRegisters.length === 4) {
             vector.getMultipleHoldingRegisters(address, length, unitID, function(err, values) {
-                console.log("getMultipleHoldingRegistersEnron === 4", address.toString(10), length.toString(10));
                 if (!err && values.length !== length) {
                     const error = new Error("Requested address length and response length do not match");
                     callback(error);
@@ -438,7 +435,6 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
             });
         } else {
             const values = vector.getMultipleHoldingRegisters(address, length, unitID);
-            console.log("getMultipleHoldingRegistersEnron", address.toString(10), length.toString(10));
             if (values.length === length) {
                 for (i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValue(i, values);
