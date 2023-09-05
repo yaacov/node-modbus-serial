@@ -838,6 +838,10 @@ class ModbusRTU extends EventEmitter {
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
     /**
@@ -903,7 +907,9 @@ class ModbusRTU extends EventEmitter {
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
 
-        this._port._transactionIdWrite += 1;
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
     /**
@@ -1080,6 +1086,10 @@ class ModbusRTU extends EventEmitter {
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
     /**
@@ -1142,6 +1152,10 @@ class ModbusRTU extends EventEmitter {
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
     /**
@@ -1178,6 +1192,10 @@ class ModbusRTU extends EventEmitter {
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
 
@@ -1218,6 +1236,10 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt8(chunck, 9);
         buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 
     /**
@@ -1255,6 +1277,10 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+
+        if (this._encapsulatedRTU) {
+            this._port._transactionIdWrite += 1;
+        }
     }
 }
 
