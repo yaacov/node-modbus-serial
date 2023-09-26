@@ -66,6 +66,7 @@ export class ModbusRTU {
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
 
   on(event: 'close', listener: () => unknown): this;
+  on(event: 'error', listener: (error: unknown) => unknown): this;
   readDeviceIdentification(deviceIdCode: number, objectId: number): Promise<ReadDeviceIdentificationResult>;
   reportServerID(deviceIdCode: number): Promise<ReportServerIDResult>;
 
