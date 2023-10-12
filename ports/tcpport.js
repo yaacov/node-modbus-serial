@@ -24,6 +24,13 @@ class TcpPort extends EventEmitter {
      *  family?: 0|4|6,
      *  timeout?: number,
      *  socket?: net.Socket
+     *  socketOpts?: {
+     *      fd: number,
+     *      allowHalfOpen?: boolean,
+     *      readable?: boolean,
+     *      writable?: boolean,
+     *      signal?: AbortSignal
+     * },
      * } & net.TcpSocketConnectOpts} options - Options object.
      *   options.port: Nonstandard Modbus port (default is 502).
      *   options.localAddress: Local IP address to bind to, default is any.
@@ -47,6 +54,12 @@ class TcpPort extends EventEmitter {
         }
 
         if (typeof options === "undefined") options = {};
+
+        this.socketOpts = undefined;
+        if (options.socketOpts) {
+            this.socketOpts = options.socketOpts;
+            delete options.socketOpts;
+        }
 
         /** @type {net.TcpSocketConnectOpts} - Options for net.connect(). */
         this.connectOptions =  {
@@ -78,13 +91,12 @@ class TcpPort extends EventEmitter {
         };
 
         // init a socket
-        this._client = this._externalSocket || new net.Socket();
+        this._client = this._externalSocket || new net.Socket(this.socketOpts);
 
         if (options.timeout) this._client.setTimeout(options.timeout);
         
         // register events handlers
         this._client.on("data", function(data) {
-            console.log("TCP port: signal data");
             let buffer;
             let crc;
             let length;
@@ -118,14 +130,12 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("connect", function() {
-            console.log("TCP port: signal connect");
             self.openFlag = true;
             modbusSerialDebug("TCP port: signal connect");
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
-            console.log("TCP port: signal close");
             self.openFlag = false;
             modbusSerialDebug("TCP port: signal close: " + had_error);
             handleCallback(had_error);
@@ -135,37 +145,18 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("error", function(had_error) {
-            console.log("TCP port: signal error");
             self.openFlag = false;
             modbusSerialDebug("TCP port: signal error: " + had_error);
             handleCallback(had_error);
         });
 
         this._client.on("timeout", function() {
-            console.log("TCP port: signal timeout");
             // modbus.openFlag is left in its current state as it reflects two types of timeouts,
             // i.e. 'false' for "TCP connection timeout" and 'true' for "Modbus response timeout"
             // (this allows to continue Modbus request re-tries without reconnecting TCP).
             modbusSerialDebug("TCP port: TimedOut");
             handleCallback(new Error("TCP Connection Timed Out"));
         });
-
-        this._client.on("end", function() {
-            console.log("TCP port: signal end");
-        });
-
-        this._client.on("drain", function() {
-            console.log("TCP port: signal drain");
-        });
-
-        this._client.on("lookup", function() {
-            console.log("TCP port: signal lookup");
-        });
-
-        this._client.on("ready", function() {
-            console.log("TCP port: signal ready");
-        });
-
     }
 
     /**

@@ -4,41 +4,6 @@
 const expect = require("chai").expect;
 const mockery = require("mockery");
 
-describe("Modbus TCP port constructor", function() {
-    const TcpPort = require("./../../ports/tcpport");
-    it("with ip as string", function() {
-        const port = new TcpPort("localhost");
-
-        expect(port).to.be.an.instanceOf(TcpPort);
-        expect(port.connectOptions.host).to.equal("localhost");
-        expect(port.connectOptions.port).to.equal(502);
-    });
-
-    it("with ip as object", function() {
-        const port = new TcpPort({ip: "localhost"});
-        
-        expect(port).to.be.an.instanceOf(TcpPort);
-        expect(port.connectOptions.host).to.equal("localhost");
-        expect(port.connectOptions.port).to.equal(502);
-    });
-
-    it("with ip as object and port as number", function() {
-        const port = new TcpPort({ip: "localhost", port: 9999});
-
-        expect(port).to.be.an.instanceOf(TcpPort);
-        expect(port.connectOptions.host).to.equal("localhost");
-        expect(port.connectOptions.port).to.equal(9999);
-    });
-
-    it("with ip as string and options as object", function() {
-        const port = new TcpPort("localhost", { port: 9999 });
-
-        expect(port).to.be.an.instanceOf(TcpPort);
-        expect(port.connectOptions.host).to.equal("localhost");
-        expect(port.connectOptions.port).to.equal(9999);
-    });
-});
-
 describe("Modbus TCP port methods", function() {
     let port;
 
@@ -57,6 +22,61 @@ describe("Modbus TCP port methods", function() {
 
     afterEach(function() {
         port.close();
+    });
+
+    describe("Modbus TCP port constructor", function() {
+        const TcpPort = require("./../../ports/tcpport");
+        it("with ip as string", function() {
+            const port = new TcpPort("localhost");
+    
+            expect(port).to.be.an.instanceOf(TcpPort);
+            expect(port.connectOptions.host).to.equal("localhost");
+            expect(port.connectOptions.port).to.equal(502);
+        });
+    
+        it("with ip as object", function() {
+            const port = new TcpPort({ip: "localhost"});
+            
+            expect(port).to.be.an.instanceOf(TcpPort);
+            expect(port.connectOptions.host).to.equal("localhost");
+            expect(port.connectOptions.port).to.equal(502);
+        });
+    
+        it("with ip as object and port as number", function() {
+            const port = new TcpPort({ip: "localhost", port: 9999});
+    
+            expect(port).to.be.an.instanceOf(TcpPort);
+            expect(port.connectOptions.host).to.equal("localhost");
+            expect(port.connectOptions.port).to.equal(9999);
+        });
+    
+        it("with ip as string and options as object", function() {
+            const port = new TcpPort("localhost", { port: 9999 });
+    
+            expect(port).to.be.an.instanceOf(TcpPort);
+            expect(port.connectOptions.host).to.equal("localhost");
+            expect(port.connectOptions.port).to.equal(9999);
+        });
+    
+        it("with socket creation options", function() {
+            const controller = new AbortController();
+            const port = new TcpPort("localhost", { port: 9999, socketOpts: {
+                allowHalfOpen: true,
+                readable: true,
+                writable: true,
+                signal: controller.signal,
+            }});
+            
+            expect(port).to.be.an.instanceOf(TcpPort);
+            expect(port.connectOptions.host).to.equal("localhost");
+            expect(port.connectOptions.port).to.equal(9999);
+            expect(port.socketOpts).to.deep.equal({
+                allowHalfOpen: true,
+                readable: true,
+                writable: true,
+                signal: controller.signal,
+            }); 
+        });
     });
 
     describe("#isOpen", function() {
