@@ -17,28 +17,33 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate a modbus-RTU port using modbus-TCP connection.
      *
-     * @param ip
-     * @param options
-     *   options.port: Nonstandard Modbus port (default is 502).
-     *   options.localAddress: Local IP address to bind to, default is any.
-     *   options.family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
+     * @param {string} ip - IP address of Modbus slave.
+     * @param {Object} options - Options object.
+     * @param {number} [options.port=502] - Nonstandard Modbus port (default is 502).
+     * @param {string} options.localAddress -  Local IP address to bind to, default is any.
+     * @param {0|4|6}  [options.family=0] - `4` = IPv4-only, `6` = IPv6-only, `0` = either (default).
+     * @param {number} [options.timeout=5000] - Connection timeout in ms (default is 5000).
+     * @param {net.Socket} [options.socket] - Use existing socket object and ignore all other parameters (ip, port, etc).
      * @constructor
      */
     constructor(ip, options) {
         super();
         const modbus = this;
         this.openFlag = false;
+        /** @type {(err?: Error) => void} */
         this.callback = null;
         this._transactionIdWrite = 1;
+        /** @type {net.Socket?} - Optional custom socket */
         this._externalSocket = null;
 
         if(typeof ip === "object") {
             options = ip;
         }
 
-        if (typeof(options) === "undefined") options = {};
+        if (typeof options === "undefined") options = {};
 
-        this.connectOptions = {
+        /** @type {net.TcpSocketConnectOpts} - Options for net.connect(). */
+        this.connectOptions =  {
             host: ip || options.ip,
             port: options.port || MODBUS_PORT,
             localAddress: options.localAddress,
@@ -55,7 +60,7 @@ class TcpPort extends EventEmitter {
         }
 
         // handle callback - call a callback function only once, for the first event
-        // it will triger
+        // it will trigger
         const handleCallback = function(had_error) {
             if (modbus.callback) {
                 modbus.callback(had_error);
@@ -142,7 +147,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful port open.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     open(callback) {
         if(this._externalSocket === null) {
@@ -159,7 +164,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful close port.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     close(callback) {
         this.callback = callback;
@@ -170,7 +175,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful destroy port.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     destroy(callback) {
         this.callback = callback;
@@ -182,7 +187,7 @@ class TcpPort extends EventEmitter {
     /**
      * Send data to a modbus-tcp slave.
      *
-     * @param data
+     * @param {Buffer} data
      */
     write(data) {
         if(data.length < MIN_DATA_LENGTH) {
