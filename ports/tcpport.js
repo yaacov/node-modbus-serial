@@ -30,7 +30,7 @@ class TcpPort extends EventEmitter {
      *      readable?: boolean,
      *      writable?: boolean,
      *      signal?: AbortSignal
-     * },
+     *  },
      * } & net.TcpSocketConnectOpts} options - Options object.
      *   options.port: Nonstandard Modbus port (default is 502).
      *   options.localAddress: Local IP address to bind to, default is any.
