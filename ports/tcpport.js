@@ -17,8 +17,21 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate a modbus-RTU port using modbus-TCP connection.
      *
-     * @param ip
-     * @param options
+     * @param {string} ip - IP address of Modbus slave.
+     * @param {{
+     *  port?: number,
+     *  localAddress?: string,
+     *  family?: 0|4|6,
+     *  timeout?: number,
+     *  socket?: net.Socket
+     *  socketOpts?: {
+     *      fd: number,
+     *      allowHalfOpen?: boolean,
+     *      readable?: boolean,
+     *      writable?: boolean,
+     *      signal?: AbortSignal
+     *  },
+     * } & net.TcpSocketConnectOpts} options - Options object.
      *   options.port: Nonstandard Modbus port (default is 502).
      *   options.localAddress: Local IP address to bind to, default is any.
      *   options.family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
@@ -26,23 +39,37 @@ class TcpPort extends EventEmitter {
      */
     constructor(ip, options) {
         super();
-        const modbus = this;
+        const self = this;
+        /** @type {boolean} Flag to indicate if port is open */
         this.openFlag = false;
+        /** @type {(err?: Error) => void} */
         this.callback = null;
         this._transactionIdWrite = 1;
+        /** @type {net.Socket?} - Optional custom socket */
         this._externalSocket = null;
 
         if(typeof ip === "object") {
             options = ip;
+            ip = undefined;
         }
 
-        if (typeof(options) === "undefined") options = {};
+        if (typeof options === "undefined") options = {};
 
-        this.connectOptions = {
-            host: ip || options.ip,
-            port: options.port || MODBUS_PORT,
-            localAddress: options.localAddress,
-            family: options.family
+        this.socketOpts = undefined;
+        if (options.socketOpts) {
+            this.socketOpts = options.socketOpts;
+            delete options.socketOpts;
+        }
+
+        /** @type {net.TcpSocketConnectOpts} - Options for net.connect(). */
+        this.connectOptions =  {
+            // Default options
+            ...{
+                host: ip || options.ip,
+                port: MODBUS_PORT
+            },
+            // User options
+            ...options
         };
 
         if(options.socket) {
@@ -55,18 +82,20 @@ class TcpPort extends EventEmitter {
         }
 
         // handle callback - call a callback function only once, for the first event
-        // it will triger
+        // it will trigger
         const handleCallback = function(had_error) {
-            if (modbus.callback) {
-                modbus.callback(had_error);
-                modbus.callback = null;
+            if (self.callback) {
+                self.callback(had_error);
+                self.callback = null;
             }
         };
 
         // init a socket
-        this._client = this._externalSocket || new net.Socket();
+        this._client = this._externalSocket || new net.Socket(this.socketOpts);
 
         if (options.timeout) this._client.setTimeout(options.timeout);
+
+        // register events handlers
         this._client.on("data", function(data) {
             let buffer;
             let crc;
@@ -89,11 +118,11 @@ class TcpPort extends EventEmitter {
                 buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
                 // update transaction id and emit data
-                modbus._transactionIdRead = data.readUInt16BE(0);
-                modbus.emit("data", buffer);
+                self._transactionIdRead = data.readUInt16BE(0);
+                self.emit("data", buffer);
 
                 // debug
-                modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: modbus._transactionIdRead });
+                modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: self._transactionIdRead });
 
                 // reset data
                 data = data.slice(length + MIN_MBAP_LENGTH);
@@ -101,22 +130,22 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("connect", function() {
-            modbus.openFlag = true;
+            self.openFlag = true;
             modbusSerialDebug("TCP port: signal connect");
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
-            modbus.openFlag = false;
+            self.openFlag = false;
             modbusSerialDebug("TCP port: signal close: " + had_error);
             handleCallback(had_error);
 
-            modbus.emit("close");
-            modbus.removeAllListeners();
+            self.emit("close");
+            self.removeAllListeners();
         });
 
         this._client.on("error", function(had_error) {
-            modbus.openFlag = false;
+            self.openFlag = false;
             modbusSerialDebug("TCP port: signal error: " + had_error);
             handleCallback(had_error);
         });
@@ -142,7 +171,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful port open.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     open(callback) {
         if(this._externalSocket === null) {
@@ -159,7 +188,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful close port.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     close(callback) {
         this.callback = callback;
@@ -170,7 +199,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful destroy port.
      *
-     * @param callback
+     * @param {(err?: Error) => void} callback
      */
     destroy(callback) {
         this.callback = callback;
@@ -182,7 +211,7 @@ class TcpPort extends EventEmitter {
     /**
      * Send data to a modbus-tcp slave.
      *
-     * @param data
+     * @param {Buffer} data
      */
     write(data) {
         if(data.length < MIN_DATA_LENGTH) {

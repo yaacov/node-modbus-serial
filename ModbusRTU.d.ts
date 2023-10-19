@@ -1,4 +1,4 @@
-import { Socket } from 'net';
+import { Socket, SocketConstructorOpts, TcpSocketConnectOpts } from 'net';
 import { TestPort } from "./TestPort";
 import { PortInfo } from '@serialport/bindings-cpp';
 
@@ -133,12 +133,14 @@ export interface SerialPortUnixPlatformOptions {
   vtime?: number;
 }
 
-export interface TcpPortOptions {
+export interface TcpPortOptions extends TcpSocketConnectOpts {
   port?: number;
   localAddress?: string;
   family?: number;
   ip?: string;
   timeout?: number;
+  socket: Socket;
+  socketOpts: SocketConstructorOpts
 }
 
 export interface UdpPortOptions {

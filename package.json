@@ -4,7 +4,7 @@
   "description": "A pure JavaScript implemetation of MODBUS-RTU (Serial and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha --recursive"
+    "test": "nyc --reporter=lcov --reporter=text mocha --recursive"
   },
   "repository": {
     "type": "git",
@@ -34,6 +34,7 @@
     "mocha": "^10.2.0",
     "mocha-eslint": "^7.0.0",
     "mockery": "^2.1.0",
+    "nyc": "^15.1.0",
     "pump": "^3.0.0",
     "sinon": "^15.2.0",
     "web-bluetooth-mock": "^1.2.0",
