@@ -28,45 +28,46 @@ describe("Modbus TCP port methods", function() {
         const TcpPort = require("./../../ports/tcpport");
         it("with ip as string", function() {
             const port = new TcpPort("localhost");
-    
+
             expect(port).to.be.an.instanceOf(TcpPort);
             expect(port.connectOptions.host).to.equal("localhost");
             expect(port.connectOptions.port).to.equal(502);
         });
-    
+
         it("with ip as object", function() {
-            const port = new TcpPort({ip: "localhost"});
-            
+            const port = new TcpPort({ ip: "localhost" });
+
             expect(port).to.be.an.instanceOf(TcpPort);
             expect(port.connectOptions.host).to.equal("localhost");
             expect(port.connectOptions.port).to.equal(502);
         });
-    
+
         it("with ip as object and port as number", function() {
-            const port = new TcpPort({ip: "localhost", port: 9999});
-    
+            const port = new TcpPort({ ip: "localhost", port: 9999 });
+
             expect(port).to.be.an.instanceOf(TcpPort);
             expect(port.connectOptions.host).to.equal("localhost");
             expect(port.connectOptions.port).to.equal(9999);
         });
-    
+
         it("with ip as string and options as object", function() {
             const port = new TcpPort("localhost", { port: 9999 });
-    
+
             expect(port).to.be.an.instanceOf(TcpPort);
             expect(port.connectOptions.host).to.equal("localhost");
             expect(port.connectOptions.port).to.equal(9999);
         });
-    
+
         it("with socket creation options", function() {
             const controller = new AbortController();
-            const port = new TcpPort("localhost", { port: 9999, socketOpts: {
-                allowHalfOpen: true,
-                readable: true,
-                writable: true,
-                signal: controller.signal,
-            }});
-            
+            const port = new TcpPort("localhost", { port: 9999,
+                socketOpts: {
+                    allowHalfOpen: true,
+                    readable: true,
+                    writable: true,
+                    signal: controller.signal
+                } });
+
             expect(port).to.be.an.instanceOf(TcpPort);
             expect(port.connectOptions.host).to.equal("localhost");
             expect(port.connectOptions.port).to.equal(9999);
@@ -74,8 +75,8 @@ describe("Modbus TCP port methods", function() {
                 allowHalfOpen: true,
                 readable: true,
                 writable: true,
-                signal: controller.signal,
-            }); 
+                signal: controller.signal
+            });
         });
     });
 

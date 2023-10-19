@@ -66,10 +66,10 @@ class TcpPort extends EventEmitter {
             // Default options
             ...{
                 host: ip || options.ip,
-                port: MODBUS_PORT,
+                port: MODBUS_PORT
             },
             // User options
-            ...options,
+            ...options
         };
 
         if(options.socket) {
@@ -94,7 +94,7 @@ class TcpPort extends EventEmitter {
         this._client = this._externalSocket || new net.Socket(this.socketOpts);
 
         if (options.timeout) this._client.setTimeout(options.timeout);
-        
+
         // register events handlers
         this._client.on("data", function(data) {
             let buffer;
