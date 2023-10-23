@@ -638,6 +638,23 @@ class ModbusRTU extends EventEmitter {
     }
 
     /**
+     * Clears the timeout for all pending transactions.
+     * This essentially cancels all pending requests.
+     */
+    _cancelPendingTransactions() {
+        if (Object.keys(this._transactions).length > 0) {
+            Object.values(this._transactions).forEach((transaction) => {
+                if (transaction._timeoutHandle) {
+                    _cancelTimeout(transaction._timeoutHandle);
+                }
+            });
+        }
+    }
+
+    // eslint command to fix this file
+    // eslint --fix index.js
+
+    /**
      * Close the serial port
      *
      * @param {Function} callback the function to call next on close success
@@ -661,6 +678,9 @@ class ModbusRTU extends EventEmitter {
      *      or failure.
      */
     destroy(callback) {
+        // cancel all pending requests as we're closing the port
+        this._cancelPendingTransactions();
+
         // close the serial port if exist and it has a destroy function
         if (this._port && this._port.destroy) {
             this._port.removeAllListeners("data");
