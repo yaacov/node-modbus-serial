@@ -651,9 +651,6 @@ class ModbusRTU extends EventEmitter {
         }
     }
 
-    // eslint command to fix this file
-    // eslint --fix index.js
-
     /**
      * Close the serial port
      *
