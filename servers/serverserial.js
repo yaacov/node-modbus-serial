@@ -26,6 +26,7 @@ const BAUDRATE = 9600;
 const UNIT_ID = 255; // listen to all adresses
 
 const ADDR_LEN = 1;
+const MIN_LEN = 6;
 
 /* Get Handlers
  */
@@ -124,7 +125,7 @@ function _callbackFactory(unitID, functionCode, sockWriter) {
  */
 function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, options) {
     // Check requestBuffer length
-    if (!requestBuffer || requestBuffer.length < ADDR_LEN) {
+    if (!requestBuffer || requestBuffer.length < MIN_LEN) {
         modbusSerialDebug("wrong size of request Buffer " + requestBuffer.length);
         return;
     }
