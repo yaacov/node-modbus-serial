@@ -229,6 +229,16 @@ describe("Modbus Serial Server (no serverID)", function() {
 
         // TODO: exceptions
     });
+
+    describe("too short client request", function() {
+        it("should handle a request that is too short without crash", function(done) {
+            // valid ID, function code & CRC, but too short body
+            serverSerial.getPort().write(Buffer.from("081013bc0f", "hex"));
+
+            // wait a bit to make sure we didn't crash
+            setTimeout(done, 50);
+        });
+    });
 });
 
 describe("Modbus Serial Server (serverID = requestID)", function() {

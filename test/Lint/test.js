@@ -16,7 +16,7 @@ const paths = [
 const options = {
     // Specify style of output
     formatter: "compact", // Defaults to `stylish`
-    timeout: 5000
+    timeout: 10000
 };
 
 // Run the tests
