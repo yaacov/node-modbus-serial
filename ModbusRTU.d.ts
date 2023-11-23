@@ -134,13 +134,13 @@ export interface SerialPortUnixPlatformOptions {
 }
 
 export interface TcpPortOptions extends TcpSocketConnectOpts {
-  port?: number;
+  port: number;
   localAddress?: string;
   family?: number;
   ip?: string;
   timeout?: number;
   socket: Socket;
-  socketOpts: SocketConstructorOpts
+  socketOpts: SocketConstructorOpts;
 }
 
 export interface UdpPortOptions {
