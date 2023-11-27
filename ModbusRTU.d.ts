@@ -139,8 +139,8 @@ export interface TcpPortOptions extends TcpSocketConnectOpts {
   family?: number;
   ip?: string;
   timeout?: number;
-  socket: Socket;
-  socketOpts: SocketConstructorOpts;
+  socket?: Socket;
+  socketOpts?: SocketConstructorOpts;
 }
 
 export interface UdpPortOptions {
