@@ -315,6 +315,90 @@ function read() {
 }
 ```
 ----
+###### Use "modbusdb" an elegant wrapper over the Modbus protocol
+#### Check this repo https://github.com/yarosdev/modbusdb for more information, pls try it and leave feedback!
+``` typescript
+import Modbus from 'modbus-serial';
+import { Modbusdb, ModbusSerialDriver, Datamap, createRegisterKey, TypeEnum, ScopeEnum } from "modbusdb";
+
+// create an empty modbus client
+const client = new Modbus();
+
+client.connectTcpRTUBuffered("127.0.0.1", { port: 8502 }, app) // or use any other available connection methods
+
+function app() {
+
+  // First you need to define a schema for a database:
+  // createRegisterKey(UNIT_ADDRESS, MODBUS_TABLE, REGISTER_ADDRESS, BIT_INDEX)
+  const schema = [
+    { key: createRegisterKey(1, ScopeEnum.InternalRegister, 10),    type: TypeEnum.Int16 },
+    { key: createRegisterKey(1, ScopeEnum.InternalRegister, 11),    type: TypeEnum.Int32 },
+    { key: createRegisterKey(1, ScopeEnum.PhysicalRegister, 99),    type: TypeEnum.UInt16 },
+    { key: createRegisterKey(1, ScopeEnum.InternalRegister, 15, 2), type: TypeEnum.Bit },
+  ];
+  
+  // Define unit-scoped config if needed:
+  const units = [
+    {
+      address: 1, // This is unit address
+      forceWriteMany: true, // Use 15(0x0f) and 16(0x10) functions for single register, default: false
+      bigEndian: true, // You can use BigEndian for byte order, default: false
+      swapWords: false, // This is applicable only for multi-registers types such as int32, float etc, default: false
+      requestWithGaps: true, // If you are requesting addresses 10 and 13, allow to send one request to the device, default: true
+      maxRequestSize: 32, // How many registers to be requested in one round-trip with device, default: 1
+    }
+  ];
+  
+  // Let`s create an instance of a database:
+  const db = new Modbusdb({
+    driver: new ModbusSerialDriver(client),
+    datamap: new Datamap(schema, units)
+  });
+
+  // Now we can request three registers:
+  // NOTICE: Modbusdb under the hood will make all needed requests for you in using an optimal plan
+  //         If registers can be requested using a single request, be sure it will
+  db.mget([
+    createRegisterKey(1, ScopeEnum.InternalRegister, 10),
+    createRegisterKey(1, ScopeEnum.InternalRegister, 11),
+    createRegisterKey(1, ScopeEnum.PhysicalRegister, 99)
+  ]).then(result => {
+    console.log('mget', result)
+  })
+
+  // You can store register`s key to be used later:
+  const speedSetPoint = createRegisterKey(1, ScopeEnum.InternalRegister, 10);
+  const workingMode = createRegisterKey(1, ScopeEnum.InternalRegister, 11);
+  
+  // Write values directly into modbus device as easy as possible:
+  // NOTICE: Modbusdb under the hood will make all needed requests for you
+  //         Write operations have higher priority over the read operations
+  db.mset([
+    [speedSetPoint, 60],
+    [workingMode, 10],
+  ]).then(result => {
+    console.log('mset', result)
+  })
+}
+```
+Enums:
+```
+ScopeEnum: (Modbus Table)
+  1 = PhysicalState = Discrete Input
+  2 = InternalState = Coil Status
+  3 = PhysicalRegister = Input Register
+  4 = InternalRegister = Holding Register
+  
+TypeEnum: (Available Data Types)
+  1 = Bit,
+  4 = Int16,
+  5 = UInt16,
+  6 = Int32,
+  7 = UInt32,
+  8 = Float
+```
+
+----
 
 
 to get more see [Examples](https://github.com/yaacov/node-modbus-serial/wiki)
