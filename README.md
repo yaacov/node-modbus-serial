@@ -315,8 +315,8 @@ function read() {
 }
 ```
 ----
-###### Use "modbusdb" an elegant wrapper over the Modbus protocol
-#### Check this repo https://github.com/yarosdev/modbusdb for more information, pls try it and leave feedback!
+#### Use "modbusdb" as an elegant wrapper over the Modbus protocol
+##### Check this repo https://github.com/yarosdev/modbusdb for more information, pls try it and leave feedback!
 ``` typescript
 import Modbus from 'modbus-serial';
 import { Modbusdb, ModbusSerialDriver, Datamap, createRegisterKey, TypeEnum, ScopeEnum } from "modbusdb";
