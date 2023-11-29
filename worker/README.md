@@ -1,5 +1,4 @@
-# DEPRECATED
-## use https://github.com/yarosdev/modbusdb
+# for a more complete module see modbusdb https://github.com/yarosdev/modbusdb
 
 ------------
 
