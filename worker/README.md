@@ -1,4 +1,6 @@
-# for a more complete module see modbusdb https://github.com/yarosdev/modbusdb
+#### See also modbusdb
+
+The worker class is a simple class that makes it easy to grab some data from device, for a more complete module see modbusdb https://github.com/yarosdev/modbusdb
 
 ------------
 
