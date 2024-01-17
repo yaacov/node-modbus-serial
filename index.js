@@ -681,7 +681,8 @@ class ModbusRTU extends EventEmitter {
         // close the serial port if exist and it has a destroy function
         if (this._port && this._port.destroy) {
             this._port.removeAllListeners("data");
-            this._port.destroy(callback);
+            this._port.destroy();
+            callback();
         } else {
             // nothing needed to be done
             callback();
