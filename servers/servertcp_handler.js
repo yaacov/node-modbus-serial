@@ -296,7 +296,13 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
-            const values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            let values;
+            try {
+                values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            } catch (error) {
+                callback(error);
+                return;
+            }
             if (values.length === length) {
                 for (i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValue(i, values);
@@ -434,7 +440,13 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
                 }
             });
         } else {
-            const values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            let values;
+            try {
+                values = vector.getMultipleHoldingRegisters(address, length, unitID);
+            } catch (error) {
+                callback(error);
+                return;
+            }
             if (values.length === length) {
                 for (i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValue(i, values);
