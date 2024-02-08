@@ -41,7 +41,12 @@ const modbusErrorMessages = [
     "Illegal data value (value cannot be written to this register)",
     "Slave device failure (device reports internal error)",
     "Acknowledge (requested data will be available later)",
-    "Slave device busy (retry request again later)"
+    "Slave device busy (retry request again later)",
+    "Negative acknowledge (slave device cannot perform programming functions)",
+    "Memory parity error (slave device detected a parity error in memory)",
+    "Unknown error",
+    "Gateway path unavailable (misconfigured gateway)",
+    "Gateway target device failed to respond (retry request again later)"
 ];
 
 const PortNotOpenError = function() {
