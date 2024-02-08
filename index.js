@@ -44,7 +44,7 @@ const modbusErrorMessages = [
     /*code 6=*/"Slave device busy (retry request again later)",
     /*code 7=*/"Negative acknowledge (slave device cannot perform programming functions)",
     /*code 8=*/"Memory parity error (slave device detected a parity error in memory)",
-    /*code 9=*/undefined,
+    /*code 9=*/"Unknown error",
     /*code10=*/"Gateway path unavailable (misconfigured gateway)",
     /*code11=*/"Gateway target device failed to respond (retry request again later)"
 ];
