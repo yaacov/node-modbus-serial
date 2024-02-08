@@ -35,18 +35,18 @@ const TRANSACTION_TIMED_OUT_MESSAGE = "Timed out";
 const TRANSACTION_TIMED_OUT_ERRNO = "ETIMEDOUT";
 
 const modbusErrorMessages = [
-    /*code 0=*/"Unknown error",
-    /*code 1=*/"Illegal function (device does not support this read/write function)",
-    /*code 2=*/"Illegal data address (register not supported by device)",
-    /*code 3=*/"Illegal data value (value cannot be written to this register)",
-    /*code 4=*/"Slave device failure (device reports internal error)",
-    /*code 5=*/"Acknowledge (requested data will be available later)",
-    /*code 6=*/"Slave device busy (retry request again later)",
-    /*code 7=*/"Negative acknowledge (slave device cannot perform programming functions)",
-    /*code 8=*/"Memory parity error (slave device detected a parity error in memory)",
-    /*code 9=*/"Unknown error",
-    /*code10=*/"Gateway path unavailable (misconfigured gateway)",
-    /*code11=*/"Gateway target device failed to respond (retry request again later)"
+    "Unknown error",
+    "Illegal function (device does not support this read/write function)",
+    "Illegal data address (register not supported by device)",
+    "Illegal data value (value cannot be written to this register)",
+    "Slave device failure (device reports internal error)",
+    "Acknowledge (requested data will be available later)",
+    "Slave device busy (retry request again later)",
+    "Negative acknowledge (slave device cannot perform programming functions)",
+    "Memory parity error (slave device detected a parity error in memory)",
+    "Unknown error",
+    "Gateway path unavailable (misconfigured gateway)",
+    "Gateway target device failed to respond (retry request again later)"
 ];
 
 const PortNotOpenError = function() {
