@@ -253,7 +253,7 @@ class ServerSerial extends EventEmitter {
         // remember open sockets
         modbus.socks = new Map();
 
-        modbus._server.on("open", function() {
+        modbus._serverPath.on("open", function() {
             modbus.socks.set(modbus._server, 0);
 
             modbusSerialDebug({
