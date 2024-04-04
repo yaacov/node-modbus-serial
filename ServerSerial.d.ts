@@ -1,5 +1,5 @@
 import * as events from 'events';
-import { OpenOptions } from "serialport"
+import { SerialPortOpenOptions } from "serialport"
 import { FCallback, IServiceVector } from './ServerTCP';
 
 export class ServerSerial extends events.EventEmitter {
@@ -7,7 +7,7 @@ export class ServerSerial extends events.EventEmitter {
     close(cb: FCallback): void;
 }
 
-type IServerSerialOptions = OpenOptions & {
+type IServerSerialOptions = SerialPortOpenOptions<any> & {
     debug?: boolean,
     unitID?: number
 }
