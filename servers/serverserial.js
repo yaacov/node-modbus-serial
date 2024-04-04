@@ -270,6 +270,7 @@ class ServerSerial extends EventEmitter {
                 modbus.socks.delete(modbus._server);
             });
 
+            modbus.emit("initialized");
         });
 
         modbus._server.on("data", function(data) {
