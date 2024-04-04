@@ -1,6 +1,7 @@
 import * as events from 'events';
 import { SerialPortOpenOptions } from "serialport"
 import { FCallback, IServiceVector } from './ServerTCP';
+import { ErrorCallback } from '@serialport/stream';
 
 export class ServerSerial extends events.EventEmitter {
     constructor(vector: IServiceVector, options: IServerSerialOptions);
@@ -9,7 +10,8 @@ export class ServerSerial extends events.EventEmitter {
 
 type IServerSerialOptions = SerialPortOpenOptions<any> & {
     debug?: boolean,
-    unitID?: number
+    unitID?: number,
+    openCallback?: ErrorCallback
 }
 
 export declare interface ServerSerial {
