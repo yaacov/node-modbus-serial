@@ -237,7 +237,7 @@ class ServerSerial extends EventEmitter {
         const optionsWithBindingandSerialport = Object.assign({}, serialportOptions, optionsWithBinding);
 
         // create a serial server
-        modbus._serverPath = new SerialPort(optionsWithBindingandSerialport);
+        modbus._serverPath = new SerialPort(optionsWithBindingandSerialport, options.openCallback);
 
         // create a serial server with a timeout parser
         modbus._server = modbus._serverPath.pipe(new ServerSerialPipeHandler(optionsWithSerialPortTimeoutParser));
@@ -253,7 +253,7 @@ class ServerSerial extends EventEmitter {
         // remember open sockets
         modbus.socks = new Map();
 
-        modbus._server.on("open", function() {
+        modbus._serverPath.on("open", function() {
             modbus.socks.set(modbus._server, 0);
 
             modbusSerialDebug({
@@ -270,6 +270,7 @@ class ServerSerial extends EventEmitter {
                 modbus.socks.delete(modbus._server);
             });
 
+            modbus.emit("initialized");
         });
 
         modbus._server.on("data", function(data) {
