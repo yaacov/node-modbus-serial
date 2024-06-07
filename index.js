@@ -268,7 +268,10 @@ function _readFC43(data, modbus, next) {
 
     let startAt = 8;
     const result = {};
-    for (let i = 0; i < numOfObjects; i++) {
+    // The modbus specification states that numOfObjects is the number of
+    // objects in the response, but the example on page 45 shows the total
+    // number over all responses. Therefore be careful about reading more data than available
+    for (let i = 0; i < numOfObjects && startAt < data.length; i++) {
         const objectId = parseInt(data.readUInt8(startAt));
         const objectLength = parseInt(data.readUInt8(startAt + 1));
         const startOfData = startAt + 2;
