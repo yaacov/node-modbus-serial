@@ -496,51 +496,56 @@ function _onReceive(data) {
 
     /* parse incoming data
      */
-
-    switch (code) {
-        case 1:
-        case 2:
-            // Read Coil Status (FC=01)
-            // Read Input Status (FC=02)
-            _readFC2(data, next);
-            break;
-        case 3:
-        case 4:
-            // Read Input Registers (FC=04)
-            // Read Holding Registers (FC=03)
-            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
-                _readFC3or4Enron(data, next);
-            } else {
-                _readFC3or4(data, next);
-            }
-            break;
-        case 5:
-            // Force Single Coil
-            _readFC5(data, next);
-            break;
-        case 6:
-            // Preset Single Register
-            if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
-                _readFC6Enron(data, next);
-            } else {
-                _readFC6(data, next);
-            }
-            break;
-        case 15:
-        case 16:
-            // Force Multiple Coils
-            // Preset Multiple Registers
-            _readFC16(data, next);
-            break;
-        case 17:
-            _readFC17(data, next);
-            break;
-        case 20:
-            _readFC20(data, transaction.next);
-            break;
-        case 43:
-            // read device identification
-            _readFC43(data, modbus, next);
+    try {
+        switch (code) {
+            case 1:
+            case 2:
+                // Read Coil Status (FC=01)
+                // Read Input Status (FC=02)
+                _readFC2(data, next);
+                break;
+            case 3:
+            case 4:
+                // Read Input Registers (FC=04)
+                // Read Holding Registers (FC=03)
+                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                    _readFC3or4Enron(data, next);
+                } else {
+                    _readFC3or4(data, next);
+                }
+                break;
+            case 5:
+                // Force Single Coil
+                _readFC5(data, next);
+                break;
+            case 6:
+                // Preset Single Register
+                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                    _readFC6Enron(data, next);
+                } else {
+                    _readFC6(data, next);
+                }
+                break;
+            case 15:
+            case 16:
+                // Force Multiple Coils
+                // Preset Multiple Registers
+                _readFC16(data, next);
+                break;
+            case 17:
+                _readFC17(data, next);
+                break;
+            case 20:
+                _readFC20(data, transaction.next);
+                break;
+            case 43:
+                // read device identification
+                _readFC43(data, modbus, next);
+        }
+    } catch (e) {
+        if (transaction.next) {
+            next(e);
+        }
     }
 }
 
