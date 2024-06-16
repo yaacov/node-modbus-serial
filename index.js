@@ -755,7 +755,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(length, 4);
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -820,7 +820,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(length, 4);
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -871,7 +871,7 @@ class ModbusRTU extends EventEmitter {
         }
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -934,7 +934,7 @@ class ModbusRTU extends EventEmitter {
         }
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -996,7 +996,7 @@ class ModbusRTU extends EventEmitter {
         }
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -1058,7 +1058,7 @@ class ModbusRTU extends EventEmitter {
         }
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -1094,7 +1094,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt8(code, 1);
 
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
 
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
@@ -1136,7 +1136,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(fileNumber, 4);
         buf.writeUInt16BE(recordNumber, 6);
         buf.writeUInt8(chunck, 9);
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
 
@@ -1172,7 +1172,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt8(deviceIdCode, 3);
         buf.writeUInt8(objectId, 4);
         // add crc bytes to buffer
-        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
         // write buffer to serial port
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
