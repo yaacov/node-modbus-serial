@@ -669,16 +669,27 @@ class ModbusRTU extends EventEmitter {
      *
      * @param {Function} callback the function to call next on close success
      *      or failure.
-     */
+     */    
     close(callback) {
-        // close the serial port if exist
-        if (this._port) {
-            this._port.removeAllListeners("data");
-            this._port.close(callback);
-        } else {
-            // nothing needed to be done
-            callback();
-        }
+        return new Promise((resolve, reject) => {
+            const cb = (err) => {
+                if (callback) {
+                    callback(err);
+                }
+                if (err) {
+                    reject(err);
+                } else {
+                    resolve();
+                }
+            };
+    
+            if (this._port) {
+                this._port.removeAllListeners("data");
+                this._port.close(cb);
+            } else {
+                cb();
+            }
+        });
     }
 
     /**
