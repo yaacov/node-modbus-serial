@@ -23,20 +23,28 @@
  * @private
  */
 const _convert = function(f) {
-    const converted = function(address, arg, next) {
+    const converted = function(...args) {
         const client = this;
         const id = this._unitID;
 
-        /* the function check for a callback
-         * if we have a callback, use it
-         * o/w build a promise.
-         */
-        if (next) {
-            // if we have a callback, use the callback
-            f.bind(client)(id, address, arg, next);
+        // The last argument might be the callback (next)
+        const next = args[args.length - 1];
+
+        // Determine if the last argument is actually a callback
+        const hasCallback = typeof next === "function";
+
+        if (hasCallback) {
+            // If there is a callback, call the function with the appropriate arguments
+            if (args.length === 1) {
+                // This case is used for client close method
+                f.bind(client)(next);
+            } else {
+                // This case is used for client writeFC methods
+                f.bind(client)(id, ...args);
+            }
         } else {
-            // o/w use  a promise
-            const promise = new Promise(function(resolve, reject) {
+            // Otherwise, use a promise
+            return new Promise(function(resolve, reject) {
                 function cb(err, data) {
                     if (err) {
                         reject(err);
@@ -45,10 +53,14 @@ const _convert = function(f) {
                     }
                 }
 
-                f.bind(client)(id, address, arg, cb);
+                if (args.length === 0) {
+                // This case is used for client close method
+                    f.bind(client)(cb);
+                } else {
+                // This case is used for client writeFC methods
+                    f.bind(client)(id, ...args, cb);
+                }
             });
-
-            return promise;
         }
     };
 
@@ -73,6 +85,7 @@ const addPromiseAPI = function(Modbus) {
     cl.getTimeout = function() {return this._timeout;};
 
     // convert functions to return promises
+    cl.close = _convert(cl.close);
     cl.readCoils = _convert(cl.writeFC1);
     cl.readDiscreteInputs = _convert(cl.writeFC2);
     cl.readHoldingRegisters = _convert(cl.writeFC3);
