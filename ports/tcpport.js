@@ -133,6 +133,7 @@ class TcpPort extends EventEmitter {
         this._client.on("connect", function() {
             self.openFlag = true;
             modbusSerialDebug("TCP port: signal connect");
+            self._client.setNoDelay();
             handleCallback();
         });
 
