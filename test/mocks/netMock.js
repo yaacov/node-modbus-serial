@@ -15,12 +15,17 @@ class Socket extends EventEmitter {
         }
     }
 
+    setNoDelay(noDelay) {
+        return this;
+    }
+
     end() {
         this.emit("close", false);
     }
 
     write(data) {
         this._data = data;
+        return true;
     }
 
     receive(buffer) {
@@ -55,6 +60,6 @@ class Server extends EventEmitter {
 
 exports.Server = Server;
 
-exports.createServer = function(options, connectionListener) {
+exports.createServer = function (options, connectionListener) {
     return new Server(options, connectionListener);
 };
