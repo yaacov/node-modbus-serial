@@ -242,15 +242,26 @@ class TcpPort extends EventEmitter {
         });
 
         // send buffer to slave
-        this._writeCompleted = new Promise((resolve) => {
-            this._writeCompleted.finally(() => {
-                if (this._client.write(buffer)) {
-                    resolve();
-                } else {
-                    this._client.once("drain", resolve);
+        let previousWritePromise = this._writeCompleted;
+        let newWritePromise = new Promise((resolveNewWrite, rejectNewWrite) => {
+            // Wait for the completion of any write that happened before.
+            previousWritePromise.finally(() => {
+                try {
+                    // The previous write succeeded, write the new buffer.
+                    if (this._client.write(buffer)) {
+                        // Mark this write as complete.
+                        resolveNewWrite();
+                    } else {
+                        // Wait for one `drain` event to mark this write as complete.
+                        this._client.once("drain", resolveNewWrite);
+                    }
+                } catch (error) {
+                    rejectNewWrite(error);
                 }
             });
         });
+        // Overwrite `_writeCompleted` so that the next call to `TcpPort.write` will have to wait on our write to complete.
+        this._writeCompleted = newWritePromise;
 
         // set next transaction id
         this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;
