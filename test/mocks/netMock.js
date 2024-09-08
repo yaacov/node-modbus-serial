@@ -15,7 +15,7 @@ class Socket extends EventEmitter {
         }
     }
 
-    setNoDelay(noDelay) {
+    setNoDelay() {
         return this;
     }
 
@@ -60,6 +60,6 @@ class Server extends EventEmitter {
 
 exports.Server = Server;
 
-exports.createServer = function (options, connectionListener) {
+exports.createServer = function(options, connectionListener) {
     return new Server(options, connectionListener);
 };
