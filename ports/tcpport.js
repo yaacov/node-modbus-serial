@@ -48,7 +48,7 @@ class TcpPort extends EventEmitter {
         /** @type {net.Socket?} - Optional custom socket */
         this._externalSocket = null;
 
-        if(typeof ip === "object") {
+        if (typeof ip === "object") {
             options = ip;
             ip = undefined;
         }
@@ -62,7 +62,7 @@ class TcpPort extends EventEmitter {
         }
 
         /** @type {net.TcpSocketConnectOpts} - Options for net.connect(). */
-        this.connectOptions =  {
+        this.connectOptions = {
             // Default options
             ...{
                 host: ip || options.ip,
@@ -72,8 +72,8 @@ class TcpPort extends EventEmitter {
             ...options
         };
 
-        if(options.socket) {
-            if(options.socket instanceof net.Socket) {
+        if (options.socket) {
+            if (options.socket instanceof net.Socket) {
                 this._externalSocket = options.socket;
                 this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
             } else {
@@ -92,6 +92,7 @@ class TcpPort extends EventEmitter {
 
         // init a socket
         this._client = this._externalSocket || new net.Socket(this.socketOpts);
+        this._writeCompleted = Promise.resolve();
 
         if (options.timeout) this._client.setTimeout(options.timeout);
 
@@ -131,7 +132,9 @@ class TcpPort extends EventEmitter {
 
         this._client.on("connect", function() {
             self.openFlag = true;
+            self._writeCompleted = Promise.resolve();
             modbusSerialDebug("TCP port: signal connect");
+            self._client.setNoDelay();
             handleCallback();
         });
 
@@ -174,10 +177,10 @@ class TcpPort extends EventEmitter {
      * @param {(err?: Error) => void} callback
      */
     open(callback) {
-        if(this._externalSocket === null) {
+        if (this._externalSocket === null) {
             this.callback = callback;
             this._client.connect(this.connectOptions);
-        } else if(this.openFlag) {
+        } else if (this.openFlag) {
             modbusSerialDebug("TCP port: external socket is opened");
             callback(); // go ahead to setup existing socket
         } else {
@@ -214,7 +217,7 @@ class TcpPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        if(data.length < MIN_DATA_LENGTH) {
+        if (data.length < MIN_DATA_LENGTH) {
             modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
             return;
         }
@@ -240,7 +243,26 @@ class TcpPort extends EventEmitter {
         });
 
         // send buffer to slave
-        this._client.write(buffer);
+        const previousWritePromise = this._writeCompleted;
+        const newWritePromise = new Promise((resolveNewWrite, rejectNewWrite) => {
+            // Wait for the completion of any write that happened before.
+            previousWritePromise.finally(() => {
+                try {
+                    // The previous write succeeded, write the new buffer.
+                    if (this._client.write(buffer)) {
+                        // Mark this write as complete.
+                        resolveNewWrite();
+                    } else {
+                        // Wait for one `drain` event to mark this write as complete.
+                        this._client.once("drain", resolveNewWrite);
+                    }
+                } catch (error) {
+                    rejectNewWrite(error);
+                }
+            });
+        });
+        // Overwrite `_writeCompleted` so that the next call to `TcpPort.write` will have to wait on our write to complete.
+        this._writeCompleted = newWritePromise;
 
         // set next transaction id
         this._transactionIdWrite = (this._transactionIdWrite + 1) % MAX_TRANSACTIONS;

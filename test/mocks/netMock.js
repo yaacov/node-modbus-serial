@@ -15,12 +15,17 @@ class Socket extends EventEmitter {
         }
     }
 
+    setNoDelay() {
+        return this;
+    }
+
     end() {
         this.emit("close", false);
     }
 
     write(data) {
         this._data = data;
+        return true;
     }
 
     receive(buffer) {
