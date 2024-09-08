@@ -132,6 +132,7 @@ class TcpPort extends EventEmitter {
 
         this._client.on("connect", function() {
             self.openFlag = true;
+            self._writeCompleted = Promise.resolve();
             modbusSerialDebug("TCP port: signal connect");
             self._client.setNoDelay();
             handleCallback();
@@ -242,8 +243,8 @@ class TcpPort extends EventEmitter {
         });
 
         // send buffer to slave
-        let previousWritePromise = this._writeCompleted;
-        let newWritePromise = new Promise((resolveNewWrite, rejectNewWrite) => {
+        const previousWritePromise = this._writeCompleted;
+        const newWritePromise = new Promise((resolveNewWrite, rejectNewWrite) => {
             // Wait for the completion of any write that happened before.
             previousWritePromise.finally(() => {
                 try {
