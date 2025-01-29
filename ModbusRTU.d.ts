@@ -21,6 +21,7 @@ export class ModbusRTU {
 
   writeFC15(address: number, dataAddress: number, states: Array<boolean>, next: NodeStyleCallback<WriteMultipleResult>): void;
   writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
+  writeFC22(address: number, dataAddress: number, andMask: number, orMask: number, next: NodeStyleCallback<WriteMaskRegisterResult>): void;
 
   // Connection shorthand API
   connectRTU(path: string, options: SerialPortOptions, next: Function): void;
@@ -64,6 +65,7 @@ export class ModbusRTU {
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisterEnron(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
+  maskWriteRegister(dataAddress: number, andMask: number, orMask: number): Promise<WriteMaskRegisterResult>;
 
   on(event: 'close', listener: () => unknown): this;
   on(event: 'error', listener: (error: unknown) => unknown): this;
@@ -100,6 +102,12 @@ export interface WriteRegisterResult {
 export interface WriteMultipleResult {
   address: number;
   length: number;
+}
+
+export interface WriteMaskRegisterResult {
+  address: number;
+  andMask: number;
+  orMask: number;
 }
 
 export interface ReadDeviceIdentificationResult {
