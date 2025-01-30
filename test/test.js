@@ -376,6 +376,20 @@ describe("ModbusRTU", function() {
             });
         });
 
+        describe("#writeFC22() - mask write register", function() {
+            it("should mask register 9 from 0xffff to 0x00ff (AND=0x00f0, OR=0x000f)", function(done) {
+                modbusRTU.writeFC22(1, 9, 0x00f0, 0x000f, function(err, data) {
+                    expect(err).to.be.a("null");
+
+                    expect(data).to.have.property("address", 9);
+                    expect(data).to.have.property("andMask", 0x00f0);
+                    expect(data).to.have.property("orMask", 0x000f);
+
+                    done();
+                });
+            });
+        });
+
         describe("#writeFC43() - read device identification", function() {
             it("should return a device identificationm without errors", function(done) {
                 modbusRTU.writeFC43(1, 4, 1, function(err, data) {
