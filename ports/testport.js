@@ -236,6 +236,24 @@ class TestPort extends EventEmitter {
             }
         }
 
+        if (functionCode === 22) {
+            address = data.readUInt16BE(2);
+            const andMask = data.readUInt16BE(4);
+            const orMask = data.readUInt16BE(6);
+
+            if (data.length !== 10) {
+                return;
+            }
+
+            const oldValue = this._holding_registers[address] || 0;
+            this._holding_registers[address] = (oldValue & andMask) | (orMask & ~andMask);
+
+            buffer = Buffer.alloc(10);
+            buffer.writeUInt16BE(address, 2);
+            buffer.writeUInt16BE(andMask, 4);
+            buffer.writeUInt16BE(orMask, 6);
+        }
+
         if (functionCode === 43) {
             const productCode = "MyProductCode1234";
             buffer = Buffer.alloc(12 + productCode.length);

@@ -27,6 +27,7 @@ describe("Promise", function() {
             expect(modbusRTU.writeRegister(address, value)).to.be.instanceOf(Promise);
             expect(modbusRTU.writeRegisters(address, [value])).to.be.instanceOf(Promise);
             expect(modbusRTU.readDeviceIdentification(deviceIdCode, objectId)).to.be.instanceOf(Promise);
+            expect(modbusRTU.maskWriteRegister(address, arg, arg)).to.be.instanceOf(Promise);
         });
     });
 

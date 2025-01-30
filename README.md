@@ -67,6 +67,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC6 "Preset Single Register" | `writeRegister(addr, value)` |
  | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
+| FC22 "Mask Write Register" | `maskWriteRegister(addr, andMask, orMask)` |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
 
 ###### Client Serial:

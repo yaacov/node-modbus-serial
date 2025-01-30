@@ -252,6 +252,22 @@ function _readFC20(data,  next) {
 
 /**
  * Parse the data for a Modbus -
+ * Mask Write Register (FC=22)
+ *
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Function} next the function to call next.
+ */
+function _readFC22(data, next) {
+    const dataAddress = data.readUInt16BE(2);
+    const andMask = data.readUInt16BE(4);
+    const orMask = data.readUInt16BE(6);
+
+    if (next)
+        next(null, { "address": dataAddress, "andMask": andMask, "orMask": orMask });
+}
+
+/**
+ * Parse the data for a Modbus -
  * Read Device Identification (FC=43)
  *
  * @param {Buffer} data the data buffer to parse.
@@ -540,6 +556,9 @@ function _onReceive(data) {
                 break;
             case 20:
                 _readFC20(data, transaction.next);
+                break;
+            case 22:
+                _readFC22(data, next);
                 break;
             case 43:
                 // read device identification
@@ -1137,6 +1156,45 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(recordNumber, 6);
         buf.writeUInt8(chunck, 9);
         buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
+        _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+    }
+
+    /**
+     * Write a Modbus "Mask Write Register" (FC=22) to serial port.
+     *
+     * @param {number} address the slave unit address.
+     * @param {number} dataAddress the Data Address of the register.
+     * @param {number} andMask the AND mask value.
+     * @param {number} orMask the OR mask value.
+     * @param {Function} next the function to call next.
+     */
+    writeFC22(address, dataAddress, andMask, orMask, next) {
+        if (this.isOpen !== true) {
+            if (next) next(new PortNotOpenError());
+            return;
+        }
+
+        if (typeof address === "undefined" || typeof dataAddress === "undefined") {
+            if (next) next(new BadAddressError());
+            return;
+        }
+
+        const code = 22;
+        const codeLength = 8;
+
+        this._transactions[this._port._transactionIdWrite] = {
+            nextAddress: address,
+            nextCode: code,
+            nextLength: codeLength + 2,
+            next: next
+        };
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        buf.writeUInt8(address, 0);
+        buf.writeUInt8(code, 1);
+        buf.writeUInt16BE(dataAddress, 2);
+        buf.writeUInt16BE(andMask, 4);
+        buf.writeUInt16BE(orMask, 6);
+        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
 
