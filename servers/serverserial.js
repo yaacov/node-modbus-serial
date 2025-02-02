@@ -22,6 +22,7 @@ const ServerSerialPipeHandler = require("./serverserial_pipe_handler");
 
 const PORT = "/dev/tty";
 const BAUDRATE = 9600;
+const PARITY = "none";
 
 const UNIT_ID = 255; // listen to all adresses
 
@@ -222,6 +223,7 @@ class ServerSerial extends EventEmitter {
         const optionsWithBinding = {
             path: options.path || options.port || PORT,
             baudRate: options.baudRate || options.baudrate || BAUDRATE,
+            parity: options.parity || PARITY,
             debug: options.debug || false,
             unitID: options.unitID || 255
         };
