@@ -567,8 +567,10 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
+            let values
+
             try {
-                const values = vector.getMultipleInputRegisters(address, length, unitID);
+                values = vector.getMultipleInputRegisters(address, length, unitID);
             } catch (error) {
                 callback(error);
                 return;
