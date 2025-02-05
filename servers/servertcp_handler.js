@@ -567,7 +567,15 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 }
             });
         } else {
-            const values = vector.getMultipleInputRegisters(address, length, unitID);
+            let values;
+
+            try {
+                values = vector.getMultipleInputRegisters(address, length, unitID);
+            } catch (error) {
+                callback(error);
+                return;
+            }
+
             if (values.length === length) {
                 for (var i = 0; i < length; i++) {
                     tryAndHandlePromiseOrValues(i, values);
