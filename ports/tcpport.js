@@ -139,12 +139,14 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("close", function(had_error) {
-            self.openFlag = false;
-            modbusSerialDebug("TCP port: signal close: " + had_error);
-            handleCallback(had_error);
+            if (self.openFlag)  {
+                self.openFlag = false;
+                modbusSerialDebug("TCP port: signal close: " + had_error);
+                handleCallback(had_error);
 
-            self.emit("close");
-            self.removeAllListeners();
+                self.emit("close");
+                self.removeAllListeners();
+            }
         });
 
         this._client.on("error", function(had_error) {
