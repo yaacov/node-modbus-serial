@@ -134,9 +134,14 @@ class TcpRTUBufferedPort extends EventEmitter {
         });
 
         this._client.on("close", function(had_error) {
-            modbus.openFlag = false;
-            handleCallback(had_error);
-            modbus.emit("close");
+            if (modbus.openFlag) {
+                modbus.openFlag = false;
+                modbusSerialDebug("TCP buffered port: signal close: " + had_error);
+                handleCallback(had_error);
+
+                modbus.emit("close");
+                modbus.removeAllListeners();
+            }
         });
 
         this._client.on("error", function(had_error) {
@@ -221,9 +226,8 @@ class TcpRTUBufferedPort extends EventEmitter {
      */
     close(callback) {
         this.callback = callback;
-        this._client.end(callback);
-
-        this.removeAllListeners();
+        // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
+        this._client.end();
     }
 
     /**
