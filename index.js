@@ -493,7 +493,7 @@ function _onReceive(data) {
      * if we do not expect this message
      * raise an error
      */
-    if (address !== transaction.nextAddress) {
+    if (Number(address) !== Number(transaction.nextAddress)) {
         error = "Unexpected data error, expected " +
               "address " + transaction.nextAddress + " got " + address;
         if (transaction.next)
