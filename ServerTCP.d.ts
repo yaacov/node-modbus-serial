@@ -1,5 +1,5 @@
 import * as events from 'events';
-import net from "net";
+import * as net from 'net';
 
 export class ServerTCP extends events.EventEmitter {
     socks: Map<net.Socket, 0>
