@@ -81,6 +81,11 @@ class RTUBufferedPort extends EventEmitter {
             self.emit("error", error);
         });
 
+        // attach a close listner on the SerialPort object
+        this._client.on("close", function() {
+            self.emit("close");
+        });
+
         // register the port data event
         this._client.on("data", function onData(data) {
             // add data to buffer
