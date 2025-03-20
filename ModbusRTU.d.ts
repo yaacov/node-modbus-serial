@@ -165,6 +165,8 @@ export interface TcpRTUPortOptions {
 
 export interface TelnetPortOptions {
   port?: number;
+  timeout?: number;
+  socket?: Socket;
 }
 
 export interface C701PortOptions {
