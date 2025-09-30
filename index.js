@@ -1222,7 +1222,7 @@ class ModbusRTU extends EventEmitter {
     }
 
     /**
-     * Write a Modbus "Custom Function Code" (FC=100-110) to serial port.
+     * Write a Modbus "Custom Function Code" (FC=65-72, 100-110) to serial port.
      *
      * @param {number} address the slave unit address.
      * @param {number} functionCode the custom function code.
