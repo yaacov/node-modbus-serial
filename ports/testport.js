@@ -33,6 +33,8 @@ class TestPort extends EventEmitter {
 
         // simulate 16 coils / digital inputs
         this._coils = 0x0000; // TODO 0xa12b, 1010 0001 0010 1011
+
+        // custom function code 100 multiplies inputs by 2
     }
 
     /**
@@ -266,6 +268,14 @@ class TestPort extends EventEmitter {
             buffer.writeUInt8(data.readInt8(4), 8);
             buffer.writeUInt8(productCode.length, 9);
             buffer.write(productCode, 10, productCode.length, "ascii");
+        }
+
+        if (functionCode === 100) {
+            // Custom function code 100 multiplies inputs by 2
+            buffer = Buffer.alloc(data.length);
+            for (let i = 2; i < (data.length - 2); i++) {
+                buffer.writeUInt8(data.readInt8(i) * 2, i);
+            }
         }
 
         // send data back
