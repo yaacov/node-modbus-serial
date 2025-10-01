@@ -45,6 +45,21 @@ describe("ModbusRTU", function() {
             });
         });
 
+        describe("#customFunction()", function() {
+            it("should call a custom function without errors", function(done) {
+                modbusRTU.customFunction(100, [1, 2, 3], function(err, data) {
+                    console.log("error", err);
+                    console.log("data", data);
+                    expect(err).to.be.a("null");
+                    expect(data).to.have.property("data").with.length(3);
+                    // test function code 100 multiplies inputs by 2
+                    expect(data.data.toString()).to.equal([2, 4, 6].toString());
+
+                    done();
+                });
+            });
+        });
+
         describe("#writeFC3() - read holding registers.", function() {
             it("should read 3 registers [0xa12b, 0xffff, 0xb21a] without errors", function(done) {
                 modbusRTU.writeFC3(1, 8, 3, function(err, data) {

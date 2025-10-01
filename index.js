@@ -308,6 +308,27 @@ function _readFC43(data, modbus, next) {
 }
 
 /**
+ * Parse the data for a Modbus -
+ * Read Device Identification (FC=43)
+ *
+ * @param {Buffer} data the data buffer to parse.
+ * @param {Modbus} modbus the client in case we need to read more device information
+ * @param {Function} next the function to call next.
+ */
+function _readCustomFC(data, _modbus, next) {
+    const length = data.length - 4; // address, fn code, crc
+    const contents = [];
+
+    for (let i = 0; i < length; i++) {
+        const byte = data.readUInt8(i + 2);
+        contents.push(byte);
+    }
+
+    if (next)
+        next(null, { "data": contents, "buffer": data.slice(2, 2 + length) });
+}
+
+/**
  * Wrapper method for writing to a port with timeout. <code><b>[this]</b></code> has the context of ModbusRTU
  * @param {Buffer} buffer The data to send
  * @private
@@ -562,6 +583,9 @@ function _onReceive(data) {
             case 43:
                 // read device identification
                 _readFC43(data, modbus, next);
+        }
+        if ((code >= 65 && code <= 72) || (code >= 100 && code <= 110)) {
+            _readCustomFC(data, transaction.nextCode, next);
         }
     } catch (e) {
         if (transaction.next) {
@@ -1193,6 +1217,46 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16BE(dataAddress, 2);
         buf.writeUInt16BE(andMask, 4);
         buf.writeUInt16BE(orMask, 6);
+        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+    }
+
+    /**
+     * Write a Modbus "Custom Function Code" (FC=65-72, 100-110) to serial port.
+     *
+     * @param {number} address the slave unit address.
+     * @param {number} functionCode the custom function code.
+     * @param {Buffer} data the array of bytes to send.
+     * @param {Function} next the function to call next.
+     */
+    writeCustomFC(address, functionCode, data, next) {
+        if (this.isOpen !== true) {
+            if (next) next(new PortNotOpenError());
+            return;
+        }
+
+        if (typeof address === "undefined" || typeof functionCode === "undefined") {
+            if (next) next(new BadAddressError());
+            return;
+        }
+
+        const code = functionCode;
+        const codeLength = 2 + data.length;
+
+        this._transactions[this._port._transactionIdWrite] = {
+            nextAddress: address,
+            nextCode: code,
+            lengthUnknown: true,
+            next: next
+        };
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+        buf.writeUInt8(address, 0);
+        buf.writeUInt8(code, 1);
+        let pos = 2;
+        for(const byte of data) {
+            buf.writeUInt8(byte, pos);
+            pos += 1;
+        }
         buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }

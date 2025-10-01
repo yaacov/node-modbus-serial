@@ -23,6 +23,8 @@ export class ModbusRTU {
   writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
   writeFC22(address: number, dataAddress: number, andMask: number, orMask: number, next: NodeStyleCallback<WriteMaskRegisterResult>): void;
 
+  writeCustomFC(address: number, functionCode: number, data: Int8Array, next: NodeStyleCallback<CustomFunctionResult>): void;
+  
   // Connection shorthand API
   connectRTU(path: string, options: SerialPortOptions, next: Function): void;
   connectRTU(path: string, options: SerialPortOptions): Promise<void>;
@@ -77,6 +79,11 @@ export class ModbusRTU {
 
 export interface NodeStyleCallback<T> {
   (err: NodeJS.ErrnoException, param: T): void;
+}
+
+export interface CustomFunctionResult {
+  data: Int8Array;
+  buffer: Buffer;
 }
 
 export interface ReadCoilResult {
