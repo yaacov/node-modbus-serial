@@ -1226,7 +1226,7 @@ class ModbusRTU extends EventEmitter {
      *
      * @param {number} address the slave unit address.
      * @param {number} functionCode the custom function code.
-     * @param {Buffer} data the array of bytes to send.
+     * @param {Array<number>} data the array of bytes to send.
      * @param {Function} next the function to call next.
      */
     writeCustomFC(address, functionCode, data, next) {
