@@ -68,6 +68,7 @@ export class ModbusRTU {
   writeRegisterEnron(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
   maskWriteRegister(dataAddress: number, andMask: number, orMask: number): Promise<WriteMaskRegisterResult>;
+  customFunction(functionCode: number, data: Array<number>): Promise<CustomFunctionResult>;
 
   on(event: 'close', listener: () => unknown): this;
   on(event: 'error', listener: (error: unknown) => unknown): this;

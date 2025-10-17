@@ -69,6 +69,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
 | FC22 "Mask Write Register" | `maskWriteRegister(addr, andMask, orMask)` |
 | FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
+| CustomFC "Custom Function" | `customFunction(functionCode, data)` |
 
 ###### Client Serial:
 

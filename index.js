@@ -309,7 +309,7 @@ function _readFC43(data, modbus, next) {
 
 /**
  * Parse the data for a Modbus -
- * Read Device Identification (FC=43)
+ * "Custom Function Code" (FC=65-72, 100-110)
  *
  * @param {Buffer} data the data buffer to parse.
  * @param {Modbus} modbus the client in case we need to read more device information
