@@ -86,7 +86,7 @@ function _asciiDecodeResponseBuffer(bufAscii) {
 function _checkData(modbus, buf) {
     // check buffer size
     if (buf.length !== modbus._length && buf.length !== 5) {
-        modbusSerialDebug({ action: "length error", recive: buf.length, expected: modbus._length });
+        modbusSerialDebug({ action: "length error", receive: buf.length, expected: modbus._length });
 
         return false;
     }

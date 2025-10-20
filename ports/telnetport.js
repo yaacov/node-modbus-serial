@@ -12,7 +12,7 @@ const TELNET_PORT = 2217;
 
 class TelnetPort extends EventEmitter {
     /**
-     * Simulate a modbus-RTU port using Telent connection.
+     * Simulate a modbus-RTU port using Telnet connection.
      *
      * @param ip
      * @param options
@@ -42,7 +42,7 @@ class TelnetPort extends EventEmitter {
         this._length = 0;
 
         // handle callback - call a callback function only once, for the first event
-        // it will triger
+        // it will trigger
         const handleCallback = function(had_error) {
             if (self.callback) {
                 self.callback(had_error);

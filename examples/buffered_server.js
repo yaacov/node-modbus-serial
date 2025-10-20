@@ -5,7 +5,7 @@
 const ModbusRTU = require("../index");
 
 const coils = Buffer.alloc(160008, 0); // coils and discrete inputs
-const regsiters = Buffer.alloc(160008, 0); // input and holding registers
+const registers = Buffer.alloc(160008, 0); // input and holding registers
 
 const unitId = 1;
 const minAddress = 0;
@@ -20,11 +20,11 @@ const bufferFactor = 8;
 
 const vector = {
     getCoil: function(addr, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxAddress) { return coils.readUInt8(addr * bufferFactor); } },
-    getInputRegister: function(addr, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxInputAddress) { return regsiters.readUInt16BE(addr * bufferFactor); } },
-    getHoldingRegister: function(addr, unitID) { if (unitID === unitId && addr >= maxInputAddress && addr < maxAddress) { return regsiters.readUInt16BE(addr * bufferFactor); } },
+    getInputRegister: function(addr, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxInputAddress) { return registers.readUInt16BE(addr * bufferFactor); } },
+    getHoldingRegister: function(addr, unitID) { if (unitID === unitId && addr >= maxInputAddress && addr < maxAddress) { return registers.readUInt16BE(addr * bufferFactor); } },
 
     setCoil: function(addr, value, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxAddress) { coils.writeUInt8(value, addr * bufferFactor); } },
-    setRegister: function(addr, value, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxAddress) { regsiters.writeUInt16BE(value, addr * bufferFactor); } }
+    setRegister: function(addr, value, unitID) { if (unitID === unitId && addr >= minAddress && addr < maxAddress) { registers.writeUInt16BE(value, addr * bufferFactor); } }
 };
 
 // set the server to answer for modbus requests

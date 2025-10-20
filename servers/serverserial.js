@@ -24,7 +24,7 @@ const PORT = "/dev/tty";
 const BAUDRATE = 9600;
 const PARITY = "none";
 
-const UNIT_ID = 255; // listen to all adresses
+const UNIT_ID = 255; // listen to all addresses
 
 const ADDR_LEN = 1;
 const MIN_LEN = 6;

@@ -17,7 +17,7 @@ async function run() {
     // set the client's unit id
     client.setID(255);
 
-    // set a timout for requests default is null (no timeout)
+    // set a timeout for requests default is null (no timeout)
     client.setTimeout(1000);
 
     // read the 7 registers starting at address 256

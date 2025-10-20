@@ -49,7 +49,7 @@ describe("Modbus TCP Server (no serverID)", function() {
             });
 
             client.once("data", function(data) {
-                // FC05 - valid responce
+                // FC05 - valid response
                 expect(data.toString("hex")).to.equal("00010000000601050005ff00");
 
                 client.end();
@@ -68,7 +68,7 @@ describe("Modbus TCP Server (no serverID)", function() {
             });
 
             client.once("data", function(data) {
-                // A valid error message, code 0x01 - Illegal fanction
+                // A valid error message, code 0x01 - Illegal function
                 expect(data.toString("hex")).to.equal("000100000003018701");
 
                 client.end();
@@ -187,7 +187,7 @@ describe("Modbus TCP Server (serverID = requestID)", function() {
             });
 
             client.once("data", function(data) {
-                // FC05 - valid responce
+                // FC05 - valid response
                 expect(data.toString("hex")).to.equal("00010000000604050005ff00");
 
                 client.end();

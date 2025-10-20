@@ -102,7 +102,7 @@ class TcpPort extends EventEmitter {
             let crc;
             let length;
 
-            // data recived
+            // data received
             modbusSerialDebug({ action: "receive tcp port strings", data: data });
 
             // check data length

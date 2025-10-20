@@ -64,7 +64,7 @@ describe("Modbus TCP Server (Enron)", function() {
             });
 
             client.once("data", function(data) {
-                // FC06 - valid responce
+                // FC06 - valid response
                 chai.expect(data.toString("hex")).to.equal("000100000008010600050000ff00");
 
                 client.end();
@@ -79,7 +79,7 @@ describe("Modbus TCP Server (Enron)", function() {
             const value = 305419896;
 
             function verify(msg) {
-                // FC06 - valid responce
+                // FC06 - valid response
                 chai.expect(msg.data[0]).to.equal(value);
                 done();
             }

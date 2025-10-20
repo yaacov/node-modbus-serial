@@ -90,7 +90,7 @@ describe("Modbus Serial Server (no serverID)", function() {
                     // Client received response
                     awaitingResponse = false;
 
-                    // FC05 - valid responce
+                    // FC05 - valid response
                     expect(data.toString("hex")).to.equal("01050001ff00ddfa");
 
                     clientSerial.close();
@@ -118,7 +118,7 @@ describe("Modbus Serial Server (no serverID)", function() {
                     // Client received response
                     awaitingResponse = false;
 
-                    // A valid error message, code 0x01 - Illegal fanction
+                    // A valid error message, code 0x01 - Illegal function
                     expect(data.toString("hex")).to.equal("0187018230");
 
                     clientSerial.close();
@@ -290,7 +290,7 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
                 } else {
                     // Client received response
                     awaitingResponse = false;
-                    // FC05 - valid responce
+                    // FC05 - valid response
                     expect(data.toString("hex")).to.equal("04050001ff00ddaf");
 
                     clientSerial.close();
