@@ -25,7 +25,7 @@ client.setWorkerOptions({
 ````
 ###### Read some data
 ``` javascript
-// Read 4 values starting from 10009 register. 
+// Read 4 values starting from 10009 register.
 // Under the hood it will read 8 registers due to int32 type
 const response = await client.send({
     unit: 1,

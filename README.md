@@ -292,11 +292,11 @@ const client = new Modbus();
 
 // open connection to a serial port
 client.connectAsciiSerial(
-    "/dev/ttyUSB0", 
+    "/dev/ttyUSB0",
     {
         baudRate: 9600,
         startOfSlaveFrameChar: 0x3A  // optional: slave frame delimiter
-    }, 
+    },
     write);
 
 function write() {
@@ -341,7 +341,7 @@ function app() {
     { key: createRegisterKey(1, ScopeEnum.PhysicalRegister, 99),    type: TypeEnum.UInt16 },
     { key: createRegisterKey(1, ScopeEnum.InternalRegister, 15, 2), type: TypeEnum.Bit },
   ];
-  
+
   // Define unit-scoped config if needed:
   const units = [
     {
@@ -353,7 +353,7 @@ function app() {
       maxRequestSize: 32, // How many registers to be requested in one round-trip with device, default: 1
     }
   ];
-  
+
   // Let`s create an instance of a database:
   const db = new Modbusdb({
     driver: new ModbusSerialDriver(client),
@@ -374,7 +374,7 @@ function app() {
   // You can store register`s key to be used later:
   const speedSetPoint = createRegisterKey(1, ScopeEnum.InternalRegister, 10);
   const workingMode = createRegisterKey(1, ScopeEnum.InternalRegister, 11);
-  
+
   // Write values directly into modbus device as easy as possible:
   // NOTICE: Modbusdb under the hood will make all needed requests for you
   //         Write operations have higher priority over the read operations
@@ -393,7 +393,7 @@ ScopeEnum: (Modbus Table)
   2 = InternalState = Coil Status
   3 = PhysicalRegister = Input Register
   4 = InternalRegister = Holding Register
-  
+
 TypeEnum: (Available Data Types)
   1 = Bit,
   4 = Int16,
