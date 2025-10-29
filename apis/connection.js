@@ -18,11 +18,11 @@
 const MIN_MODBUSRTU_FRAMESZ = 5;
 
 /**
- * Adds connection shorthand API to a Modbus objext
+ * Adds connection shorthand API to a Modbus object
  *
  * @param {ModbusRTU} Modbus the ModbusRTU object.
  */
-const addConnctionAPI = function(Modbus) {
+const addConnectionAPI = function(Modbus) {
     const cl = Modbus.prototype;
 
     const open = function(obj, next) {
@@ -315,7 +315,7 @@ const addConnctionAPI = function(Modbus) {
     };
 
     /**
-     * Connect to a communication port, using Bufferd Serial port.
+     * Connect to a communication port, using Buffered Serial port.
      *
      * @param {string} path the path to the Serial Port - required.
      * @param {Object} options - the serial port options - optional.
@@ -428,6 +428,6 @@ const addConnctionAPI = function(Modbus) {
 /**
  * Connection API Modbus.
  *
- * @type {addConnctionAPI}
+ * @type {addConnectionAPI}
  */
-module.exports = addConnctionAPI;
+module.exports = addConnectionAPI;

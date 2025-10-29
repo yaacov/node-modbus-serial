@@ -12,11 +12,11 @@ export interface IServiceVector {
         ((addr: number, unitID: number, cb: FCallbackVal<boolean>) => void) |
         ((addr: number, unitID: number) => Promise<boolean>) |
         ((addr: number, unitID: number) => boolean);
-    getDiscreteInput?: 
+    getDiscreteInput?:
         ((addr: number, unitID: number, cb: FCallbackVal<boolean>) => void) |
         ((addr: number, unitID: number) => Promise<boolean>) |
         ((addr: number, unitID: number) => boolean);
-    getInputRegister?: 
+    getInputRegister?:
         ((addr: number, unitID: number, cb: FCallbackVal<number>) => void) |
         ((addr: number, unitID: number) => Promise<number>) |
         ((addr: number, unitID: number) => number);
@@ -28,15 +28,15 @@ export interface IServiceVector {
         ((addr: number, length: number, unitID: number, cb: FCallbackVal<number[]>) => void) |
         ((addr: number, length: number, unitID: number) => Promise<number[]>) |
         ((addr: number, length: number, unitID: number) => number[]);
-    getMultipleHoldingRegisters?: 
+    getMultipleHoldingRegisters?:
         ((addr: number, length: number, unitID: number, cb: FCallbackVal<number[]>) => void) |
         ((addr: number, length: number, unitID: number) => Promise<number[]>) |
         ((addr: number, length: number, unitID: number) => number[]);
-    setCoil?: 
+    setCoil?:
         ((addr: number, value: boolean, unitID: number, cb: FCallback) => void) |
         ((addr: number, value: boolean, unitID: number) => Promise<void>) |
         ((addr: number, value: boolean, unitID: number) => void)
-    setRegister?: 
+    setRegister?:
         ((addr: number, value: number, unitID: number, cb: FCallback) => void) |
         ((addr: number, value: number, unitID: number) => Promise<void>) |
         ((addr: number, value: number, unitID: number) => void)

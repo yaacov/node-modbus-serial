@@ -105,10 +105,10 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
     }
 
     const isGetCoil = (fc === 1 && vector.getCoil);
-    const isGetDiscreteInpupt = (fc === 2 && vector.getDiscreteInput);
+    const isGetDiscreteInput = (fc === 2 && vector.getDiscreteInput);
 
     // read coils
-    if (isGetCoil || isGetDiscreteInpupt) {
+    if (isGetCoil || isGetDiscreteInput) {
         let callbackInvoked = false;
         let cbCount = 0;
         const buildCb = function(i) {
@@ -156,7 +156,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetDiscreteInpupt && vector.getDiscreteInput.length === 3) {
+        else if (isGetDiscreteInput && vector.getDiscreteInput.length === 3) {
             for (i = 0; i < length; i++) {
                 cb = buildCb(i);
                 try {
@@ -179,7 +179,7 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
                 }
             }
         }
-        else if (isGetDiscreteInpupt) {
+        else if (isGetDiscreteInput) {
             for (i = 0; i < length; i++) {
                 cb = buildCb(i);
                 try {

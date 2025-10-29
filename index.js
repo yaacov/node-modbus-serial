@@ -1144,7 +1144,7 @@ class ModbusRTU extends EventEmitter {
 
 
     /**
-     * Write  mODBUS "Read Device Identification" (FC=20) to serial port
+     * Write a Modbus "Read Device Identification" (FC=20) to serial port
      * @param {number} address the slave unit address.
      * @param {Function} next;
      */
@@ -1162,7 +1162,7 @@ class ModbusRTU extends EventEmitter {
         const code = 20;
         const codeLength = 10;
         const byteCount = 7;
-        const chunck = 100;
+        const chunk = 100;
 
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
@@ -1177,7 +1177,7 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt8(6, 3); // ReferenceType
         buf.writeUInt16BE(fileNumber, 4);
         buf.writeUInt16BE(recordNumber, 6);
-        buf.writeUInt8(chunck, 9);
+        buf.writeUInt8(chunk, 9);
         buf.writeUInt16LE(crc16(buf.subarray(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }

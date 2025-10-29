@@ -24,7 +24,7 @@ export class ModbusRTU {
   writeFC22(address: number, dataAddress: number, andMask: number, orMask: number, next: NodeStyleCallback<WriteMaskRegisterResult>): void;
 
   writeCustomFC(address: number, functionCode: number, data: Int8Array, next: NodeStyleCallback<CustomFunctionResult>): void;
-  
+
   // Connection shorthand API
   connectRTU(path: string, options: SerialPortOptions, next: Function): void;
   connectRTU(path: string, options: SerialPortOptions): Promise<void>;

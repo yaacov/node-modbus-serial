@@ -16,7 +16,7 @@ client.connectTCP("127.0.0.1", { port: 8502 })
 
 function setClient() {
     // set the client's unit id
-    // set a timout for requests default is null (no timeout)
+    // set a timeout for requests default is null (no timeout)
     client.setID(1);
     client.setTimeout(1000);
 
@@ -35,7 +35,7 @@ function run() {
 }
 
 function writeRegisters() {
-    // write 3 registers statrting at register 101
+    // write 3 registers starting at register 101
     // negative values (< 0) have to add 65535 for Modbus registers
     client.writeRegisters(101, [10, 9, 8, -20 + 65535, -10 + 65535])
         .then(function(d) {

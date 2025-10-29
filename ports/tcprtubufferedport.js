@@ -62,7 +62,7 @@ class TcpRTUBufferedPort extends EventEmitter {
         modbus._buffer = Buffer.alloc(0);
 
         // handle callback - call a callback function only once, for the first event
-        // it will triger
+        // it will trigger
         const handleCallback = function(had_error) {
             if (modbus.callback) {
                 modbus.callback(had_error);
@@ -280,7 +280,7 @@ class TcpRTUBufferedPort extends EventEmitter {
 }
 
 /**
- * TCP RTU bufferd port for Modbus.
+ * TCP RTU buffered port for Modbus.
  *
  * @type {TcpRTUBufferedPort}
  */

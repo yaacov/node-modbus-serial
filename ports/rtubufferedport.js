@@ -76,12 +76,12 @@ class RTUBufferedPort extends EventEmitter {
         // create the SerialPort
         this._client = new SerialPort(Object.assign({}, { path }, options));
 
-        // attach an error listner on the SerialPort object
+        // attach an error listener on the SerialPort object
         this._client.on("error", function(error) {
             self.emit("error", error);
         });
 
-        // attach a close listner on the SerialPort object
+        // attach a close listener on the SerialPort object
         this._client.on("close", function() {
             self.emit("close");
         });

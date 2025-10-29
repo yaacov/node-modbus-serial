@@ -20,7 +20,7 @@ const net = require("net");
 const modbusSerialDebug = require("debug")("modbus-serial");
 
 const HOST = "127.0.0.1";
-const UNIT_ID = 255; // listen to all adresses
+const UNIT_ID = 255; // listen to all addresses
 const MODBUS_PORT = 502;
 
 // Not really its official length, but we parse UnitID as part of PDU

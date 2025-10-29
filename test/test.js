@@ -406,7 +406,7 @@ describe("ModbusRTU", function() {
         });
 
         describe("#writeFC43() - read device identification", function() {
-            it("should return a device identificationm without errors", function(done) {
+            it("should return a device identification without errors", function(done) {
                 modbusRTU.writeFC43(1, 4, 1, function(err, data) {
                     expect(err).to.be.a("null");
                     expect(data.conformityLevel).to.equal(1);

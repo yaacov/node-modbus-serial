@@ -56,7 +56,7 @@ client.connectTCP(
 
 function setClient() {
     // set the client's unit id
-    // set a timout for requests default is null (no timeout)
+    // set a timeout for requests default is null (no timeout)
     client.setID(1);
     client.setTimeout(1000);
 
