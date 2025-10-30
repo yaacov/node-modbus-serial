@@ -274,7 +274,7 @@ class TestPort extends EventEmitter {
             // Custom function code 100 multiplies inputs by 2
             buffer = Buffer.alloc(data.length);
             for (let i = 2; i < (data.length - 2); i++) {
-                buffer.writeUInt8(data.readInt8(i) * 2, i);
+                buffer.writeUInt8(data.readUInt8(i) * 2, i);
             }
         }
 

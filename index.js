@@ -309,7 +309,7 @@ function _readFC43(data, modbus, next) {
 
 /**
  * Parse the data for a Modbus -
- * Read Device Identification (FC=43)
+ * "Custom Function Code" (FC=65-72, 100-110)
  *
  * @param {Buffer} data the data buffer to parse.
  * @param {Modbus} modbus the client in case we need to read more device information
@@ -1226,7 +1226,7 @@ class ModbusRTU extends EventEmitter {
      *
      * @param {number} address the slave unit address.
      * @param {number} functionCode the custom function code.
-     * @param {Buffer} data the array of bytes to send.
+     * @param {Array<number>} data the array of bytes to send.
      * @param {Function} next the function to call next.
      */
     writeCustomFC(address, functionCode, data, next) {

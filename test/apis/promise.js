@@ -17,6 +17,8 @@ describe("Promise", function() {
             const value = 1;
             const deviceIdCode = 1;
             const objectId = 2;
+            const functionCode = 100;
+            const data = [1, 2, 3];
 
             modbusRTU.open();
             expect(modbusRTU.readCoils(address, arg)).to.be.instanceOf(Promise);
@@ -28,6 +30,7 @@ describe("Promise", function() {
             expect(modbusRTU.writeRegisters(address, [value])).to.be.instanceOf(Promise);
             expect(modbusRTU.readDeviceIdentification(deviceIdCode, objectId)).to.be.instanceOf(Promise);
             expect(modbusRTU.maskWriteRegister(address, arg, arg)).to.be.instanceOf(Promise);
+            expect(modbusRTU.customFunction(functionCode, data)).to.be.instanceOf(Promise);
         });
     });
 
