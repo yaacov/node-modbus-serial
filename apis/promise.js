@@ -24,47 +24,47 @@
  */
 const _convert = function(f) {
     const converted = function(...args) {
-    const client = this;
-    const id = this._unitID;
+        const client = this;
+        const id = this._unitID;
 
-    // The last argument might be the callback (next)
-    const next = args[args.length - 1];
+        // The last argument might be the callback (next)
+        const next = args[args.length - 1];
 
-    // Determine if the last argument is actually a callback
+        // Determine if the last argument is actually a callback
         const hasCallback = typeof next === "function";
 
-    if (hasCallback) {
-      // If there is a callback, call the function with the appropriate arguments
-      if (args.length === 1) {
-        // This case is used for client close method
-        f.bind(client)(next);
-      } else {
-        // This case is used for client writeFC methods
-        f.bind(client)(id, ...args);
-      }
-    } else {
-      // Otherwise, use a promise
-            return new Promise(function(resolve, reject) {
-        function cb(err, data) {
-          if (err) {
-            reject(err);
-          } else {
-            resolve(data);
-          }
-        }
-
-        if (args.length === 0) {
-          // This case is used for client close method
-          f.bind(client)(cb);
+        if (hasCallback) {
+            // If there is a callback, call the function with the appropriate arguments
+            if (args.length === 1) {
+                // This case is used for client close method
+                f.bind(client)(next);
+            } else {
+                // This case is used for client writeFC methods
+                f.bind(client)(id, ...args);
+            }
         } else {
-          // This case is used for client writeFC methods
-          f.bind(client)(id, ...args, cb);
-        }
-      });
-    }
-  };
+            // Otherwise, use a promise
+            return new Promise(function(resolve, reject) {
+                function cb(err, data) {
+                    if (err) {
+                        reject(err);
+                    } else {
+                        resolve(data);
+                    }
+                }
 
-  return converted;
+                if (args.length === 0) {
+                // This case is used for client close method
+                    f.bind(client)(cb);
+                } else {
+                // This case is used for client writeFC methods
+                    f.bind(client)(id, ...args, cb);
+                }
+            });
+        }
+    };
+
+    return converted;
 };
 
 /**
@@ -74,34 +74,34 @@ const _convert = function(f) {
  */
 const addPromiseAPI = function(Modbus) {
 
-  const cl = Modbus.prototype;
+    const cl = Modbus.prototype;
 
-  // set/get unitID
+    // set/get unitID
     cl.setID = function(id) {this._unitID = Number(id);};
     cl.getID = function() {return this._unitID;};
 
-  // set/get timeout
+    // set/get timeout
     cl.setTimeout = function(timeout) {this._timeout = timeout;};
     cl.getTimeout = function() {return this._timeout;};
 
-  // convert functions to return promises
-  cl.close = _convert(cl.close);
-  cl.readCoils = _convert(cl.writeFC1);
-  cl.readDiscreteInputs = _convert(cl.writeFC2);
-  cl.readHoldingRegisters = _convert(cl.writeFC3);
-  cl.readRegistersEnron = _convert(cl.writeFC3);
-  cl.readInputRegisters = _convert(cl.writeFC4);
-  cl.writeCoil = _convert(cl.writeFC5);
-  cl.writeRegister = _convert(cl.writeFC6);
-  cl.writeRegisterEnron = _convert(cl.writeFC6);
-  cl.writeCoils = _convert(cl.writeFC15);
-  cl.writeRegisters = _convert(cl.writeFC16);
-  cl.reportServerID = _convert(cl.writeFC17);
-  cl.readFileRecords = _convert(cl.writeFC20);
-  cl.maskWriteRegister = _convert(cl.writeFC22);
-  cl.readWriteRegisters = _convert(cl.writeFC23);
-  cl.readDeviceIdentification = _convert(cl.writeFC43);
-  cl.customFunction = _convert(cl.writeCustomFC);
+    // convert functions to return promises
+    cl.close = _convert(cl.close);
+    cl.readCoils = _convert(cl.writeFC1);
+    cl.readDiscreteInputs = _convert(cl.writeFC2);
+    cl.readHoldingRegisters = _convert(cl.writeFC3);
+    cl.readRegistersEnron = _convert(cl.writeFC3);
+    cl.readInputRegisters = _convert(cl.writeFC4);
+    cl.writeCoil = _convert(cl.writeFC5);
+    cl.writeRegister = _convert(cl.writeFC6);
+    cl.writeRegisterEnron = _convert(cl.writeFC6);
+    cl.writeCoils = _convert(cl.writeFC15);
+    cl.writeRegisters = _convert(cl.writeFC16);
+    cl.reportServerID = _convert(cl.writeFC17);
+    cl.readFileRecords = _convert(cl.writeFC20);
+    cl.maskWriteRegister = _convert(cl.writeFC22);
+    cl.readWriteRegisters = _convert(cl.writeFC23);
+    cl.readDeviceIdentification = _convert(cl.writeFC43);
+    cl.customFunction = _convert(cl.writeCustomFC);
 };
 
 /**
