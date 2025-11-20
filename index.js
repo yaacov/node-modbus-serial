@@ -1243,6 +1243,17 @@ class ModbusRTU extends EventEmitter {
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
 
+      /**
+     * Write a Modbus "Read/Write Multiple Registers" (FC=23) to serial port.
+     *
+     * @param {number} address the slave unit address.
+     * @param {number} startingReadAddress the Data Address of the first register to read.
+     * @param {number} numReadRegisters the number of registers to read.
+     * @param {number} startingWriteAddress the Data Address of the first register to write.
+     * @param {number} numWriteRegisters the number of registers to write.
+     * @param {Array|Buffer} valuesToWrite the array of values or buffer to write to registers.
+     * @param {Function} next the function to call next.
+     */
     writeFC23(address, startingReadAddress, numReadRegisters, startingWriteAddress,
               numWriteRegisters, valuesToWrite, next) {
       if (this.isOpen !== true) {
@@ -1288,7 +1299,6 @@ class ModbusRTU extends EventEmitter {
       buf.writeUInt16BE(numWriteRegisters, 8);
       buf.writeUInt8(writeByteCount, 10);
 
-      // Write the values to the buffer
       if (Buffer.isBuffer(valuesToWrite)) {
         valuesToWrite.copy(buf, 11);
       } else {
