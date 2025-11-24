@@ -265,6 +265,25 @@ function _readFC22(data, next) {
         next(null, { "address": dataAddress, "andMask": andMask, "orMask": orMask });
 }
 
+  /**
+   * Parse the data for a Modbus -
+   * Read Write Multiple Registers (FC=23)
+   *
+   * @param {Buffer} data the data buffer to parse.
+   * @param {Function} next the function to call next.
+   */
+  function _readFC23(data, next) {
+    const bytes = data.readInt8(2);
+    const values = [];
+
+    for (let i = 0; i < bytes; i += 2) {
+      const reg = data.readUInt16BE(3 + i);
+      values.push(reg);
+    }
+
+    if (next) next(null, { data: values });
+  }
+
 /**
  * Parse the data for a Modbus -
  * Read Device Identification (FC=43)
@@ -579,6 +598,9 @@ function _onReceive(data) {
                 break;
             case 22:
                 _readFC22(data, next);
+                break;
+             case 23:
+                _readFC23(data, next);
                 break;
             case 43:
                 // read device identification
@@ -1220,6 +1242,74 @@ class ModbusRTU extends EventEmitter {
         buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
+
+      /**
+     * Write a Modbus "Read/Write Multiple Registers" (FC=23) to serial port.
+     *
+     * @param {number} address the slave unit address.
+     * @param {number} startingReadAddress the Data Address of the first register to read.
+     * @param {number} numReadRegisters the number of registers to read.
+     * @param {number} startingWriteAddress the Data Address of the first register to write.
+     * @param {number} numWriteRegisters the number of registers to write.
+     * @param {Array|Buffer} valuesToWrite the array of values or buffer to write to registers.
+     * @param {Function} next the function to call next.
+     */
+    writeFC23(address, startingReadAddress, numReadRegisters, startingWriteAddress,
+              numWriteRegisters, valuesToWrite, next) {
+      if (this.isOpen !== true) {
+        if (next) next(new PortNotOpenError());
+        return;
+      }
+
+      if (typeof address === "undefined" || typeof startingReadAddress === "undefined" || typeof startingWriteAddress === "undefined") {
+        if (next) next(new BadAddressError());
+        return;
+      }
+
+      if (!Array.isArray(valuesToWrite) && !Buffer.isBuffer(valuesToWrite)) {
+        if (next)
+          next(new Error("Parameter valuesToWrite must be an array or buffer"));
+        return;
+      }
+
+      const code = 23;
+
+      // Calculate byte count for write data (should be numWriteRegisters * 2)
+      const writeByteCount = numWriteRegisters * 2;
+
+      // Expected response length: address(1) + code(1) + byteCount(1) + data(numReadRegisters*2) + crc(2)
+      const responseLength = 3 + numReadRegisters * 2 + 2;
+
+      this._transactions[this._port._transactionIdWrite] = {
+        nextAddress: address,
+        nextCode: code,
+        nextLength: responseLength,
+        next: next,
+      };
+
+      // Request: address(1) + code(1) + readAddr(2) + readQty(2) + writeAddr(2) + writeQty(2) + byteCount(1) + writeData(N*2) + crc(2)
+      const codeLength = 11 + writeByteCount;
+      const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+
+      buf.writeUInt8(address, 0);
+      buf.writeUInt8(code, 1);
+      buf.writeUInt16BE(startingReadAddress, 2);
+      buf.writeUInt16BE(numReadRegisters, 4);
+      buf.writeUInt16BE(startingWriteAddress, 6);
+      buf.writeUInt16BE(numWriteRegisters, 8);
+      buf.writeUInt8(writeByteCount, 10);
+
+      if (Buffer.isBuffer(valuesToWrite)) {
+        valuesToWrite.copy(buf, 11);
+      } else {
+        for (let i = 0; i < numWriteRegisters; i++) {
+          buf.writeUInt16BE(valuesToWrite[i], 11 + 2 * i);
+        }
+      }
+
+      buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+      _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+  }
 
     /**
      * Write a Modbus "Custom Function Code" (FC=65-72, 100-110) to serial port.

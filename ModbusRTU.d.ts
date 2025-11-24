@@ -22,7 +22,7 @@ export class ModbusRTU {
   writeFC15(address: number, dataAddress: number, states: Array<boolean>, next: NodeStyleCallback<WriteMultipleResult>): void;
   writeFC16(address: number, dataAddress: number, values: Array<number>, next: NodeStyleCallback<WriteMultipleResult>): void;
   writeFC22(address: number, dataAddress: number, andMask: number, orMask: number, next: NodeStyleCallback<WriteMaskRegisterResult>): void;
-
+  writeFC23(address: number, startingReadAddress: number, numReadRegisters: number, startingWriteAddress: number, numWriteRegisters: number, valuesToWrite: Array<number> | Buffer, next: NodeStyleCallback<ReadRegisterResult>): void;
   writeCustomFC(address: number, functionCode: number, data: Array<number>, next: NodeStyleCallback<CustomFunctionResult>): void;
 
   // Connection shorthand API

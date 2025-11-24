@@ -99,6 +99,7 @@ const addPromiseAPI = function(Modbus) {
     cl.reportServerID = _convert(cl.writeFC17);
     cl.readFileRecords = _convert(cl.writeFC20);
     cl.maskWriteRegister = _convert(cl.writeFC22);
+    cl.readWriteRegisters = _convert(cl.writeFC23);
     cl.readDeviceIdentification = _convert(cl.writeFC43);
     cl.customFunction = _convert(cl.writeCustomFC);
 };
