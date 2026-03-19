@@ -96,7 +96,7 @@ class TcpPort extends EventEmitter {
 
         if (options.timeout) this._client.setTimeout(options.timeout);
 
-        this._clientRcvData = Buffer.alloc(5);    //Initialize a variable to store all received data
+        self._clientRcvData = Buffer.alloc(0);    //Initialize a variable to store all received data
         
         // register events handlers
         this._client.on("data", function(data) {
@@ -105,41 +105,41 @@ class TcpPort extends EventEmitter {
             let length;
 
             // Append received data to the RcvData Buffer
-            this._clientRcvData = Buffer.concat([this._clientRcvData, data]);    
+            self._clientRcvData = Buffer.concat([self._clientRcvData, data]); 
             
             // data received
             modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: this._clientRcvData });
 
             // check data length
-            while (_clientRcvData.length > MIN_MBAP_LENGTH) {
+            while (self._clientRcvData.length > MIN_MBAP_LENGTH) {
                 // parse tcp header length
-                length = _clientRcvData.readUInt16BE(4);
+                length = self._clientRcvData.readUInt16BE(4);
 
                 // Check if RcvData has enought data (MBAP size + message size)
                 // If false, all the modBus message has not been received yet
                 // => Return to wait next receiving
-                if(this._clientRcvData.length < (length + MIN_MBAP_LENGTH))
+                if(self._clientRcvData.length < (length + MIN_MBAP_LENGTH))
                 {
                     return;
                 }
 
                 // cut 6 bytes of mbap and copy pdu
                 buffer = Buffer.alloc(length + CRC_LENGTH);
-                _clientRcvData.copy(buffer, 0, MIN_MBAP_LENGTH);
+                self._clientRcvData.copy(buffer, 0, MIN_MBAP_LENGTH);
 
                 // add crc to message
                 crc = crc16(buffer.slice(0, -CRC_LENGTH));
                 buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
 
                 // update transaction id and emit data
-                self._transactionIdRead = _clientRcvData.readUInt16BE(0);
+                self._transactionIdRead = self._clientRcvData.readUInt16BE(0);
                 self.emit("data", buffer);
 
                 // debug
                 modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: self._transactionIdRead });
 
                 // reset data
-                _clientRcvData = _clientRcvData.slice(length + MIN_MBAP_LENGTH);
+                self._clientRcvData = self._clientRcvData.slice(length + MIN_MBAP_LENGTH);
             }
         });
 
