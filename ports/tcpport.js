@@ -154,6 +154,7 @@ class TcpPort extends EventEmitter {
         this._client.on("close", function(had_error) {
             if (self.openFlag)  {
                 self.openFlag = false;
+                self._clientRcvData = Buffer.alloc(0); // Reset the variable that storing all received data
                 modbusSerialDebug("TCP port: signal close: " + had_error);
                 handleCallback(had_error);
 
