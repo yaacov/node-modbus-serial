@@ -28,10 +28,11 @@ class ModbusUdpPort extends EventEmitter {
         this.ip = ip;
         this.openFlag = false;
         this._transactionIdWrite = 1;
-        this.port = options.port || MODBUS_PORT;
 
-        // options
-        if (typeof(options) === "undefined") options = {};
+        if (typeof options === "undefined") {
+            options = {};
+        }
+        this.port = options.port || MODBUS_PORT;
 
         // create a socket
         this._client = dgram.createSocket("udp4");

@@ -56,7 +56,7 @@ class UdpPort extends EventEmitter {
 
         // wait for answer
         this._client.on("message", function(data) {
-            let buffer = null;
+            let buffer;
 
             // check expected length
             if (modbus.length < 6) return;
@@ -148,7 +148,7 @@ class UdpPort extends EventEmitter {
             return;
         }
 
-        let length = null;
+        let length;
 
         // remember current unit and command
         this._id = data[0];

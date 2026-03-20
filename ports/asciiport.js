@@ -218,7 +218,7 @@ class AsciiPort extends EventEmitter {
             return;
         }
 
-        let length = null;
+        let length;
 
         // remember current unit and command
         this._id = data[0];

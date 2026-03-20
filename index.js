@@ -1034,7 +1034,7 @@ class ModbusRTU extends EventEmitter {
         }
 
         const code = 15;
-        let i = 0;
+        let i;
 
         // set state variables
         this._transactions[this._port._transactionIdWrite] = {
