@@ -1,3 +1,7 @@
+/**
+ * References `serialport` / `@serialport/stream`. `serialport` is optional; add it (or `skipLibCheck`)
+ * if this file must type-check when optional deps were skipped.
+ */
 import * as events from 'events';
 import * as stream from 'stream';
 import { SerialPortOpenOptions } from 'serialport';

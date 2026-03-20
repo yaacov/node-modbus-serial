@@ -30,6 +30,27 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
 
+##### Optional `serialport` dependency
+
+[`serialport`](https://www.npmjs.com/package/serialport) is an **optional** dependency: npm tries to install it, but if the install fails (or you skip optionals), `modbus-serial` still installs and TCP/UDP usage works.
+
+**Skip installing optional dependencies** (no native serial build, smaller tree):
+
+    npm install modbus-serial --no-optional
+
+Or in `.npmrc`: `optional=false`
+
+If you skipped or dropped `serialport` and later need serial RTU/ASCII, install it explicitly:
+
+    npm install serialport
+
+Without `serialport`, serial-specific APIs fail at **runtime** when used, for example:
+
+- `ModbusRTU.getPorts()`, `connectRTU`, `connectRTUBuffered`, `connectAsciiSerial`
+- `ModbusRTU.RTUBufferedPort`, `ModbusRTU.ServerSerial` (not exported if `serialport` cannot be loaded)
+
+TypeScript: `ServerSerial.d.ts` imports `serialport` types. If you use `--no-optional` and have no `serialport` in the tree, use **`skipLibCheck`** or add **`serialport` as a devDependency** for type-checking.
+
 #### Development
 
 This repo uses **npm** and a committed **`package-lock.json`**. After cloning:

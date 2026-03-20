@@ -1,12 +1,26 @@
 import { Socket, SocketConstructorOpts, TcpSocketConnectOpts } from 'net';
 import { TestPort } from "./TestPort";
-import { PortInfo } from '@serialport/bindings-cpp';
+
+/**
+ * Subset of `serialport` `SerialPort.list()` entries — defined here so typings do not require
+ * `@serialport/bindings-cpp` at install time when using `npm install --no-optional`. Values from
+ * `getPorts()` are compatible with `PortInfo` when `serialport` is installed.
+ */
+export interface ModbusSerialPortListEntry {
+  path: string;
+  manufacturer?: string;
+  serialNumber?: string;
+  pnpId?: string;
+  locationId?: string;
+  productId?: string;
+  vendorId?: string;
+}
 
 export class ModbusRTU {
   constructor(port?: any);
   static TestPort: typeof TestPort
 
-  static getPorts(): Promise<PortInfo[]>
+  static getPorts(): Promise<ModbusSerialPortListEntry[]>
 
   open(callback?: Function): void;
   close(callback?: Function): void;

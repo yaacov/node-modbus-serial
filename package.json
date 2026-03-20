@@ -1,8 +1,23 @@
 {
   "name": "modbus-serial",
   "version": "8.0.23",
-  "description": "A pure JavaScript implementation of MODBUS-RTU (Serial and TCP) for NodeJS.",
+  "description": "A pure JavaScript implementation of MODBUS-RTU (Serial and TCP) for NodeJS. The serialport package is an optional dependency (use npm install --no-optional to skip).",
   "main": "index.js",
+  "types": "index.d.ts",
+  "files": [
+    "index.js",
+    "apis",
+    "ports",
+    "servers",
+    "utils",
+    "index.d.ts",
+    "ModbusRTU.d.ts",
+    "ServerTCP.d.ts",
+    "ServerSerial.d.ts",
+    "TestPort.d.ts",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text mocha --recursive",
     "lint": "eslint .",
@@ -48,7 +63,9 @@
     "webbluetooth": "^3.6.0"
   },
   "dependencies": {
-    "debug": "^4.3.1",
+    "debug": "^4.3.1"
+  },
+  "optionalDependencies": {
     "serialport": "^12.0.0"
   }
 }
