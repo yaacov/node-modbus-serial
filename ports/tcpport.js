@@ -96,8 +96,8 @@ class TcpPort extends EventEmitter {
 
         if (options.timeout) this._client.setTimeout(options.timeout);
 
-        self._clientRcvData = Buffer.alloc(0);    //Initialize a variable to store all received data
-        
+        self._clientRcvData = Buffer.alloc(0); // Initialize a variable to store all received data
+
         // register events handlers
         this._client.on("data", function(data) {
             let buffer;
