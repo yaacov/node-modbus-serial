@@ -12,7 +12,9 @@ export default defineConfig([
         ignores: [
             "**/node_modules/**",
             "**/coverage/**",
-            "**/.nyc_output/**"
+            "**/.nyc_output/**",
+            "**/docs/**",
+            "**/modbus-serial/**"
         ]
     },
     js.configs.recommended,

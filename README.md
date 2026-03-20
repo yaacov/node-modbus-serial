@@ -40,6 +40,15 @@ This repo uses **npm** and a committed **`package-lock.json`**. After cloning:
 
 To refresh dependencies after editing `package.json`, run `npm install` and commit the updated lockfile.
 
+Optional maintainer tasks (generated output is gitignored):
+
+- `npm run clean` — remove `modbus-serial/` and `docs/gen/`
+- `npm run build` — copy `apis`, `ports`, `servers`, and `utils` into `modbus-serial/`
+- `npm run doc` — generate API HTML under `docs/gen/` (JSDoc 4 + clean-jsdoc-theme)
+- `npm run doc:examples` — copy `examples/` into `docs/gen/examples/`
+- `npm run docs` — run `doc` then `doc:examples`
+- `npm run publish:prepare` — runs `build` then `docs` (mirrored package tree plus generated HTML and copied examples)
+
 #### What can I do with this module ?
 
 This class makes it fun and easy to communicate with electronic
