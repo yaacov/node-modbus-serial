@@ -108,7 +108,7 @@ class TcpPort extends EventEmitter {
             self._clientRcvData = Buffer.concat([self._clientRcvData, data]); 
             
             // data received
-            modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: this._clientRcvData });
+            modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: self._clientRcvData });
 
             // check data length
             while (self._clientRcvData.length > MIN_MBAP_LENGTH) {
