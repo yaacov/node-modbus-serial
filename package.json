@@ -6,7 +6,13 @@
   "scripts": {
     "test": "nyc --reporter=lcov --reporter=text mocha --recursive",
     "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint:fix": "eslint . --fix",
+    "clean": "node scripts/clean.js",
+    "build": "node scripts/build-modbus-serial.js",
+    "doc": "jsdoc -c jsdoc.json",
+    "doc:examples": "node scripts/copy-doc-examples.js",
+    "docs": "npm run doc && npm run doc:examples",
+    "publish:prepare": "npm run build && npm run docs"
   },
   "repository": {
     "type": "git",
@@ -30,15 +36,13 @@
     "@eslint/js": "^9.39.1",
     "chai": "^4.5.0",
     "chai-as-promised": "^7.1.2",
+    "clean-jsdoc-theme": "^4.3.0",
     "eslint": "^10.0.3",
     "globals": "^16.5.0",
-    "gulp": "^5.0.1",
-    "gulp-clean": "^0.4.0",
-    "gulp-jsdoc3": "^3.0.0",
+    "jsdoc": "^4.0.5",
     "mocha": "^11.7.5",
     "mockery": "^2.1.0",
     "nyc": "^18.0.0",
-    "pump": "^3.0.4",
     "sinon": "^21.0.3",
     "web-bluetooth-mock": "^1.2.0",
     "webbluetooth": "^3.6.0"

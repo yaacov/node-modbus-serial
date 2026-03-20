@@ -18,34 +18,24 @@ class TcpPort extends EventEmitter {
      * Simulate a modbus-RTU port using modbus-TCP connection.
      *
      * @param {string} ip - IP address of Modbus slave.
-     * @param {{
-     *  port?: number,
-     *  localAddress?: string,
-     *  family?: 0|4|6,
-     *  timeout?: number,
-     *  socket?: net.Socket
-     *  socketOpts?: {
-     *      fd: number,
-     *      allowHalfOpen?: boolean,
-     *      readable?: boolean,
-     *      writable?: boolean,
-     *      signal?: AbortSignal
-     *  },
-     * } & net.TcpSocketConnectOpts} options - Options object.
+     * @param {Object} options - Options object (extends {@link net#connect} options).
      *   options.port: Nonstandard Modbus port (default is 502).
      *   options.localAddress: Local IP address to bind to, default is any.
      *   options.family: 4 = IPv4-only, 6 = IPv6-only, 0 = either (default).
+     *   options.timeout, options.socket, options.socketOpts: see implementation.
      * @constructor
      */
     constructor(ip, options) {
         super();
         const self = this;
-        /** @type {boolean} Flag to indicate if port is open */
+        /** Flag to indicate if port is open */
+        /** @type {boolean} */
         this.openFlag = false;
-        /** @type {(err?: Error) => void} */
+        /** @type {function(Error=):void} */
         this.callback = null;
         this._transactionIdWrite = 1;
-        /** @type {net.Socket?} - Optional custom socket */
+        /** Optional custom socket */
+        /** @type {net.Socket|null} */
         this._externalSocket = null;
 
         if (typeof ip === "object") {
@@ -61,7 +51,8 @@ class TcpPort extends EventEmitter {
             delete options.socketOpts;
         }
 
-        /** @type {net.TcpSocketConnectOpts} - Options for net.connect(). */
+        /** Options for {@link net#connect}. */
+        /** @type {net.TcpSocketConnectOpts} */
         this.connectOptions = {
             // Default options
             ...{
@@ -190,7 +181,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful port open.
      *
-     * @param {(err?: Error) => void} callback
+     * @param {function(Error=):void} callback
      */
     open(callback) {
         if (this._externalSocket === null) {
@@ -207,7 +198,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful close port.
      *
-     * @param {(err?: Error) => void} callback
+     * @param {function(Error=):void} callback
      */
     close(callback) {
         this.callback = callback;
@@ -218,7 +209,7 @@ class TcpPort extends EventEmitter {
     /**
      * Simulate successful destroy port.
      *
-     * @param {(err?: Error) => void} callback
+     * @param {function(Error=):void} callback
      */
     destroy(callback) {
         this.callback = callback;
