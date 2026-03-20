@@ -10,6 +10,7 @@
     "ports",
     "servers",
     "utils",
+    "worker",
     "index.d.ts",
     "ModbusRTU.d.ts",
     "ServerTCP.d.ts",
