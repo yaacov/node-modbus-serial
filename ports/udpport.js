@@ -103,7 +103,6 @@ class ModbusUdpPort extends EventEmitter {
      *
      * @param callback
      */
-    // eslint-disable-next-line class-methods-use-this
     open(callback) {
         if (callback)
             callback(null);

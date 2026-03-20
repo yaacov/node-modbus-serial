@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-undef */
 
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");

@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-undef */
 
 const expect = require("chai").expect;
 const mockery = require("mockery");
