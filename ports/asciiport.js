@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-ternary */
 
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;

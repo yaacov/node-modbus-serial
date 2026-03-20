@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-undef */
 
 const ModbusRTU = require("../index");
 const TestPort = ModbusRTU.TestPort;

@@ -1,5 +1,4 @@
 "use strict";
-/* eslint-disable no-undef */
 
 /**
  * Tests require two linked serial connections:

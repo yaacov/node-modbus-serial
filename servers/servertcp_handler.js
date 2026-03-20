@@ -1,4 +1,3 @@
-/* eslint-disable no-var */
 "use strict";
 /**
  * Copyright (c) 2017, Yaacov Zamir <kobi.zamir@gmail.com>

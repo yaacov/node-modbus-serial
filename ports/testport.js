@@ -1,4 +1,3 @@
-/* eslint-disable class-methods-use-this */
 "use strict";
 const events = require("events");
 const EventEmitter = events.EventEmitter || events;
