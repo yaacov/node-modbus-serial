@@ -34,6 +34,8 @@ try these options on npm install to build, if you have problems to install
 
 [`serialport`](https://www.npmjs.com/package/serialport) is an **optional** dependency: npm tries to install it, but if the install fails (or you skip optionals), `modbus-serial` still installs and TCP/UDP usage works.
 
+The version range pulled in by this package targets **serialport 13.x**, which requires **Node.js 20 or newer**. If you need serial on an older Node release, install a compatible `serialport` major (for example 12.x) explicitly alongside `modbus-serial`, or use `--no-optional` and TCP-only flows.
+
 **Skip installing optional dependencies** (no native serial build, smaller tree):
 
     npm install modbus-serial --no-optional
