@@ -1,7 +1,8 @@
 "use strict";
 
 const chai = require("chai");
-const chaiAsPromised = require("chai-as-promised");
+const chaiAsPromisedModule = require("chai-as-promised");
+const chaiAsPromised = chaiAsPromisedModule.default ?? chaiAsPromisedModule;
 // Load chai-as-promised support
 chai.use(chaiAsPromised);
 // Initialise should API (attaches as a property on Object)

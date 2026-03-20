@@ -71,12 +71,12 @@ class TestPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        let buffer = null;
-        let length = null;
-        let address = null;
-        let value = null;
-        let state = null;
-        let i = null;
+        let buffer;
+        let length;
+        let address;
+        let value;
+        let state;
+        let i;
 
         if(data.length < MIN_DATA_LENGTH) {
             modbusSerialDebug("expected length of data is to small - minimum is " + MIN_DATA_LENGTH);
