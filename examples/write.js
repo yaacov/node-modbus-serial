@@ -1,12 +1,12 @@
-/* eslint-disable no-console, spaced-comment */
+
 
 // create an empty modbus client
-//let ModbusRTU = require("modbus-serial");
+// let ModbusRTU = require("modbus-serial");
 const ModbusRTU = require("../index");
 const client = new ModbusRTU();
 
 // open connection to a serial port
-//client.connectRTUBuffered("/dev/ttyUSB0", {baudRate: 9600})
+// client.connectRTUBuffered("/dev/ttyUSB0", {baudRate: 9600})
 client.connectTCP("127.0.0.1", { port: 8502 })
     .then(setClient)
     .then(function() {

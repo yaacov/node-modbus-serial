@@ -1,6 +1,7 @@
 # webstorm ide
 
 .idea/
+.vscode/
 
 # Logs
 logs
@@ -32,5 +33,3 @@ build/Release
 node_modules
 modbus-serial
 docs
-
-package-lock\.json

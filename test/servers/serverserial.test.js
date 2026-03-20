@@ -1,5 +1,5 @@
 "use strict";
-/* eslint-disable no-undef, no-console */
+/* eslint-disable no-undef */
 
 /**
  * Tests require two linked serial connections:
@@ -24,8 +24,8 @@ const ServerSerial = require("./../../servers/serverserial");
 // const MAX_HOLDING_REGISTER = 127;
 
 describe("Modbus Serial Server (no serverID)", function() {
-    let serverSerial; // eslint-disable-line no-unused-vars
-    let clientSerial; // eslint-disable-line no-unused-vars
+    let serverSerial;
+    let clientSerial;
 
     beforeEach(function() {
         const vector = {
@@ -242,8 +242,8 @@ describe("Modbus Serial Server (no serverID)", function() {
 });
 
 describe("Modbus Serial Server (serverID = requestID)", function() {
-    let serverSerial; // eslint-disable-line no-unused-vars
-    let clientSerial; // eslint-disable-line no-unused-vars
+    let serverSerial;
+    let clientSerial;
 
     before(function() {
         const vector = {
@@ -302,8 +302,8 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
 });
 
 describe("Modbus Serial Server (serverID != requestID)", function() {
-    let serverSerial; // eslint-disable-line no-unused-vars
-    let clientSerial; // eslint-disable-line no-unused-vars
+    let serverSerial;
+    let clientSerial;
 
     before(function() {
         const vector = {

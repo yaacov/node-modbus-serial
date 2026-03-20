@@ -1,7 +1,7 @@
-/* eslint-disable no-console, no-unused-vars, spaced-comment */
+
 
 // create an empty modbus client
-//let ModbusRTU = require("modbus-serial");
+// let ModbusRTU = require("modbus-serial");
 const ModbusRTU = require("../index");
 
 const coils = Buffer.alloc(160008, 0); // coils and discrete inputs

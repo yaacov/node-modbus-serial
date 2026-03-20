@@ -1,5 +1,3 @@
-/* globals navigator */
-
 "use strict";
 
 const { EventEmitter } = require("events");

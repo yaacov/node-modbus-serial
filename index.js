@@ -215,8 +215,8 @@ function _readFC16(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC17(data, next) {
-    const length = parseInt(data.readUInt8(2));
-    const serverId = parseInt(data.readUInt8(3));
+    const length = parseInt(data.readUInt8(2), 10);
+    const serverId = parseInt(data.readUInt8(3), 10);
     const running = data.readUInt8(4) === 0xFF;
     let additionalData;
     if (length > 2) {
@@ -239,7 +239,7 @@ function _readFC17(data, next) {
  * @param {Function} next
  */
 function _readFC20(data,  next) {
-    const fileRespLength = parseInt(data.readUInt8(2));
+    const fileRespLength = parseInt(data.readUInt8(2), 10);
     const result = [];
     for (let i = 5; i < fileRespLength + 5; i++) {
         const reg = data.readUInt8(i);
@@ -265,24 +265,24 @@ function _readFC22(data, next) {
         next(null, { "address": dataAddress, "andMask": andMask, "orMask": orMask });
 }
 
-  /**
+/**
    * Parse the data for a Modbus -
    * Read Write Multiple Registers (FC=23)
    *
    * @param {Buffer} data the data buffer to parse.
    * @param {Function} next the function to call next.
    */
-  function _readFC23(data, next) {
-    const bytes = data.readInt8(2);
+function _readFC23(data, next) {
+    const bytes = data.readUInt8(2);
     const values = [];
 
     for (let i = 0; i < bytes; i += 2) {
-      const reg = data.readUInt16BE(3 + i);
-      values.push(reg);
+        const reg = data.readUInt16BE(3 + i);
+        values.push(reg);
     }
 
     if (next) next(null, { data: values });
-  }
+}
 
 /**
  * Parse the data for a Modbus -
@@ -293,12 +293,12 @@ function _readFC22(data, next) {
  * @param {Function} next the function to call next.
  */
 function _readFC43(data, modbus, next) {
-    const address = parseInt(data.readUInt8(0));
-    const readDeviceIdCode = parseInt(data.readUInt8(3));
-    const conformityLevel = parseInt(data.readUInt8(4));
-    const moreFollows = parseInt(data.readUInt8(5));
-    const nextObjectId = parseInt(data.readUInt8(6));
-    const numOfObjects = parseInt(data.readUInt8(7));
+    const address = parseInt(data.readUInt8(0), 10);
+    const readDeviceIdCode = parseInt(data.readUInt8(3), 10);
+    const conformityLevel = parseInt(data.readUInt8(4), 10);
+    const moreFollows = parseInt(data.readUInt8(5), 10);
+    const nextObjectId = parseInt(data.readUInt8(6), 10);
+    const numOfObjects = parseInt(data.readUInt8(7), 10);
 
     let startAt = 8;
     const result = {};
@@ -306,8 +306,8 @@ function _readFC43(data, modbus, next) {
     // objects in the response, but the example on page 45 shows the total
     // number over all responses. Therefore be careful about reading more data than available
     for (let i = 0; i < numOfObjects && startAt < data.length; i++) {
-        const objectId = parseInt(data.readUInt8(startAt));
-        const objectLength = parseInt(data.readUInt8(startAt + 1));
+        const objectId = parseInt(data.readUInt8(startAt), 10);
+        const objectLength = parseInt(data.readUInt8(startAt + 1), 10);
         const startOfData = startAt + 2;
         result[objectId] = data.toString("ascii", startOfData, startOfData + objectLength);
         startAt = startOfData + objectLength;
@@ -599,7 +599,7 @@ function _onReceive(data) {
             case 22:
                 _readFC22(data, next);
                 break;
-             case 23:
+            case 23:
                 _readFC23(data, next);
                 break;
             case 43:
@@ -652,6 +652,9 @@ class ModbusRTU extends EventEmitter {
 
         this._onReceive = _onReceive.bind(this);
         this._onError = _onError.bind(this);
+        this._onPortClose = function() {
+            this.emit("close");
+        }.bind(this);
     }
 
     /**
@@ -688,7 +691,8 @@ class ModbusRTU extends EventEmitter {
                 modbus._port.on("error", modbus._onError);
 
                 /* Hook the close event so we can relay it to our callers. */
-                modbus._port.once("close", modbus.emit.bind(modbus, "close"));
+                modbus._port.removeListener("close", modbus._onPortClose);
+                modbus._port.once("close", modbus._onPortClose);
 
                 /* On serial port open OK call next function with no error */
                 if (callback)
@@ -737,7 +741,9 @@ class ModbusRTU extends EventEmitter {
     close(callback) {
         // close the serial port if exist
         if (this._port) {
-            this._port.removeAllListeners("data");
+            this._port.removeListener("data", this._onReceive);
+            this._port.removeListener("error", this._onError);
+            this._port.removeListener("close", this._onPortClose);
             this._port.close(callback);
         } else {
             // nothing needed to be done
@@ -757,7 +763,9 @@ class ModbusRTU extends EventEmitter {
 
         // close the serial port if exist and it has a destroy function
         if (this._port && this._port.destroy) {
-            this._port.removeAllListeners("data");
+            this._port.removeListener("data", this._onReceive);
+            this._port.removeListener("error", this._onError);
+            this._port.removeListener("close", this._onPortClose);
             this._port.destroy();
             callback();
         } else {
@@ -806,7 +814,7 @@ class ModbusRTU extends EventEmitter {
         this._transactions[this._port._transactionIdWrite] = {
             nextAddress: address,
             nextCode: code,
-            nextLength: 3 + parseInt((length - 1) / 8 + 1) + 2,
+            nextLength: 3 + parseInt((length - 1) / 8 + 1, 10) + 2,
             next: next
         };
 
@@ -1243,7 +1251,7 @@ class ModbusRTU extends EventEmitter {
         _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
     }
 
-      /**
+    /**
      * Write a Modbus "Read/Write Multiple Registers" (FC=23) to serial port.
      *
      * @param {number} address the slave unit address.
@@ -1255,61 +1263,93 @@ class ModbusRTU extends EventEmitter {
      * @param {Function} next the function to call next.
      */
     writeFC23(address, startingReadAddress, numReadRegisters, startingWriteAddress,
-              numWriteRegisters, valuesToWrite, next) {
-      if (this.isOpen !== true) {
-        if (next) next(new PortNotOpenError());
-        return;
-      }
-
-      if (typeof address === "undefined" || typeof startingReadAddress === "undefined" || typeof startingWriteAddress === "undefined") {
-        if (next) next(new BadAddressError());
-        return;
-      }
-
-      if (!Array.isArray(valuesToWrite) && !Buffer.isBuffer(valuesToWrite)) {
-        if (next)
-          next(new Error("Parameter valuesToWrite must be an array or buffer"));
-        return;
-      }
-
-      const code = 23;
-
-      // Calculate byte count for write data (should be numWriteRegisters * 2)
-      const writeByteCount = numWriteRegisters * 2;
-
-      // Expected response length: address(1) + code(1) + byteCount(1) + data(numReadRegisters*2) + crc(2)
-      const responseLength = 3 + numReadRegisters * 2 + 2;
-
-      this._transactions[this._port._transactionIdWrite] = {
-        nextAddress: address,
-        nextCode: code,
-        nextLength: responseLength,
-        next: next,
-      };
-
-      // Request: address(1) + code(1) + readAddr(2) + readQty(2) + writeAddr(2) + writeQty(2) + byteCount(1) + writeData(N*2) + crc(2)
-      const codeLength = 11 + writeByteCount;
-      const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
-
-      buf.writeUInt8(address, 0);
-      buf.writeUInt8(code, 1);
-      buf.writeUInt16BE(startingReadAddress, 2);
-      buf.writeUInt16BE(numReadRegisters, 4);
-      buf.writeUInt16BE(startingWriteAddress, 6);
-      buf.writeUInt16BE(numWriteRegisters, 8);
-      buf.writeUInt8(writeByteCount, 10);
-
-      if (Buffer.isBuffer(valuesToWrite)) {
-        valuesToWrite.copy(buf, 11);
-      } else {
-        for (let i = 0; i < numWriteRegisters; i++) {
-          buf.writeUInt16BE(valuesToWrite[i], 11 + 2 * i);
+        numWriteRegisters, valuesToWrite, next) {
+        if (this.isOpen !== true) {
+            if (next) next(new PortNotOpenError());
+            return;
         }
-      }
 
-      buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
-      _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
-  }
+        if (typeof address === "undefined" || typeof startingReadAddress === "undefined" || typeof startingWriteAddress === "undefined") {
+            if (next) next(new BadAddressError());
+            return;
+        }
+
+        if (!Array.isArray(valuesToWrite) && !Buffer.isBuffer(valuesToWrite)) {
+            if (next)
+                next(new Error("Parameter valuesToWrite must be an array or buffer"));
+            return;
+        }
+
+        // Modbus FC23: read qty 1–125, write qty 1–123 (PDU limits)
+        const maxReadRegistersFC23 = 125;
+        const maxWriteRegistersFC23 = 123;
+        function invalidFc23RegisterCount(n, max) {
+            if (typeof n === "undefined") return true;
+            if (typeof n !== "number" || Number.isNaN(n) || !isFinite(n)) return true;
+            if (Math.floor(n) !== n) return true;
+            return n < 1 || n > max;
+        }
+        if (invalidFc23RegisterCount(numReadRegisters, maxReadRegistersFC23)) {
+            if (next) {
+                next(new Error("numReadRegisters must be an integer from 1 to " + maxReadRegistersFC23));
+            }
+            return;
+        }
+        if (invalidFc23RegisterCount(numWriteRegisters, maxWriteRegistersFC23)) {
+            if (next) {
+                next(new Error("numWriteRegisters must be an integer from 1 to " + maxWriteRegistersFC23));
+            }
+            return;
+        }
+
+        const code = 23;
+
+        // Calculate byte count for write data (should be numWriteRegisters * 2)
+        const writeByteCount = numWriteRegisters * 2;
+
+        if (Buffer.isBuffer(valuesToWrite)) {
+            if (valuesToWrite.length < writeByteCount) {
+                if (next) next(new Error("valuesToWrite length does not match numWriteRegisters"));
+                return;
+            }
+        } else if (valuesToWrite.length < numWriteRegisters) {
+            if (next) next(new Error("valuesToWrite length does not match numWriteRegisters"));
+            return;
+        }
+
+        // Expected response length: address(1) + code(1) + byteCount(1) + data(numReadRegisters*2) + crc(2)
+        const responseLength = 3 + numReadRegisters * 2 + 2;
+
+        this._transactions[this._port._transactionIdWrite] = {
+            nextAddress: address,
+            nextCode: code,
+            nextLength: responseLength,
+            next: next
+        };
+
+        // Request: address(1) + code(1) + readAddr(2) + readQty(2) + writeAddr(2) + writeQty(2) + byteCount(1) + writeData(N*2) + crc(2)
+        const codeLength = 11 + writeByteCount;
+        const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
+
+        buf.writeUInt8(address, 0);
+        buf.writeUInt8(code, 1);
+        buf.writeUInt16BE(startingReadAddress, 2);
+        buf.writeUInt16BE(numReadRegisters, 4);
+        buf.writeUInt16BE(startingWriteAddress, 6);
+        buf.writeUInt16BE(numWriteRegisters, 8);
+        buf.writeUInt8(writeByteCount, 10);
+
+        if (Buffer.isBuffer(valuesToWrite)) {
+            valuesToWrite.copy(buf, 11);
+        } else {
+            for (let i = 0; i < numWriteRegisters; i++) {
+                buf.writeUInt16BE(valuesToWrite[i], 11 + 2 * i);
+            }
+        }
+
+        buf.writeUInt16LE(crc16(buf.slice(0, -2)), codeLength);
+        _writeBufferToPort.call(this, buf, this._port._transactionIdWrite);
+    }
 
     /**
      * Write a Modbus "Custom Function Code" (FC=65-72, 100-110) to serial port.
@@ -1410,7 +1450,7 @@ module.exports.getPorts = function getPorts() {
 module.exports.TestPort = require("./ports/testport");
 try {
     module.exports.RTUBufferedPort = require("./ports/rtubufferedport");
-} catch (err) { }
+} catch (err) { /* optional native dep */ }
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
@@ -1419,5 +1459,5 @@ module.exports.C701Port = require("./ports/c701port");
 module.exports.ServerTCP = require("./servers/servertcp");
 try {
     module.exports.ServerSerial = require("./servers/serverserial");
-} catch (err) { }
+} catch (err) { /* optional native dep */ }
 module.exports.default = module.exports;

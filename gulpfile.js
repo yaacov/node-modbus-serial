@@ -9,10 +9,6 @@ gulp.task("default", function() {
     // place code for your default task here
 });
 
-gulp.task("docs", ["doc", "docExamples"]);
-gulp.task("build", ["apis", "ports", "servers", "utils"]);
-gulp.task("publish", ["build", "docs"]);
-
 gulp.task("clean", function() {
     return gulp.src(["modbus-serial", "docs/gen"])
         .pipe(clean({ force: true }));
@@ -62,3 +58,7 @@ gulp.task("utils", function(cb) {
     cb
     );
 });
+
+gulp.task("docs", gulp.series("doc", "docExamples"));
+gulp.task("build", gulp.parallel("apis", "ports", "servers", "utils"));
+gulp.task("publish", gulp.series("build", "docs"));

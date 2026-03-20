@@ -4,7 +4,9 @@
   "description": "A pure JavaScript implementation of MODBUS-RTU (Serial and TCP) for NodeJS.",
   "main": "index.js",
   "scripts": {
-    "test": "nyc --reporter=lcov --reporter=text mocha --recursive"
+    "test": "nyc --reporter=lcov --reporter=text mocha --recursive",
+    "lint": "eslint index.js \"ports/**/*.js\" \"servers/**/*.js\" \"apis/**/*.js\" \"utils/**/*.js\" \"examples/**/*.js\" \"test/**/*.js\"",
+    "lint:fix": "eslint index.js \"ports/**/*.js\" \"servers/**/*.js\" \"apis/**/*.js\" \"utils/**/*.js\" \"examples/**/*.js\" \"test/**/*.js\" --fix"
   },
   "repository": {
     "type": "git",
@@ -25,20 +27,22 @@
   },
   "homepage": "https://github.com/yaacov/node-modbus-serial#readme",
   "devDependencies": {
-    "chai": "^4.2.0",
-    "chai-as-promised": "^7.1.1",
-    "eslint": "^8.12.0",
-    "gulp": "^4.0.2",
+    "@eslint/js": "^9.39.1",
+    "@stylistic/eslint-plugin": "^5.10.0",
+    "chai": "^4.5.0",
+    "chai-as-promised": "^7.1.2",
+    "eslint": "^10.0.3",
+    "globals": "^16.5.0",
+    "gulp": "^5.0.1",
     "gulp-clean": "^0.4.0",
     "gulp-jsdoc3": "^3.0.0",
-    "mocha": "^10.2.0",
-    "mocha-eslint": "^7.0.0",
+    "mocha": "^11.7.5",
     "mockery": "^2.1.0",
-    "nyc": "^15.1.0",
-    "pump": "^3.0.0",
-    "sinon": "^15.2.0",
+    "nyc": "^18.0.0",
+    "pump": "^3.0.4",
+    "sinon": "^21.0.3",
     "web-bluetooth-mock": "^1.2.0",
-    "webbluetooth": "^3.1.0"
+    "webbluetooth": "^3.6.0"
   },
   "dependencies": {
     "debug": "^4.3.1",

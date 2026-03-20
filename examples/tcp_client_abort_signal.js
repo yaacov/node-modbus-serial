@@ -52,7 +52,7 @@ runner()
     .catch((error) => {
         console.error(error);
     })
-    .finally(async() => {
+    .finally(async () => {
         console.log("Close client");
         await client.close();
     });
