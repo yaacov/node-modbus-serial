@@ -1,6 +1,6 @@
 {
   "name": "modbus-serial",
-  "version": "8.0.24",
+  "version": "8.0.25",
   "description": "A pure JavaScript implementation of MODBUS-RTU (Serial and TCP) for NodeJS. The serialport package is an optional dependency (use npm install --no-optional to skip).",
   "main": "index.js",
   "types": "index.d.ts",
