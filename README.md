@@ -30,6 +30,15 @@ try these options on npm install to build, if you have problems to install
 
     --unsafe-perm --build-from-source
 
+#### Development
+
+This repo uses **npm** and a committed **`package-lock.json`**. After cloning:
+
+    npm ci
+    npm run lint
+    npm test
+
+To refresh dependencies after editing `package.json`, run `npm install` and commit the updated lockfile.
 
 #### What can I do with this module ?
 

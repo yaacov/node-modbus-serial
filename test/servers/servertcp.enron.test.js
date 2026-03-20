@@ -1,5 +1,5 @@
 "use strict";
-/* eslint-disable no-undef, no-console */
+/* eslint-disable no-undef */
 
 const chai = require("chai");
 const chaiAsPromised = require("chai-as-promised");
@@ -15,7 +15,7 @@ const Modbus = require("../../");
 const holdingRegisters = {};
 
 describe("Modbus TCP Server (Enron)", function() {
-    let serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP;
     let modbusClient;
 
     before(function() {

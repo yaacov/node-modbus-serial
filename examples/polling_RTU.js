@@ -1,17 +1,17 @@
-/* eslint-disable no-console, spaced-comment, func-call-spacing, no-spaced-func */
 
-//==============================================================
+
+// ==============================================================
 // This is an example of polling (reading) Holding Registers
 // on a regular scan interval with timeouts enabled.
 // For robust behaviour, the next action is not activated
 // until the previous action is completed (callback served).
-//==============================================================
+// ==============================================================
 
 "use strict";
 
-//==============================================================
+// ==============================================================
 // create an empty modbus client
-const ModbusRTU   = require ("modbus-serial");
+const ModbusRTU   = require("modbus-serial");
 const client      = new ModbusRTU();
 
 let mbsStatus   = "Initializing...";    // holds a status of Modbus
@@ -37,15 +37,15 @@ client.on("error", function(error) {
 });
 
 
-//==============================================================
+// ==============================================================
 const connectClient = function()
 {
     // set requests parameters
-    client.setID      (mbsId);
-    client.setTimeout (mbsTimeout);
+    client.setID(mbsId);
+    client.setTimeout(mbsTimeout);
 
     // try to connect
-    client.connectRTUBuffered ("COM9", { baudRate: 9600, parity: "even", dataBits: 8, stopBits: 1 })
+    client.connectRTUBuffered("COM9", { baudRate: 9600, parity: "even", dataBits: 8, stopBits: 1 })
         .then(function()
         {
             mbsState  = MBS_STATE_GOOD_CONNECT;
@@ -61,11 +61,11 @@ const connectClient = function()
 };
 
 
-//==============================================================
+// ==============================================================
 const readModbusData = function()
 {
     // try to read data
-    client.readHoldingRegisters (5, 1)
+    client.readHoldingRegisters(5, 1)
         .then(function(data)
         {
             mbsState   = MBS_STATE_GOOD_READ;
@@ -81,7 +81,7 @@ const readModbusData = function()
 };
 
 
-//==============================================================
+// ==============================================================
 const runModbus = function()
 {
     let nextAction;
@@ -128,8 +128,8 @@ const runModbus = function()
     }
 
     // set for next run
-    setTimeout (runModbus, mbsScan);
+    setTimeout(runModbus, mbsScan);
 };
 
-//==============================================================
+// ==============================================================
 runModbus();

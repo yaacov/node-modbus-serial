@@ -1,4 +1,4 @@
-/* eslint-disable no-console, spaced-comment */
+
 
 // create an empty modbus client
 const ModbusRTU = require("../index");

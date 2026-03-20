@@ -1,12 +1,12 @@
 "use strict";
-/* eslint-disable no-undef, no-console */
+/* eslint-disable no-undef */
 
 const expect = require("chai").expect;
 const net = require("net");
 const TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server (no serverID)", function() {
-    let serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP;
 
     before(function() {
         const vector = {
@@ -163,7 +163,7 @@ describe("Modbus TCP Server (no serverID)", function() {
 });
 
 describe("Modbus TCP Server (serverID = requestID)", function() {
-    let serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP;
 
     before(function() {
         const vector = {
@@ -198,7 +198,7 @@ describe("Modbus TCP Server (serverID = requestID)", function() {
 });
 
 describe("Modbus TCP Server (serverID != requestID)", function() {
-    let serverTCP; // eslint-disable-line no-unused-vars
+    let serverTCP;
 
     before(function() {
         const vector = {

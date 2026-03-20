@@ -48,8 +48,6 @@ describe("ModbusRTU", function() {
         describe("#customFunction()", function() {
             it("should call a custom function without errors", function(done) {
                 modbusRTU.customFunction(100, [1, 2, 3], function(err, data) {
-                    console.log("error", err);
-                    console.log("data", data);
                     expect(err).to.be.a("null");
                     expect(data).to.have.property("data").with.length(3);
                     // test function code 100 multiplies inputs by 2

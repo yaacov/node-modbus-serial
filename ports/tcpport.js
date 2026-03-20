@@ -105,8 +105,8 @@ class TcpPort extends EventEmitter {
             let length;
 
             // Append received data to the RcvData Buffer
-            self._clientRcvData = Buffer.concat([self._clientRcvData, data]); 
-            
+            self._clientRcvData = Buffer.concat([self._clientRcvData, data]);
+
             // data received
             modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: self._clientRcvData });
 

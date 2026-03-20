@@ -1,4 +1,4 @@
-/* eslint-disable no-console, no-unused-vars, spaced-comment */
+
 
 const ModbusRTU = require("../index");
 const holdingRegisters = {};

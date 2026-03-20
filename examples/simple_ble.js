@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+
 
 const { bluetooth } = require("webbluetooth");
 const ModbusRTU = require("../index");
