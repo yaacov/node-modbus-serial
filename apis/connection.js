@@ -60,6 +60,7 @@ const addConnectionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._register32bit = options.register32bit;
         }
 
         // check if we have options
@@ -97,6 +98,7 @@ const addConnectionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._register32bit = options.register32bit;
         }
 
         // check if we have options
@@ -325,6 +327,7 @@ const addConnectionAPI = function(Modbus) {
         if (options) {
             this._enron = options.enron;
             this._enronTables = options.enronTables;
+            this._register32bit = options.register32bit;
         }
 
         // check if we have options

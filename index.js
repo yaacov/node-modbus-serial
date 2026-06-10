@@ -566,7 +566,7 @@ function _onReceive(data) {
             case 4:
                 // Read Input Registers (FC=04)
                 // Read Holding Registers (FC=03)
-                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                if (modbus._register32bit || (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1]))) {
                     _readFC3or4Enron(data, next);
                 } else {
                     _readFC3or4(data, next);
@@ -578,7 +578,7 @@ function _onReceive(data) {
                 break;
             case 6:
                 // Preset Single Register
-                if (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1])) {
+                if (modbus._register32bit || (modbus._enron && !(transaction.nextDataAddress >= modbus._enronTables.shortRange[0] && transaction.nextDataAddress <= modbus._enronTables.shortRange[1]))) {
                     _readFC6Enron(data, next);
                 } else {
                     _readFC6(data, next);
@@ -870,7 +870,7 @@ class ModbusRTU extends EventEmitter {
         code = code || 4;
 
         let valueSize = 2;
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+        if (this._register32bit || (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1]))) {
             valueSize = 4;
         }
 
@@ -973,7 +973,7 @@ class ModbusRTU extends EventEmitter {
         const code = 6;
 
         let valueSize = 8;
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+        if (this._register32bit || (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1]))) {
             valueSize = 10;
         }
 
@@ -986,8 +986,8 @@ class ModbusRTU extends EventEmitter {
             next: next
         };
 
-        let codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + (2B value | 4B value (enron))
-        if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+        let codeLength = 6; // 1B deviceAddress + 1B functionCode + 2B dataAddress + (2B value | 4B value)
+        if (this._register32bit || (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1]))) {
             codeLength = 8;
         }
 
@@ -999,7 +999,7 @@ class ModbusRTU extends EventEmitter {
 
         if (Buffer.isBuffer(value)) {
             value.copy(buf, 4);
-        } else if (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1])) {
+        } else if (this._register32bit || (this._enron && !(dataAddress >= this._enronTables.shortRange[0] && dataAddress <= this._enronTables.shortRange[1]))) {
             buf.writeUInt32BE(value, 4);
         } else {
             buf.writeUInt16BE(value, 4);
@@ -1107,22 +1107,27 @@ class ModbusRTU extends EventEmitter {
 
         let dataLength = array.length;
         if (Buffer.isBuffer(array)) {
-            // if array is a buffer it has double length
-            dataLength = array.length / 2;
+            // if array is a buffer it has double length (or quad for 32-bit)
+            dataLength = array.length / (this._register32bit ? 4 : 2);
         }
 
-        const codeLength = 7 + 2 * dataLength;
+        const bytesPerRegister = this._register32bit ? 4 : 2;
+        const codeLength = 7 + bytesPerRegister * dataLength;
         const buf = Buffer.alloc(codeLength + 2); // add 2 crc bytes
 
         buf.writeUInt8(address, 0);
         buf.writeUInt8(code, 1);
         buf.writeUInt16BE(dataAddress, 2);
         buf.writeUInt16BE(dataLength, 4);
-        buf.writeUInt8(dataLength * 2, 6);
+        buf.writeUInt8(dataLength * bytesPerRegister, 6);
 
         // copy content of array to buf
         if (Buffer.isBuffer(array)) {
             array.copy(buf, 7);
+        } else if (this._register32bit) {
+            for (let i = 0; i < dataLength; i++) {
+                buf.writeUInt32BE(array[i], 7 + 4 * i);
+            }
         } else {
             for (let i = 0; i < dataLength; i++) {
                 buf.writeUInt16BE(array[i], 7 + 2 * i);

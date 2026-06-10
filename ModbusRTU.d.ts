@@ -156,6 +156,7 @@ export interface SerialPortOptions {
   bufferSize?: number;
   parser?: any;
   platformOptions?: SerialPortUnixPlatformOptions;
+  register32bit?: boolean;
 }
 
 export interface SerialPortUnixPlatformOptions {
@@ -171,6 +172,7 @@ export interface TcpPortOptions extends TcpSocketConnectOpts {
   timeout?: number;
   socket?: Socket;
   socketOpts?: SocketConstructorOpts;
+  register32bit?: boolean;
 }
 
 export interface UdpPortOptions {
