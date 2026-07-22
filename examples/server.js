@@ -22,6 +22,7 @@ const vector = {
     },
     getCoil: function(addr) { return (addr % 2) === 0; },
     setRegister: function(addr, value) { console.log("set register", addr, value); return; },
+    setRegisterMask: function(addr, andMask, orMask) { console.log("mask register", addr, andMask, orMask); return; },
     setCoil: function(addr, value) { console.log("set coil", addr, value); return; },
     readDeviceIdentification: function(addr) {
         return {

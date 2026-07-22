@@ -25,8 +25,10 @@ const ServerSerial = require("./../../servers/serverserial");
 describe("Modbus Serial Server (no serverID)", function() {
     let serverSerial;
     let clientSerial;
+    let maskedRegister;
 
     beforeEach(function() {
+        maskedRegister = 0xffff;
         const vector = {
             getInputRegister: function(addr) {
                 return addr;
@@ -46,6 +48,9 @@ describe("Modbus Serial Server (no serverID)", function() {
             setRegister: function(addr, value) {
                 console.log("\tset register", addr, value);
                 return;
+            },
+            setRegisterMask: function(addr, andMask, orMask) {
+                maskedRegister = (maskedRegister & andMask) | (orMask & ~andMask);
             },
             setCoil: function(addr, value) {
                 console.log("\tset coil", addr, value);
@@ -91,6 +96,25 @@ describe("Modbus Serial Server (no serverID)", function() {
 
                     // FC05 - valid response
                     expect(data.toString("hex")).to.equal("01050001ff00ddfa");
+
+                    clientSerial.close();
+                    done();
+                }
+            });
+        });
+
+        it("should mask a holding register with FC22", function(done) {
+            let awaitingResponse = false;
+
+            clientSerial.write(Buffer.from("0116000900f0000f6a30", "hex"));
+
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    expect(data.toString("hex")).to.equal("0116000900f0000f6a30");
+                    expect(maskedRegister).to.equal(0x00ff);
 
                     clientSerial.close();
                     done();
@@ -237,6 +261,12 @@ describe("Modbus Serial Server (no serverID)", function() {
             // wait a bit to make sure we didn't crash
             setTimeout(done, 50);
         });
+
+        it("should handle a FC22 request that is too short without crash", function(done) {
+            serverSerial.getPort().write(Buffer.from("01160009201a", "hex"));
+
+            setTimeout(done, 50);
+        });
     });
 });
 
@@ -244,7 +274,7 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
     let serverSerial;
     let clientSerial;
 
-    before(function() {
+    beforeEach(function() {
         const vector = {
             setCoil: function(addr, value) {
                 console.log("\tset coil", addr, value);
@@ -270,7 +300,7 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
         });
     });
 
-    after(function() {
+    afterEach(function() {
         serverSerial.close();
     });
 
@@ -291,6 +321,24 @@ describe("Modbus Serial Server (serverID = requestID)", function() {
                     awaitingResponse = false;
                     // FC05 - valid response
                     expect(data.toString("hex")).to.equal("04050001ff00ddaf");
+
+                    clientSerial.close();
+                    done();
+                }
+            });
+        });
+
+        it("should reject FC22 when setRegisterMask is not implemented", function(done) {
+            let awaitingResponse = false;
+
+            clientSerial.write(Buffer.from("0416000900f0000faa0f", "hex"));
+
+            clientSerial.on("data", function(data) {
+                if (awaitingResponse === false) {
+                    awaitingResponse = true;
+                    serverSerial.getPort().write(data);
+                } else {
+                    expect(data.toString("hex")).to.equal("0496019e61");
 
                     clientSerial.close();
                     done();

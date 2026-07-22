@@ -6,8 +6,11 @@ const TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server (no serverID)", function() {
     let serverTCP;
+    let maskedRegister;
+    let maskedUnitID;
 
     before(function() {
+        maskedRegister = 0xffff;
         const vector = {
             getInputRegister: function(addr) {
                 return addr;
@@ -27,6 +30,13 @@ describe("Modbus TCP Server (no serverID)", function() {
             setRegister: function(addr, value) {
                 console.log("\tset register", addr, value);
                 return;
+            },
+            setRegisterMask: function(addr, andMask, orMask, unitID) {
+                if (addr === 62)
+                    throw new Error();
+
+                maskedRegister = (maskedRegister & andMask) | (orMask & ~andMask);
+                maskedUnitID = unitID;
             },
             setCoil: function(addr, value) {
                 console.log("\tset coil", addr, value);
@@ -50,6 +60,21 @@ describe("Modbus TCP Server (no serverID)", function() {
             client.once("data", function(data) {
                 // FC05 - valid response
                 expect(data.toString("hex")).to.equal("00010000000601050005ff00");
+
+                client.end();
+                done();
+            });
+        });
+
+        it("should mask a holding register with FC22", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                client.write(Buffer.from("0001000000080116000900f0000f", "hex"));
+            });
+
+            client.once("data", function(data) {
+                expect(data.toString("hex")).to.equal("0001000000080116000900f0000f");
+                expect(maskedRegister).to.equal(0x00ff);
+                expect(maskedUnitID).to.equal(1);
 
                 client.end();
                 done();
@@ -84,6 +109,19 @@ describe("Modbus TCP Server (no serverID)", function() {
             client.once("data", function(data) {
                 // A valid error message, code 0x04 - Slave failure
                 expect(data.toString("hex")).to.equal("000100000003018304");
+
+                client.end();
+                done();
+            });
+        });
+
+        it("should receive a slave failure when a synchronous FC22 handler throws", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                client.write(Buffer.from("0001000000080116003E00f0000f", "hex"));
+            });
+
+            client.once("data", function(data) {
+                expect(data.toString("hex")).to.equal("000100000003019604");
 
                 client.end();
                 done();
@@ -188,6 +226,19 @@ describe("Modbus TCP Server (serverID = requestID)", function() {
             client.once("data", function(data) {
                 // FC05 - valid response
                 expect(data.toString("hex")).to.equal("00010000000604050005ff00");
+
+                client.end();
+                done();
+            });
+        });
+
+        it("should reject FC22 when setRegisterMask is not implemented", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8512 }, function() {
+                client.write(Buffer.from("0001000000080416000900f0000f", "hex"));
+            });
+
+            client.once("data", function(data) {
+                expect(data.toString("hex")).to.equal("000100000003049601");
 
                 client.end();
                 done();
