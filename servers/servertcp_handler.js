@@ -1027,6 +1027,68 @@ function _handleReportServerID(requestBuffer, vector, unitID, callback) {
 }
 
 /**
+ * Function to handle FC22 request.
+ *
+ * @param requestBuffer - request Buffer from client
+ * @param vector - vector of functions for read and write
+ * @param unitID - Id of the requesting unit
+ * @param {function} callback - callback to be invoked passing {Buffer} response
+ * @returns undefined
+ * @private
+ */
+function _handleMaskWriteRegister(requestBuffer, vector, unitID, callback) {
+    if (requestBuffer.length !== 10) {
+        return;
+    }
+
+    if (!vector.setRegisterMask) {
+        callback({ modbusErrorCode: 0x01 });
+        return;
+    }
+
+    const address = requestBuffer.readUInt16BE(2);
+    const andMask = requestBuffer.readUInt16BE(4);
+    const orMask = requestBuffer.readUInt16BE(6);
+
+    const responseBuffer = Buffer.alloc(10);
+    responseBuffer.writeUInt16BE(address, 2);
+    responseBuffer.writeUInt16BE(andMask, 4);
+    responseBuffer.writeUInt16BE(orMask, 6);
+
+    let callbackInvoked = false;
+    const cb = function(err) {
+        if (err) {
+            if (!callbackInvoked) {
+                callbackInvoked = true;
+                callback(err);
+            }
+
+            return;
+        }
+
+        if (!callbackInvoked) {
+            modbusSerialDebug({ action: "FC22 response", responseBuffer: responseBuffer });
+
+            callbackInvoked = true;
+            callback(null, responseBuffer);
+        }
+    };
+
+    try {
+        if (vector.setRegisterMask.length === 5) {
+            vector.setRegisterMask(address, andMask, orMask, unitID, cb);
+        }
+        else {
+            const promiseOrValue = vector.setRegisterMask(address, andMask, orMask, unitID);
+            _handlePromiseOrValue(promiseOrValue, cb);
+        }
+    }
+    catch(err) {
+        cb(err);
+    }
+}
+
+/**
  * Function to handle FC43 request.
  *
  * @param requestBuffer - request Buffer from client
@@ -1232,5 +1294,6 @@ module.exports = {
     forceMultipleCoils: _handleForceMultipleCoils,
     writeMultipleRegisters: _handleWriteMultipleRegisters,
     reportServerID: _handleReportServerID,
+    maskWriteRegister: _handleMaskWriteRegister,
     handleMEI: _handleMEI
 };

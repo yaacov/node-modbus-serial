@@ -180,6 +180,9 @@ function _parseModbusBuffer(requestBuffer, vector, serverUnitID, sockWriter, opt
         case 16:
             handlers.writeMultipleRegisters(requestBuffer, vector, unitID, cb);
             break;
+        case 22:
+            handlers.maskWriteRegister(requestBuffer, vector, unitID, cb);
+            break;
         case 43:
             handlers.handleMEI(requestBuffer, vector, unitID, cb);
             break;

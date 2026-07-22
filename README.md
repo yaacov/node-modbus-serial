@@ -299,6 +299,11 @@ const vector = {
         console.log("set register", addr, value, unitID);
         return;
     },
+    setRegisterMask: function(addr, andMask, orMask, unitID) {
+        // Asynchronous handling supported also here
+        console.log("mask register", addr, andMask, orMask, unitID);
+        return;
+    },
     setCoil: function(addr, value, unitID) {
         // Asynchronous handling supported also here
         console.log("set coil", addr, value, unitID);
