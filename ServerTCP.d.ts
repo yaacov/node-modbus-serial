@@ -44,6 +44,10 @@ export interface IServiceVector {
         ((addr: number, value: number[], unitID: number, cb: FCallback) => void) |
         ((addr: number, value: number[], unitID: number) => Promise<void>) |
         ((addr: number, value: number[], unitID: number) => void);
+    setRegisterMask?:
+        ((addr: number, andMask: number, orMask: number, unitID: number, cb: FCallback) => void) |
+        ((addr: number, andMask: number, orMask: number, unitID: number) => Promise<void>) |
+        ((addr: number, andMask: number, orMask: number, unitID: number) => void);
 }
 
 interface IServerOptions {

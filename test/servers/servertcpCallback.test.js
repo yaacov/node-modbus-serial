@@ -6,8 +6,10 @@ const TcpServer = require("./../../servers/servertcp");
 
 describe("Modbus TCP Server Callback", function() {
     let serverTCP;
+    let maskedRegister;
 
     before(function() {
+        maskedRegister = 0xffff;
         const vector = {
             getInputRegister: function(addr, unit, callback) {
                 setTimeout(function() {
@@ -32,6 +34,17 @@ describe("Modbus TCP Server Callback", function() {
             setRegister: function(addr, value, unit, callback) {
                 setTimeout(function() {
                     console.log("set register", addr, value);
+                    callback(null);
+                }, 50);
+            },
+            setRegisterMask: function(addr, andMask, orMask, unit, callback) {
+                setTimeout(function() {
+                    if (addr === 62) {
+                        callback(new Error());
+                        return;
+                    }
+
+                    maskedRegister = (maskedRegister & andMask) | (orMask & ~andMask);
                     callback(null);
                 }, 50);
             },
@@ -62,6 +75,20 @@ describe("Modbus TCP Server Callback", function() {
             });
         });
 
+        it("should mask a holding register with FC22", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
+                client.write(Buffer.from("0001000000080116000900f0000f", "hex"));
+            });
+
+            client.once("data", function(data) {
+                expect(data.toString("hex")).to.equal("0001000000080116000900f0000f");
+                expect(maskedRegister).to.equal(0x00ff);
+
+                client.end();
+                done();
+            });
+        });
+
         // TODO: FC1 - FCX tests
     });
 
@@ -88,6 +115,19 @@ describe("Modbus TCP Server Callback", function() {
             client.once("data", function(data) {
                 // A valid error message, code 0x04 - Slave failure
                 expect(data.toString("hex")).to.equal("000100000003018304");
+                done();
+            });
+        });
+
+        it("should receive a slave failure when a FC22 callback returns an error", function(done) {
+            const client = net.connect({ host: "0.0.0.0", port: 8513 }, function() {
+                client.write(Buffer.from("0001000000080116003E00f0000f", "hex"));
+            });
+
+            client.once("data", function(data) {
+                expect(data.toString("hex")).to.equal("000100000003019604");
+
+                client.end();
                 done();
             });
         });
