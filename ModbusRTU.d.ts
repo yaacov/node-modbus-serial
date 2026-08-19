@@ -81,6 +81,8 @@ export class ModbusRTU {
   writeRegister(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisterEnron(dataAddress: number, value: number): Promise<WriteRegisterResult>;
   writeRegisters(dataAddress: number, values: Array<number> | Buffer): Promise<WriteMultipleResult>; // 16
+  writeFileRecords(fileNumber: number, recordNumber: number, values: Array<number> | Buffer): Promise<WriteFileRecordsResult>;
+  readFileRecords(fileNumber: number, recordNumber: number): Promise<ReadFileRecordsResult>;
   maskWriteRegister(dataAddress: number, andMask: number, orMask: number): Promise<WriteMaskRegisterResult>;
   customFunction(functionCode: number, data: Array<number>): Promise<CustomFunctionResult>;
 
@@ -111,6 +113,11 @@ export interface ReadRegisterResult {
   buffer: Buffer;
 }
 
+export interface ReadFileRecordsResult {
+  data: Array<number>;
+  length: number;
+}
+
 export interface WriteCoilResult {
   address: number;
   state: boolean;
@@ -124,6 +131,13 @@ export interface WriteRegisterResult {
 export interface WriteMultipleResult {
   address: number;
   length: number;
+}
+
+export interface WriteFileRecordsResult {
+  data: Array<number>;
+  length: number;
+  fileNumber: number;
+  recordNumber: number;
 }
 
 export interface WriteMaskRegisterResult {
