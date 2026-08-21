@@ -9,6 +9,9 @@ const crc16 = require("../utils/crc16");
 /* TODO: const should be set once, maybe */
 const MODBUS_PORT = 502; // modbus port
 const MAX_TRANSACTIONS = 256; // maximum transaction to wait for
+const MIN_DATA_LENGTH = 4; // custom function can have length 4
+const MIN_MBAP_LENGTH = 6;
+const CRC_LENGTH = 2;
 // MBAP length counts the unit identifier (1 byte) plus the PDU (1 to 253 bytes),
 // so a conforming frame always declares between 2 and 254.
 const MIN_MBAP_DATA_LENGTH = 2;
@@ -17,9 +20,38 @@ const MAX_MBAP_DATA_LENGTH = 254;
 // conforming response is at most 260 bytes and arrives within milliseconds of its first
 // byte on any working link, so this only fires when the declared length was wrong.
 const PARTIAL_FRAME_TIMEOUT = 1000;
-const MIN_DATA_LENGTH = 4; // custom function can have length 4
-const MIN_MBAP_LENGTH = 6;
-const CRC_LENGTH = 2;
+
+/**
+ * Find the next offset that begins a frame the buffer can actually satisfy.
+ *
+ * Modbus TCP has no frame delimiter, so once the stream is misaligned there is nothing to
+ * anchor on but the header fields themselves. Scanning for a plausible protocol identifier
+ * and length alone is not enough: random payload bytes match that test often, and accepting
+ * one only moves the misalignment along. An offset is therefore taken only when the frame it
+ * declares ends within the bytes already held, which is a far stronger signal that a real
+ * response starts there. Searching from offset 1 guarantees forward progress.
+ *
+ * @param {Buffer} buffer the bytes held so far
+ * @param {number} from the offset to start searching from
+ * @return {number} the offset of the next complete frame, or -1 if there is none
+ */
+function findNextHeader(buffer, from) {
+    for (let offset = from; offset + MIN_MBAP_LENGTH < buffer.length; offset += 1) {
+        if (buffer.readUInt16BE(offset + 2) !== 0) {
+            continue;
+        }
+
+        const candidate = buffer.readUInt16BE(offset + 4);
+        if (candidate < MIN_MBAP_DATA_LENGTH || candidate > MAX_MBAP_DATA_LENGTH) {
+            continue;
+        }
+
+        if (offset + MIN_MBAP_LENGTH + candidate <= buffer.length) {
+            return offset;
+        }
+    }
+    return -1;
+}
 
 class TcpPort extends EventEmitter {
     /**
@@ -96,7 +128,7 @@ class TcpPort extends EventEmitter {
         if (options.timeout) this._client.setTimeout(options.timeout);
 
         self._clientRcvData = Buffer.alloc(0); // Initialize a variable to store all received data
-        self._partialFrameSince = null; // when the current incomplete frame started arriving
+        self._partialFrameTimer = null; // fires when an incomplete frame has waited too long
 
         // register events handlers
         this._client.on("data", function(data) {
@@ -112,27 +144,36 @@ class TcpPort extends EventEmitter {
             modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: self._clientRcvData });
 
             // check data length
-            while (self._clientRcvData.length > MIN_MBAP_LENGTH) {
+            while (self._clientRcvData.length >= MIN_MBAP_LENGTH) {
                 // parse tcp header protocol identifier and length
                 protocolId = self._clientRcvData.readUInt16BE(2);
                 length = self._clientRcvData.readUInt16BE(4);
 
                 // Modbus TCP carries no checksum of its own, so a corrupted header is
-                // indistinguishable from a valid one unless it is range checked. An out of
-                // range length makes the stream unrecoverable: every later read appends to a
-                // buffer that is never drained, the port stops emitting and every transaction
-                // times out. Drop what we hold and resynchronise on the next response.
+                // indistinguishable from a valid one unless it is range checked. Left
+                // unchecked, an impossible length makes the stream unrecoverable: every
+                // later read appends to a buffer that is never drained, the port stops
+                // emitting and every transaction times out. Skip to the next position that
+                // could start a frame rather than discarding bytes that may still be a
+                // valid response delivered in the same read.
                 if (protocolId !== 0 ||
                     length < MIN_MBAP_DATA_LENGTH ||
                     length > MAX_MBAP_DATA_LENGTH) {
+                    const resyncAt = findNextHeader(self._clientRcvData, 1);
                     modbusSerialDebug({
-                        action: "discarding corrupted mbap header",
+                        action: "resynchronising after corrupted mbap header",
                         protocolId: protocolId,
-                        length: length
+                        length: length,
+                        resyncAt: resyncAt
                     });
-                    self._clientRcvData = Buffer.alloc(0);
-                    self._partialFrameSince = null;
-                    return;
+                    self._cancelPartialFrameTimer();
+                    self._clientRcvData = resyncAt === -1 ?
+                        Buffer.alloc(0) :
+                        self._clientRcvData.slice(resyncAt);
+                    if (resyncAt === -1) {
+                        return;
+                    }
+                    continue;
                 }
 
                 // Check if RcvData has enought data (MBAP size + message size)
@@ -140,25 +181,14 @@ class TcpPort extends EventEmitter {
                 // => Return to wait next receiving
                 if(self._clientRcvData.length < (length + MIN_MBAP_LENGTH))
                 {
-                    // A length that is in range but wrong cannot be detected here, only by
-                    // the frame never completing. Track how long it has been pending and give
-                    // up rather than buffering indefinitely.
-                    const now = Date.now();
-                    if (self._partialFrameSince === null) {
-                        self._partialFrameSince = now;
-                    } else if (now - self._partialFrameSince > PARTIAL_FRAME_TIMEOUT) {
-                        modbusSerialDebug({
-                            action: "discarding stale partial frame",
-                            declaredLength: length,
-                            buffered: self._clientRcvData.length
-                        });
-                        self._clientRcvData = Buffer.alloc(0);
-                        self._partialFrameSince = null;
-                    }
+                    // A length that is in range but wrong cannot be recognised from the
+                    // header, only by the frame never completing. Arm a timer so the buffer
+                    // is released even if the peer goes silent.
+                    self._startPartialFrameTimer();
                     return;
                 }
 
-                self._partialFrameSince = null;
+                self._cancelPartialFrameTimer();
 
                 // cut 6 bytes of mbap and copy pdu
                 buffer = Buffer.alloc(length + CRC_LENGTH);
@@ -246,7 +276,54 @@ class TcpPort extends EventEmitter {
      *
      * @param {function(Error=):void} callback
      */
+    /**
+     * Arm the timer that releases a frame which never completes.
+     *
+     * A declared length inside the valid range but wrong for the data on the wire cannot be
+     * recognised from the header. It only shows itself by the frame never arriving in full,
+     * and a peer that then falls silent would leave the buffer held forever.
+     */
+    _startPartialFrameTimer() {
+        const self = this;
+
+        if (self._partialFrameTimer !== null) {
+            return;
+        }
+
+        self._partialFrameTimer = setTimeout(function() {
+            self._partialFrameTimer = null;
+
+            const resyncAt = findNextHeader(self._clientRcvData, 1);
+
+            modbusSerialDebug({
+                action: "releasing stale partial frame",
+                buffered: self._clientRcvData.length,
+                resyncAt: resyncAt
+            });
+
+            self._clientRcvData = resyncAt === -1 ?
+                Buffer.alloc(0) :
+                self._clientRcvData.slice(resyncAt);
+        }, PARTIAL_FRAME_TIMEOUT);
+
+        // never hold the event loop open on account of a damaged frame
+        if (typeof self._partialFrameTimer.unref === "function") {
+            self._partialFrameTimer.unref();
+        }
+    }
+
+    /**
+     * Cancel the partial frame timer, if one is pending.
+     */
+    _cancelPartialFrameTimer() {
+        if (this._partialFrameTimer !== null) {
+            clearTimeout(this._partialFrameTimer);
+            this._partialFrameTimer = null;
+        }
+    }
+
     close(callback) {
+        this._cancelPartialFrameTimer();
         this.callback = callback;
         // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
         this._client.end();
@@ -258,6 +335,7 @@ class TcpPort extends EventEmitter {
      * @param {function(Error=):void} callback
      */
     destroy(callback) {
+        this._cancelPartialFrameTimer();
         this.callback = callback;
         if (!this._client.destroyed) {
             this._client.destroy();

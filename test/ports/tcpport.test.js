@@ -183,6 +183,42 @@ describe("Modbus TCP port methods", function() {
             });
         });
 
+        it("should keep a valid response delivered alongside a corrupted one", function(done) {
+            // TCP may hand over a damaged frame and the next good response in one read;
+            // discarding the whole buffer would time out a transaction that did arrive
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.concat([
+                    Buffer.from("0001" + "0000" + "ffff" + "110366778899", "hex"),
+                    Buffer.from(validResponse, "hex")
+                ]));
+            });
+        });
+
+        it("should release a partial frame when the peer goes silent", function(done) {
+            port.open(function() {
+                // declares 71 bytes, sends 2, then nothing more arrives
+                port._client.receive(Buffer.from("0001" + "0000" + "0047" + "1103", "hex"));
+                expect(port._clientRcvData.length).to.be.above(0);
+                setTimeout(function() {
+                    expect(port._clientRcvData.length).to.equal(0);
+                    done();
+                }, 1200);
+            });
+        });
+
+        it("should examine a header delivered as exactly six bytes", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("000100000047", "hex"));
+                // the loop must not skip a buffer holding precisely the MBAP header
+                expect(port._partialFrameTimer).to.not.equal(null);
+                done();
+            });
+        });
+
         it("should still parse an ordinary response", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal(validParsed);
