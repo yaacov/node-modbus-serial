@@ -22,21 +22,30 @@ const MAX_MBAP_DATA_LENGTH = 254;
 const PARTIAL_FRAME_TIMEOUT = 1000;
 
 /**
- * Find the next offset that begins a frame the buffer can actually satisfy.
+ * Find the next offset that begins a frame the buffer can already satisfy.
  *
  * Modbus TCP has no frame delimiter, so once the stream is misaligned there is nothing to
- * anchor on but the header fields themselves. Scanning for a plausible protocol identifier
- * and length alone is not enough: random payload bytes match that test often, and accepting
- * one only moves the misalignment along. An offset is therefore taken only when the frame it
- * declares ends within the bytes already held, which is a far stronger signal that a real
- * response starts there. Searching from offset 1 guarantees forward progress.
+ * anchor on but the header fields themselves. A plausible protocol identifier and length is
+ * a weak signal on its own: random payload bytes match it often, and acting on one only
+ * carries the misalignment forward. An offset is therefore taken only when the frame it
+ * declares ends within the bytes already held.
+ *
+ * The cost of that strictness is real. If TCP splits a genuine response across reads and
+ * corruption precedes it, no complete frame is visible yet and those bytes are dropped, so
+ * one transaction times out that could in principle have been recovered. The alternative was
+ * measured and is worse: accepting a merely plausible header resynchronises onto payload
+ * bytes and emits frames that were never sent, which is the failure this change exists to
+ * prevent. Losing a recoverable response costs one timeout; a fabricated frame can surface
+ * as an exception the device never raised.
+ *
+ * Searching from offset 1 guarantees forward progress.
  *
  * @param {Buffer} buffer the bytes held so far
  * @param {number} from the offset to start searching from
  * @return {number} the offset of the next complete frame, or -1 if there is none
  */
 function findNextHeader(buffer, from) {
-    for (let offset = from; offset + MIN_MBAP_LENGTH < buffer.length; offset += 1) {
+    for (let offset = from; offset + MIN_MBAP_LENGTH <= buffer.length; offset += 1) {
         if (buffer.readUInt16BE(offset + 2) !== 0) {
             continue;
         }
@@ -50,6 +59,7 @@ function findNextHeader(buffer, from) {
             return offset;
         }
     }
+
     return -1;
 }
 
