@@ -9,6 +9,14 @@ const crc16 = require("../utils/crc16");
 /* TODO: const should be set once, maybe */
 const MODBUS_PORT = 502; // modbus port
 const MAX_TRANSACTIONS = 256; // maximum transaction to wait for
+// MBAP length counts the unit identifier (1 byte) plus the PDU (1 to 253 bytes),
+// so a conforming frame always declares between 2 and 254.
+const MIN_MBAP_DATA_LENGTH = 2;
+const MAX_MBAP_DATA_LENGTH = 254;
+// A frame that stays incomplete for longer than this is treated as a lost stream. A
+// conforming response is at most 260 bytes and arrives within milliseconds of its first
+// byte on any working link, so this only fires when the declared length was wrong.
+const PARTIAL_FRAME_TIMEOUT = 1000;
 const MIN_DATA_LENGTH = 4; // custom function can have length 4
 const MIN_MBAP_LENGTH = 6;
 const CRC_LENGTH = 2;
@@ -88,12 +96,14 @@ class TcpPort extends EventEmitter {
         if (options.timeout) this._client.setTimeout(options.timeout);
 
         self._clientRcvData = Buffer.alloc(0); // Initialize a variable to store all received data
+        self._partialFrameSince = null; // when the current incomplete frame started arriving
 
         // register events handlers
         this._client.on("data", function(data) {
             let buffer;
             let crc;
             let length;
+            let protocolId;
 
             // Append received data to the RcvData Buffer
             self._clientRcvData = Buffer.concat([self._clientRcvData, data]);
@@ -103,16 +113,52 @@ class TcpPort extends EventEmitter {
 
             // check data length
             while (self._clientRcvData.length > MIN_MBAP_LENGTH) {
-                // parse tcp header length
+                // parse tcp header protocol identifier and length
+                protocolId = self._clientRcvData.readUInt16BE(2);
                 length = self._clientRcvData.readUInt16BE(4);
+
+                // Modbus TCP carries no checksum of its own, so a corrupted header is
+                // indistinguishable from a valid one unless it is range checked. An out of
+                // range length makes the stream unrecoverable: every later read appends to a
+                // buffer that is never drained, the port stops emitting and every transaction
+                // times out. Drop what we hold and resynchronise on the next response.
+                if (protocolId !== 0 ||
+                    length < MIN_MBAP_DATA_LENGTH ||
+                    length > MAX_MBAP_DATA_LENGTH) {
+                    modbusSerialDebug({
+                        action: "discarding corrupted mbap header",
+                        protocolId: protocolId,
+                        length: length
+                    });
+                    self._clientRcvData = Buffer.alloc(0);
+                    self._partialFrameSince = null;
+                    return;
+                }
 
                 // Check if RcvData has enought data (MBAP size + message size)
                 // If false, all the modBus message has not been received yet
                 // => Return to wait next receiving
                 if(self._clientRcvData.length < (length + MIN_MBAP_LENGTH))
                 {
+                    // A length that is in range but wrong cannot be detected here, only by
+                    // the frame never completing. Track how long it has been pending and give
+                    // up rather than buffering indefinitely.
+                    const now = Date.now();
+                    if (self._partialFrameSince === null) {
+                        self._partialFrameSince = now;
+                    } else if (now - self._partialFrameSince > PARTIAL_FRAME_TIMEOUT) {
+                        modbusSerialDebug({
+                            action: "discarding stale partial frame",
+                            declaredLength: length,
+                            buffered: self._clientRcvData.length
+                        });
+                        self._clientRcvData = Buffer.alloc(0);
+                        self._partialFrameSince = null;
+                    }
                     return;
                 }
+
+                self._partialFrameSince = null;
 
                 // cut 6 bytes of mbap and copy pdu
                 buffer = Buffer.alloc(length + CRC_LENGTH);
