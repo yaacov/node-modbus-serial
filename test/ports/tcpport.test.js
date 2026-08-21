@@ -145,6 +145,55 @@ describe("Modbus TCP port methods", function() {
         });
     });
 
+    describe("corrupted MBAP header", function() {
+        // A valid readHoldingRegisters response, used to prove the port recovers.
+        const validResponse = "000100000006110366778899";
+        const validParsed = "1103667788994fa2";
+
+        function expectRecovery(corrupted, done) {
+            port.once("data", function(data) {
+                // the corrupted frame must not be emitted, only the valid one after it
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.from(corrupted, "hex"));
+                port._client.receive(Buffer.from(validResponse, "hex"));
+            });
+        }
+
+        it("should discard a frame declaring a length above the maximum", function(done) {
+            // length field 0xFFFF: without validation the buffer is never drained again
+            expectRecovery("0001" + "0000" + "ffff" + "110366778899", done);
+        });
+
+        it("should discard a frame declaring a length below the minimum", function(done) {
+            expectRecovery("0001" + "0000" + "0000" + "110366778899", done);
+        });
+
+        it("should discard a frame with a non-zero protocol identifier", function(done) {
+            expectRecovery("0001" + "00ff" + "0006" + "110366778899", done);
+        });
+
+        it("should not leave the receive buffer growing without bound", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("0001" + "0000" + "ffff" + "110366778899", "hex"));
+                expect(port._clientRcvData.length).to.equal(0);
+                done();
+            });
+        });
+
+        it("should still parse an ordinary response", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.from(validResponse, "hex"));
+            });
+        });
+    });
+
     describe("#write", function() {
         it("should write a valid TCP message to the port", function(done) {
             port.write(Buffer.from("1103006B00037687", "hex"));
