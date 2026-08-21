@@ -108,8 +108,9 @@ describe("ModbusRTU", function() {
                 // after its transaction identifier has been reused. Reporting the length
                 // first points at the byte count and away from the actual cause.
                 modbusRTU.writeFC3(7, 8, 3, function(err) {
-                    expect(err.message).to.have.string("Unexpected data error");
-                    expect(err.message).to.not.have.string("Data length error");
+                    expect(err.message).to.equal(
+                        "Unexpected data error, expected code 3 got 1"
+                    );
 
                     done();
                 });

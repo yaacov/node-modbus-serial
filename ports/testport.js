@@ -306,7 +306,7 @@ class TestPort extends EventEmitter {
                     // unit 6: does not answer
                     return;
                 case 7:
-                    // unit 7: answers a different function code, with a length to match.
+                    // unit 7: answers a different function code, one byte short.
                     // stands in for a reply to an earlier request arriving late, after its
                     // transaction identifier has come round again
                     buffer.writeUInt8(1, 1);
