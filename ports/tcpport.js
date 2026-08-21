@@ -132,82 +132,13 @@ class TcpPort extends EventEmitter {
 
         // register events handlers
         this._client.on("data", function(data) {
-            let buffer;
-            let crc;
-            let length;
-            let protocolId;
-
             // Append received data to the RcvData Buffer
             self._clientRcvData = Buffer.concat([self._clientRcvData, data]);
 
             // data received
             modbusSerialDebug({ action: "receive tcp port strings", data: data, clientRcvData: self._clientRcvData });
 
-            // check data length
-            while (self._clientRcvData.length >= MIN_MBAP_LENGTH) {
-                // parse tcp header protocol identifier and length
-                protocolId = self._clientRcvData.readUInt16BE(2);
-                length = self._clientRcvData.readUInt16BE(4);
-
-                // Modbus TCP carries no checksum of its own, so a corrupted header is
-                // indistinguishable from a valid one unless it is range checked. Left
-                // unchecked, an impossible length makes the stream unrecoverable: every
-                // later read appends to a buffer that is never drained, the port stops
-                // emitting and every transaction times out. Skip to the next position that
-                // could start a frame rather than discarding bytes that may still be a
-                // valid response delivered in the same read.
-                if (protocolId !== 0 ||
-                    length < MIN_MBAP_DATA_LENGTH ||
-                    length > MAX_MBAP_DATA_LENGTH) {
-                    const resyncAt = findNextHeader(self._clientRcvData, 1);
-                    modbusSerialDebug({
-                        action: "resynchronising after corrupted mbap header",
-                        protocolId: protocolId,
-                        length: length,
-                        resyncAt: resyncAt
-                    });
-                    self._cancelPartialFrameTimer();
-                    self._clientRcvData = resyncAt === -1 ?
-                        Buffer.alloc(0) :
-                        self._clientRcvData.slice(resyncAt);
-                    if (resyncAt === -1) {
-                        return;
-                    }
-                    continue;
-                }
-
-                // Check if RcvData has enought data (MBAP size + message size)
-                // If false, all the modBus message has not been received yet
-                // => Return to wait next receiving
-                if(self._clientRcvData.length < (length + MIN_MBAP_LENGTH))
-                {
-                    // A length that is in range but wrong cannot be recognised from the
-                    // header, only by the frame never completing. Arm a timer so the buffer
-                    // is released even if the peer goes silent.
-                    self._startPartialFrameTimer();
-                    return;
-                }
-
-                self._cancelPartialFrameTimer();
-
-                // cut 6 bytes of mbap and copy pdu
-                buffer = Buffer.alloc(length + CRC_LENGTH);
-                self._clientRcvData.copy(buffer, 0, MIN_MBAP_LENGTH);
-
-                // add crc to message
-                crc = crc16(buffer.slice(0, -CRC_LENGTH));
-                buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
-
-                // update transaction id and emit data
-                self._transactionIdRead = self._clientRcvData.readUInt16BE(0);
-                self.emit("data", buffer);
-
-                // debug
-                modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: self._transactionIdRead });
-
-                // reset data
-                self._clientRcvData = self._clientRcvData.slice(length + MIN_MBAP_LENGTH);
-            }
+            self._parseReceivedData();
         });
 
         this._client.on("connect", function() {
@@ -219,6 +150,9 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("close", function(had_error) {
+            // the peer may close while a frame is still pending on our side
+            self._cancelPartialFrameTimer();
+
             if (self.openFlag)  {
                 self.openFlag = false;
                 self._clientRcvData = Buffer.alloc(0); // Reset the variable that storing all received data
@@ -277,6 +211,86 @@ class TcpPort extends EventEmitter {
      * @param {function(Error=):void} callback
      */
     /**
+     * Parse whatever is held in the receive buffer, emitting every complete frame.
+     *
+     * Called when data arrives, and again after the partial frame timer resynchronises, so a
+     * response queued behind a damaged frame is still delivered even if the peer has since
+     * gone quiet.
+     */
+    _parseReceivedData() {
+        const self = this;
+        let buffer;
+        let crc;
+        let length;
+        let protocolId;
+
+                // check data length
+                while (self._clientRcvData.length >= MIN_MBAP_LENGTH) {
+                    // parse tcp header protocol identifier and length
+                    protocolId = self._clientRcvData.readUInt16BE(2);
+                    length = self._clientRcvData.readUInt16BE(4);
+
+                    // Modbus TCP carries no checksum of its own, so a corrupted header is
+                    // indistinguishable from a valid one unless it is range checked. Left
+                    // unchecked, an impossible length makes the stream unrecoverable: every
+                    // later read appends to a buffer that is never drained, the port stops
+                    // emitting and every transaction times out. Skip to the next position that
+                    // could start a frame rather than discarding bytes that may still be a
+                    // valid response delivered in the same read.
+                    if (protocolId !== 0 ||
+                        length < MIN_MBAP_DATA_LENGTH ||
+                        length > MAX_MBAP_DATA_LENGTH) {
+                        const resyncAt = findNextHeader(self._clientRcvData, 1);
+                        modbusSerialDebug({
+                            action: "resynchronising after corrupted mbap header",
+                            protocolId: protocolId,
+                            length: length,
+                            resyncAt: resyncAt
+                        });
+                        self._cancelPartialFrameTimer();
+                        self._clientRcvData = resyncAt === -1 ?
+                            Buffer.alloc(0) :
+                            self._clientRcvData.slice(resyncAt);
+                        if (resyncAt === -1) {
+                            return;
+                        }
+                        continue;
+                    }
+
+                    // Check if RcvData has enought data (MBAP size + message size)
+                    // If false, all the modBus message has not been received yet
+                    // => Return to wait next receiving
+                    if(self._clientRcvData.length < (length + MIN_MBAP_LENGTH))
+                    {
+                        // A length that is in range but wrong cannot be recognised from the
+                        // header, only by the frame never completing. Arm a timer so the buffer
+                        // is released even if the peer goes silent.
+                        self._startPartialFrameTimer();
+                        return;
+                    }
+
+                    self._cancelPartialFrameTimer();
+
+                    // cut 6 bytes of mbap and copy pdu
+                    buffer = Buffer.alloc(length + CRC_LENGTH);
+                    self._clientRcvData.copy(buffer, 0, MIN_MBAP_LENGTH);
+
+                    // add crc to message
+                    crc = crc16(buffer.slice(0, -CRC_LENGTH));
+                    buffer.writeUInt16LE(crc, buffer.length - CRC_LENGTH);
+
+                    // update transaction id and emit data
+                    self._transactionIdRead = self._clientRcvData.readUInt16BE(0);
+                    self.emit("data", buffer);
+
+                    // debug
+                    modbusSerialDebug({ action: "parsed tcp port", buffer: buffer, transactionId: self._transactionIdRead });
+
+                    // reset data
+                    self._clientRcvData = self._clientRcvData.slice(length + MIN_MBAP_LENGTH);
+                }
+    }
+    /**
      * Arm the timer that releases a frame which never completes.
      *
      * A declared length inside the valid range but wrong for the data on the wire cannot be
@@ -301,9 +315,15 @@ class TcpPort extends EventEmitter {
                 resyncAt: resyncAt
             });
 
-            self._clientRcvData = resyncAt === -1 ?
-                Buffer.alloc(0) :
-                self._clientRcvData.slice(resyncAt);
+            if (resyncAt === -1) {
+                self._clientRcvData = Buffer.alloc(0);
+                return;
+            }
+
+            self._clientRcvData = self._clientRcvData.slice(resyncAt);
+
+            // a complete response may have been queued behind the damaged frame
+            self._parseReceivedData();
         }, PARTIAL_FRAME_TIMEOUT);
 
         // never hold the event loop open on account of a damaged frame

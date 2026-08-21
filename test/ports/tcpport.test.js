@@ -219,6 +219,33 @@ describe("Modbus TCP port methods", function() {
             });
         });
 
+        it("should deliver a response queued behind a stale partial frame", function(done) {
+            // an in-range but wrong length, then a complete response, in a single read;
+            // the timer must resynchronise and resume parsing rather than leave it buffered
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.concat([
+                    Buffer.from("0001" + "0000" + "0047" + "1103", "hex"),
+                    Buffer.from(validResponse, "hex")
+                ]));
+            });
+        });
+
+        it("should cancel the partial frame timer when the peer closes", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("0001" + "0000" + "0047" + "1103", "hex"));
+                expect(port._partialFrameTimer).to.not.equal(null);
+
+                // a peer that disconnects mid-frame must not leave a timer behind
+                port.close();
+                expect(port._partialFrameTimer).to.equal(null);
+                done();
+            });
+        });
+
         it("should still parse an ordinary response", function(done) {
             port.once("data", function(data) {
                 expect(data.toString("hex")).to.equal(validParsed);
