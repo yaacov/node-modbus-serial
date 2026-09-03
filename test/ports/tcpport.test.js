@@ -145,6 +145,118 @@ describe("Modbus TCP port methods", function() {
         });
     });
 
+    describe("corrupted MBAP header", function() {
+        // A valid readHoldingRegisters response, used to prove the port recovers.
+        const validResponse = "000100000006110366778899";
+        const validParsed = "1103667788994fa2";
+
+        function expectRecovery(corrupted, done) {
+            port.once("data", function(data) {
+                // the corrupted frame must not be emitted, only the valid one after it
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.from(corrupted, "hex"));
+                port._client.receive(Buffer.from(validResponse, "hex"));
+            });
+        }
+
+        it("should discard a frame declaring a length above the maximum", function(done) {
+            // length field 0xFFFF: without validation the buffer is never drained again
+            expectRecovery("0001" + "0000" + "ffff" + "110366778899", done);
+        });
+
+        it("should discard a frame declaring a length below the minimum", function(done) {
+            expectRecovery("0001" + "0000" + "0000" + "110366778899", done);
+        });
+
+        it("should discard a frame with a non-zero protocol identifier", function(done) {
+            expectRecovery("0001" + "00ff" + "0006" + "110366778899", done);
+        });
+
+        it("should not leave the receive buffer growing without bound", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("0001" + "0000" + "ffff" + "110366778899", "hex"));
+                expect(port._clientRcvData.length).to.equal(0);
+                done();
+            });
+        });
+
+        it("should keep a valid response delivered alongside a corrupted one", function(done) {
+            // TCP may hand over a damaged frame and the next good response in one read;
+            // discarding the whole buffer would time out a transaction that did arrive
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.concat([
+                    Buffer.from("0001" + "0000" + "ffff" + "110366778899", "hex"),
+                    Buffer.from(validResponse, "hex")
+                ]));
+            });
+        });
+
+        it("should release a partial frame when the peer goes silent", function(done) {
+            port.open(function() {
+                // declares 71 bytes, sends 2, then nothing more arrives
+                port._client.receive(Buffer.from("0001" + "0000" + "0047" + "1103", "hex"));
+                expect(port._clientRcvData.length).to.be.above(0);
+                setTimeout(function() {
+                    expect(port._clientRcvData.length).to.equal(0);
+                    done();
+                }, 1200);
+            });
+        });
+
+        it("should examine a header delivered as exactly six bytes", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("000100000047", "hex"));
+                // the loop must not skip a buffer holding precisely the MBAP header
+                expect(port._partialFrameTimer).to.not.equal(null);
+                done();
+            });
+        });
+
+        it("should deliver a response queued behind a stale partial frame", function(done) {
+            // an in-range but wrong length, then a complete response, in a single read;
+            // the timer must resynchronise and resume parsing rather than leave it buffered
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.concat([
+                    Buffer.from("0001" + "0000" + "0047" + "1103", "hex"),
+                    Buffer.from(validResponse, "hex")
+                ]));
+            });
+        });
+
+        it("should cancel the partial frame timer when the peer closes", function(done) {
+            port.open(function() {
+                port._client.receive(Buffer.from("0001" + "0000" + "0047" + "1103", "hex"));
+                expect(port._partialFrameTimer).to.not.equal(null);
+
+                // a peer that disconnects mid-frame must not leave a timer behind
+                port.close();
+                expect(port._partialFrameTimer).to.equal(null);
+                done();
+            });
+        });
+
+        it("should still parse an ordinary response", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(validParsed);
+                done();
+            });
+            port.open(function() {
+                port._client.receive(Buffer.from(validResponse, "hex"));
+            });
+        });
+    });
+
     describe("#write", function() {
         it("should write a valid TCP message to the port", function(done) {
             port.write(Buffer.from("1103006B00037687", "hex"));
