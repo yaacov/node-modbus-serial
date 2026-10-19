@@ -3,50 +3,16 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const SerialPort = require("serialport").SerialPort;
 const modbusSerialDebug = require("debug")("modbus-serial");
+const { reportServerIdLength, readDeviceIdentificationLength } = require("../utils/response_length");
 
 /* TODO: const should be set once, maybe */
 const EXCEPTION_LENGTH = 5;
 const MIN_DATA_LENGTH = 6;
 const MIN_WRITE_DATA_LENGTH = 4;
 const MAX_BUFFER_LENGTH = 256;
-const CRC_LENGTH = 2;
 const READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
 const REPORT_SERVER_ID_FUNCTION_CODE = 17;
 const LENGTH_UNKNOWN = "unknown";
-const BITS_TO_NUM_OF_OBJECTS = 7;
-
-// Helper function -> Bool
-// BIT | TYPE
-// 8 | OBJECTID
-// 9 | length of OBJECTID
-// 10 -> n | the object
-// 10 + n + 1 | new object id
-const calculateFC43Length = function(buffer, numObjects, i, bufferLength) {
-    const result = { hasAllData: true };
-    let currentByte = 8 + i; // current byte starts at object id.
-    if (numObjects > 0) {
-        for (let j = 0; j < numObjects; j++) {
-            if (bufferLength < currentByte) {
-                result.hasAllData = false;
-                break;
-            }
-            const objLength = buffer[currentByte + 1];
-            if (!objLength) {
-                result.hasAllData = false;
-                break;
-            }
-            currentByte += 2 + objLength;
-        }
-    }
-    if (currentByte + CRC_LENGTH > bufferLength) {
-        // still waiting on the CRC!
-        result.hasAllData = false;
-    }
-    if (result.hasAllData) {
-        result.bufLength = currentByte + CRC_LENGTH;
-    }
-    return result;
-};
 
 class RTUBufferedPort extends EventEmitter {
     /**
@@ -120,19 +86,17 @@ class RTUBufferedPort extends EventEmitter {
                 if (unitId !== self._id) continue;
 
                 if (functionCode === self._cmd && functionCode === READ_DEVICE_IDENTIFICATION_FUNCTION_CODE) {
-                    if (bufferLength <= BITS_TO_NUM_OF_OBJECTS + i) {
-                        return;
-                    }
-                    const numObjects = self._buffer[7 + i];
-                    const result = calculateFC43Length(self._buffer, numObjects, i, bufferLength);
-                    if (result.hasAllData) {
-                        self._emitData(i, result.bufLength);
+                    const responseLength = readDeviceIdentificationLength(self._buffer, i);
+                    if (responseLength !== null && i + responseLength <= bufferLength) {
+                        self._emitData(i, responseLength);
                         return;
                     }
                 } else if (functionCode === self._cmd && functionCode === REPORT_SERVER_ID_FUNCTION_CODE) {
-                    const contentLength = self._buffer[i + 2];
-                    self._emitData(i, contentLength + 5); // length + serverID + status + contentLength + CRC
-                    return;
+                    const responseLength = reportServerIdLength(self._buffer, i);
+                    if (responseLength !== null && i + responseLength <= bufferLength) {
+                        self._emitData(i, responseLength);
+                        return;
+                    }
                 } else {
                     if (functionCode === self._cmd && i + expectedLength <= bufferLength) {
                         self._emitData(i, expectedLength);

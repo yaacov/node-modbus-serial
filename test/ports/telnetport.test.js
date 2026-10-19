@@ -8,6 +8,19 @@ const LONG_MSG = "01038001830183018301830183018301830183018301830183018301830183
 0183018301830183018301830183018301830183018301830183018301830183018301830183018\
 3018301830183018301830183018301830183018346e0";
 
+// FC 43 basic device identification of unit 0x11 ("HUAWEI", "SUN2000", "V100R") and FC 17 report server id
+const FC43_REQUEST = "112b0e0100b1b4";
+const FC43_RESPONSE = "112b0e01010000030006485541574549010753554e323030300205563130305277dd";
+const FC43_EXCEPTION = "11ab019f35";
+const FC17_REQUEST = "1111cdec";
+const FC17_RESPONSE = "11110501020304ff0f67";
+
+const receiveBytewise = function(client, hex) {
+    for (let i = 0; i < hex.length; i += 2) {
+        client.receive(Buffer.from(hex.slice(i, i + 2), "hex"));
+    }
+};
+
 describe("Modbus Telnet port", function() {
     let port;
 
@@ -201,10 +214,69 @@ describe("Modbus Telnet port", function() {
         });
     });
 
+    describe("data handler, function codes with variable length", function() {
+        it("should return a complete FC 43 Read Device Identification response", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, FC43_RESPONSE);
+                });
+            });
+        });
+
+        it("should return a complete FC 43 response after illegal start chars", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, "2054ff" + FC43_RESPONSE);
+                });
+            });
+        });
+
+        it("should return a FC 43 exception", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_EXCEPTION);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, FC43_EXCEPTION);
+                });
+            });
+        });
+
+        it("should return a complete FC 17 Report Server ID response", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC17_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC17_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, FC17_RESPONSE);
+                });
+            });
+        });
+    });
+
     describe("#write", function() {
         it("should write a valid RTU message to the port", function() {
             port.write(Buffer.from("1103006B00037687", "hex"));
             expect(port._client._data.toString("hex")).to.equal("1103006b00037687");
+        });
+
+        it("should write a 4 byte FC 17 request to the port", function() {
+            port.write(Buffer.from(FC17_REQUEST, "hex"));
+            expect(port._client._data.toString("hex")).to.equal(FC17_REQUEST);
         });
     });
 });

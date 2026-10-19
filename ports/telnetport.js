@@ -3,10 +3,15 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
 const modbusSerialDebug = require("debug")("modbus-serial");
+const { reportServerIdLength, readDeviceIdentificationLength } = require("../utils/response_length");
 
 /* TODO: const should be set once, maybe */
 const EXCEPTION_LENGTH = 5;
 const MIN_DATA_LENGTH = 6;
+const MIN_WRITE_DATA_LENGTH = 4;
+const LENGTH_UNKNOWN = "unknown";
+const READ_DEVICE_IDENTIFICATION_FUNCTION_CODE = 43;
+const REPORT_SERVER_ID_FUNCTION_CODE = 17;
 
 const TELNET_PORT = 2217;
 
@@ -92,7 +97,10 @@ class TelnetPort extends EventEmitter {
             );
 
             // check data length
-            if (expectedLength < 6 || bufferLength < EXCEPTION_LENGTH) return;
+            if (
+                (expectedLength !== LENGTH_UNKNOWN && expectedLength < MIN_DATA_LENGTH) ||
+                bufferLength < EXCEPTION_LENGTH
+            ) return;
 
             // loop and check length-sized buffer chunks
             const maxOffset = bufferLength - EXCEPTION_LENGTH;
@@ -102,12 +110,12 @@ class TelnetPort extends EventEmitter {
 
                 if (unitId !== self._id) continue;
 
-                if (
-                    functionCode === self._cmd &&
-                    i + expectedLength <= bufferLength
-                ) {
-                    self._emitData(i, expectedLength);
-                    return;
+                if (functionCode === self._cmd) {
+                    const responseLength = self._responseLength(i);
+                    if (responseLength !== null && i + responseLength <= bufferLength) {
+                        self._emitData(i, responseLength);
+                        return;
+                    }
                 }
                 if (
                     functionCode === (0x80 | self._cmd) &&
@@ -154,6 +162,25 @@ class TelnetPort extends EventEmitter {
      */
     get isOpen() {
         return this.openFlag;
+    }
+
+    /**
+     * Length of the expected response: fixed for most function codes, read from the received bytes for
+     * Report Server ID (17) and Read Device Identification (43).
+     *
+     * @param {number} start the start index of the response within the buffer
+     * @returns {number|null} the length of the response, null while it is not known yet
+     * @private
+     */
+    _responseLength(start) {
+        switch (this._cmd) {
+            case REPORT_SERVER_ID_FUNCTION_CODE:
+                return reportServerIdLength(this._buffer, start);
+            case READ_DEVICE_IDENTIFICATION_FUNCTION_CODE:
+                return readDeviceIdentificationLength(this._buffer, start);
+            default:
+                return this._length;
+        }
     }
 
     /**
@@ -219,10 +246,10 @@ class TelnetPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        if (data.length < MIN_DATA_LENGTH) {
+        if (data.length < MIN_WRITE_DATA_LENGTH) {
             modbusSerialDebug(
                 "expected length of data is to small - minimum is " +
-                    MIN_DATA_LENGTH
+                    MIN_WRITE_DATA_LENGTH
             );
             return;
         }
@@ -250,6 +277,11 @@ class TelnetPort extends EventEmitter {
             case 15:
             case 16:
                 this._length = 6 + 2;
+                break;
+            case REPORT_SERVER_ID_FUNCTION_CODE:
+            case READ_DEVICE_IDENTIFICATION_FUNCTION_CODE:
+                // the length follows from the response itself, see _responseLength
+                this._length = LENGTH_UNKNOWN;
                 break;
             default:
                 // raise and error ?
