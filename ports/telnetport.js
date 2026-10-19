@@ -246,10 +246,14 @@ class TelnetPort extends EventEmitter {
      * @param {Buffer} data
      */
     write(data) {
-        if (data.length < MIN_WRITE_DATA_LENGTH) {
+        // only a Report Server ID request is shorter than 6 bytes; FC 1-4 read their quantity at offset 4
+        const minLength = data.length > 1 && data[1] === REPORT_SERVER_ID_FUNCTION_CODE
+            ? MIN_WRITE_DATA_LENGTH
+            : MIN_DATA_LENGTH;
+        if (data.length < minLength) {
             modbusSerialDebug(
                 "expected length of data is to small - minimum is " +
-                    MIN_WRITE_DATA_LENGTH
+                    minLength
             );
             return;
         }

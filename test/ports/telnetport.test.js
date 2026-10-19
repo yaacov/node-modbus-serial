@@ -278,5 +278,17 @@ describe("Modbus Telnet port", function() {
             port.write(Buffer.from(FC17_REQUEST, "hex"));
             expect(port._client._data.toString("hex")).to.equal(FC17_REQUEST);
         });
+
+        it("should reject a FC 1-4 request shorter than 6 bytes without touching the pending request", function() {
+            port.write(Buffer.from("1103006B00037687", "hex"));
+            for (const shortRequest of ["12010000", "1202000000", "12030000", "1204000000"]) {
+                expect(function() {
+                    port.write(Buffer.from(shortRequest, "hex"));
+                }).to.not.throw();
+            }
+            expect(port._client._data.toString("hex")).to.equal("1103006b00037687");
+            expect(port._id).to.equal(0x11);
+            expect(port._cmd).to.equal(3);
+        });
     });
 });
