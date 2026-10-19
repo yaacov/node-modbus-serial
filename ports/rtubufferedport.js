@@ -87,12 +87,15 @@ class RTUBufferedPort extends EventEmitter {
 
                 if (functionCode === self._cmd && functionCode === READ_DEVICE_IDENTIFICATION_FUNCTION_CODE) {
                     const responseLength = readDeviceIdentificationLength(self._buffer, i);
+                    // could never fit the buffer: no response, look for one further on
+                    if (responseLength !== null && responseLength > MAX_BUFFER_LENGTH) continue;
                     if (responseLength !== null && i + responseLength <= bufferLength) {
                         self._emitData(i, responseLength);
                         return;
                     }
                 } else if (functionCode === self._cmd && functionCode === REPORT_SERVER_ID_FUNCTION_CODE) {
                     const responseLength = reportServerIdLength(self._buffer, i);
+                    if (responseLength !== null && responseLength > MAX_BUFFER_LENGTH) continue;
                     if (responseLength !== null && i + responseLength <= bufferLength) {
                         self._emitData(i, responseLength);
                         return;

@@ -266,6 +266,20 @@ describe("Modbus Telnet port", function() {
                 });
             });
         });
+
+        it("should skip a FC 17 candidate longer than an RTU frame and return the response behind it", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC17_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC17_REQUEST, "hex"));
+                setTimeout(function() {
+                    // byte count 0xff: 260 bytes, more than any RTU frame
+                    port._client.receive(Buffer.from("1111ff" + FC17_RESPONSE, "hex"));
+                });
+            });
+        });
     });
 
     describe("#write", function() {

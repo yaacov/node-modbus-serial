@@ -3,7 +3,11 @@ const events = require("events");
 const EventEmitter = events.EventEmitter || events;
 const net = require("net");
 const modbusSerialDebug = require("debug")("modbus-serial");
-const { reportServerIdLength, readDeviceIdentificationLength } = require("../utils/response_length");
+const {
+    MAX_RTU_FRAME_LENGTH,
+    reportServerIdLength,
+    readDeviceIdentificationLength
+} = require("../utils/response_length");
 
 /* TODO: const should be set once, maybe */
 const EXCEPTION_LENGTH = 5;
@@ -112,6 +116,8 @@ class TelnetPort extends EventEmitter {
 
                 if (functionCode === self._cmd) {
                     const responseLength = self._responseLength(i);
+                    // longer than any RTU frame: no response, look for one further on
+                    if (responseLength !== null && responseLength > MAX_RTU_FRAME_LENGTH) continue;
                     if (responseLength !== null && i + responseLength <= bufferLength) {
                         self._emitData(i, responseLength);
                         return;

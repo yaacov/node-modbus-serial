@@ -2,7 +2,11 @@
 
 const expect = require("chai").expect;
 
-const { reportServerIdLength, readDeviceIdentificationLength } = require("../../utils/response_length");
+const {
+    MAX_RTU_FRAME_LENGTH,
+    reportServerIdLength,
+    readDeviceIdentificationLength
+} = require("../../utils/response_length");
 
 // basic device identification: "HUAWEI", "SUN2000", "V100R"
 const FC43_RESPONSE = Buffer.from("112b0e01010000030006485541574549010753554e323030300205563130305277dd", "hex");
@@ -38,6 +42,12 @@ describe("Modbus response length", function() {
             const buffer = Buffer.concat([Buffer.from("2054ff", "hex"), FC43_RESPONSE]);
             expect(readDeviceIdentificationLength(buffer, 3)).to.equal(FC43_RESPONSE.length);
         });
+
+        it("should report an object list longer than an RTU frame without waiting for it", function() {
+            // two objects announced, the first one alone has 255 bytes
+            const buffer = Buffer.from("112b0e010100000200ff", "hex");
+            expect(readDeviceIdentificationLength(buffer, 0)).to.be.above(MAX_RTU_FRAME_LENGTH);
+        });
     });
 
     describe("reportServerIdLength() - FC 17", function() {
@@ -52,6 +62,10 @@ describe("Modbus response length", function() {
         it("should count from the start of the response, not of the buffer", function() {
             const buffer = Buffer.concat([Buffer.from("20", "hex"), FC17_RESPONSE]);
             expect(reportServerIdLength(buffer, 1)).to.equal(FC17_RESPONSE.length);
+        });
+
+        it("should report a byte count beyond an RTU frame", function() {
+            expect(reportServerIdLength(Buffer.from("1111ff", "hex"), 0)).to.be.above(MAX_RTU_FRAME_LENGTH);
         });
     });
 

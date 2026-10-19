@@ -237,6 +237,34 @@ describe("Modbus RTU buffered port", function() {
                 });
             });
         });
+
+        it("should skip a FC 17 candidate too long for the buffer and return the response behind it", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC17_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC17_REQUEST, "hex"));
+                setTimeout(function() {
+                    // byte count 0xff: 260 bytes, more than the buffer keeps
+                    port._client.receive(Buffer.from("1111ff" + FC17_RESPONSE, "hex"));
+                });
+            });
+        });
+
+        it("should skip a FC 43 candidate too long for the buffer and return the response behind it", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    // two objects announced, the first one alone has 255 bytes
+                    port._client.receive(Buffer.from("112b0e010100000200ff" + FC43_RESPONSE, "hex"));
+                });
+            });
+        });
     });
 
     describe("#write", function() {
