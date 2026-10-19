@@ -8,6 +8,20 @@ const LONG_MSG = "01038001830183018301830183018301830183018301830183018301830183
 0183018301830183018301830183018301830183018301830183018301830183018301830183018\
 3018301830183018301830183018301830183018346e0";
 
+// FC 43 basic device identification of unit 0x11 ("HUAWEI", "SUN2000", "V100R"), one with an empty first object,
+// and FC 17 report server id
+const FC43_REQUEST = "112b0e0100b1b4";
+const FC43_RESPONSE = "112b0e01010000030006485541574549010753554e323030300205563130305277dd";
+const FC43_EMPTY_OBJECT = "112b0e010100000200000103414243c831";
+const FC17_REQUEST = "1111cdec";
+const FC17_RESPONSE = "11110501020304ff0f67";
+
+const receiveBytewise = function(client, hex) {
+    for (let i = 0; i < hex.length; i += 2) {
+        client.receive(Buffer.from(hex.slice(i, i + 2), "hex"));
+    }
+};
+
 describe("Modbus RTU buffered port", function() {
     let port;
 
@@ -179,6 +193,75 @@ describe("Modbus RTU buffered port", function() {
                     port._client.receive(Buffer.from("40", "hex"));
                     port._client.receive(Buffer.from("49", "hex"));
                     port._client.receive(Buffer.from("ad", "hex"));
+                });
+            });
+        });
+    });
+
+    describe("data handler, function codes with variable length", function() {
+        it("should cut a FC 43 response out of illegal chars arriving in the same chunk", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    port._client.receive(Buffer.from("2054ff" + FC43_RESPONSE + "2054", "hex"));
+                });
+            });
+        });
+
+        it("should return a FC 43 response with an empty object", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_EMPTY_OBJECT);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, FC43_EMPTY_OBJECT);
+                });
+            });
+        });
+
+        it("should return a FC 17 response only once it is complete", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC17_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC17_REQUEST, "hex"));
+                setTimeout(function() {
+                    receiveBytewise(port._client, FC17_RESPONSE);
+                });
+            });
+        });
+
+        it("should skip a FC 17 candidate too long for the buffer and return the response behind it", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC17_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC17_REQUEST, "hex"));
+                setTimeout(function() {
+                    // byte count 0xff: 260 bytes, more than the buffer keeps
+                    port._client.receive(Buffer.from("1111ff" + FC17_RESPONSE, "hex"));
+                });
+            });
+        });
+
+        it("should skip a FC 43 candidate too long for the buffer and return the response behind it", function(done) {
+            port.once("data", function(data) {
+                expect(data.toString("hex")).to.equal(FC43_RESPONSE);
+                done();
+            });
+            port.open(function() {
+                port.write(Buffer.from(FC43_REQUEST, "hex"));
+                setTimeout(function() {
+                    // two objects announced, the first one alone has 255 bytes
+                    port._client.receive(Buffer.from("112b0e010100000200ff" + FC43_RESPONSE, "hex"));
                 });
             });
         });
