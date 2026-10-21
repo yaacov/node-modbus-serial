@@ -70,7 +70,9 @@ class TcpPort extends EventEmitter {
             if (options.socket instanceof net.Socket) {
                 this._externalSocket = options.socket;
                 this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
-                this._connected = this.openFlag;
+                // only "open" counts: an "opening" socket sets _connected on 'connect' (below), so a
+                // connection attempt that fails still emits no 'close'
+                this._connected = this._externalSocket.readyState === "open";
             } else {
                 throw new Error("invalid socket provided");
             }

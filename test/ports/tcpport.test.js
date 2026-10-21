@@ -193,5 +193,47 @@ describe("Modbus TCP port methods", function() {
             errPort._client.emit("close", true);
             expect(closes).to.equal(0);
         });
+
+        describe("with an external socket", function() {
+            let net;
+
+            beforeEach(function() {
+                net = require("net"); // the mocked net from before()
+            });
+
+            const externalPort = function(readyState) {
+                const socket = new net.Socket();
+                socket.readyState = readyState;
+                const extPort = new TcpPort("127.0.0.1", { socket: socket });
+                const closes = [];
+                extPort.on("close", function() {
+                    closes.push(true);
+                });
+                return { socket: socket, port: extPort, closes: closes };
+            };
+
+            it("should not emit close when a connecting socket fails to connect", function() {
+                const ext = externalPort("opening");
+                ext.socket.emit("error", new Error("connect ECONNREFUSED"));
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(0);
+            });
+
+            it("should emit close when a connecting socket connects and then errors", function() {
+                const ext = externalPort("opening");
+                ext.socket.emit("connect");
+                ext.socket.emit("error", new Error("read ECONNRESET"));
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(1);
+            });
+
+            it("should emit close when an open socket errors", function() {
+                const ext = externalPort("open");
+                ext.socket.emit("error", new Error("read ECONNRESET"));
+                expect(ext.port.isOpen).to.be.false;
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(1);
+            });
+        });
     });
 });
