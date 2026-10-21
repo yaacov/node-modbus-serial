@@ -155,4 +155,43 @@ describe("Modbus TCP port methods", function() {
         });
     });
 
+    describe("socket errors", function() {
+        let TcpPort;
+
+        beforeEach(function() {
+            // require here, not at describe time, so it gets the mocked net registered in before()
+            TcpPort = require("./../../ports/tcpport");
+        });
+
+        it("should emit close when an open connection errors", function(done) {
+            const errPort = new TcpPort("127.0.0.1", { port: 9999 });
+            let closes = 0;
+            errPort.on("close", function() {
+                closes++;
+            });
+            errPort.open(function() {
+                // after open() has finished with its callback
+                setImmediate(function() {
+                    // like ECONNRESET: net.Socket emits 'error', then 'close' with had_error
+                    errPort._client.emit("error", new Error("read ECONNRESET"));
+                    expect(errPort.isOpen).to.be.false;
+                    errPort._client.emit("close", true);
+                    expect(closes).to.equal(1);
+                    done();
+                });
+            });
+        });
+
+        it("should not emit close when the connection attempt fails", function() {
+            const errPort = new TcpPort("127.0.0.1", { port: 9999 });
+            let closes = 0;
+            errPort.on("close", function() {
+                closes++;
+            });
+            // like ECONNREFUSED: the socket never connects, then emits 'error' and 'close'
+            errPort._client.emit("error", new Error("connect ECONNREFUSED"));
+            errPort._client.emit("close", true);
+            expect(closes).to.equal(0);
+        });
+    });
 });

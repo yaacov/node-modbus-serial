@@ -31,6 +31,9 @@ class TcpPort extends EventEmitter {
         /** Flag to indicate if port is open */
         /** @type {boolean} */
         this.openFlag = false;
+        // true while the socket is connected; unlike openFlag, an 'error' doesn't clear it, so the
+        // 'close' that always follows still reaches our listeners
+        this._connected = false;
         /** @type {function(Error=):void} */
         this.callback = null;
         this._transactionIdWrite = 1;
@@ -67,6 +70,7 @@ class TcpPort extends EventEmitter {
             if (options.socket instanceof net.Socket) {
                 this._externalSocket = options.socket;
                 this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
+                this._connected = this.openFlag;
             } else {
                 throw new Error("invalid socket provided");
             }
@@ -136,6 +140,7 @@ class TcpPort extends EventEmitter {
 
         this._client.on("connect", function() {
             self.openFlag = true;
+            self._connected = true;
             self._writeCompleted = Promise.resolve();
             modbusSerialDebug("TCP port: signal connect");
             self._client.setNoDelay();
@@ -143,7 +148,10 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("close", function(had_error) {
-            if (self.openFlag)  {
+            // gate on _connected, not openFlag: an 'error' (e.g. ECONNRESET) clears openFlag first,
+            // and a failed connect never set _connected, so it still emits nothing
+            if (self._connected) {
+                self._connected = false;
                 self.openFlag = false;
                 self._clientRcvData = Buffer.alloc(0); // Reset the variable that storing all received data
                 modbusSerialDebug("TCP port: signal close: " + had_error);

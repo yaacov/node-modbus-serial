@@ -33,6 +33,9 @@ class TcpRTUBufferedPort extends EventEmitter {
 
         const modbus = this;
         modbus.openFlag = false;
+        // true while the socket is connected; unlike openFlag, an 'error' doesn't clear it, so the
+        // 'close' that always follows still reaches our listeners
+        modbus._connected = false;
         modbus.callback = null;
         modbus._transactionIdWrite = 1;
         this._externalSocket = null;
@@ -53,6 +56,7 @@ class TcpRTUBufferedPort extends EventEmitter {
             if(options.socket instanceof net.Socket) {
                 this._externalSocket = options.socket;
                 this.openFlag = this._externalSocket.readyState === "opening" || this._externalSocket.readyState === "open";
+                this._connected = this.openFlag;
             } else {
                 throw new Error("invalid socket provided");
             }
@@ -130,11 +134,15 @@ class TcpRTUBufferedPort extends EventEmitter {
 
         this._client.on("connect", function() {
             modbus.openFlag = true;
+            modbus._connected = true;
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
-            if (modbus.openFlag) {
+            // gate on _connected, not openFlag: an 'error' (e.g. ECONNRESET) clears openFlag first,
+            // and a failed connect never set _connected, so it still emits nothing
+            if (modbus._connected) {
+                modbus._connected = false;
                 modbus.openFlag = false;
                 modbusSerialDebug("TCP buffered port: signal close: " + had_error);
                 handleCallback(had_error);
