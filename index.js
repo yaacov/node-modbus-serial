@@ -1526,6 +1526,7 @@ try {
 module.exports.TcpPort = require("./ports/tcpport");
 module.exports.TcpRTUBufferedPort = require("./ports/tcprtubufferedport");
 module.exports.TelnetPort = require("./ports/telnetport");
+module.exports.AsciiTcpPort = require("./ports/asciitcpport");
 module.exports.C701Port = require("./ports/c701port");
 
 module.exports.ServerTCP = require("./servers/servertcp");
