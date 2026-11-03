@@ -120,4 +120,86 @@ describe("Modbus TCP RTU buffered port", function() {
             expect(port._client._data.toString("hex")).to.equal("000100000006010300050004");
         });
     });
+
+    describe("socket errors", function() {
+        let TcpRTUBufferedPort;
+
+        beforeEach(function() {
+            // require here, not at describe time, so it gets the mocked net registered in before()
+            TcpRTUBufferedPort = require("./../../ports/tcprtubufferedport");
+        });
+
+        it("should emit close when an open connection errors", function(done) {
+            const errPort = new TcpRTUBufferedPort("127.0.0.1", { port: 9999 });
+            let closes = 0;
+            errPort.on("close", function() {
+                closes++;
+            });
+            errPort.open(function() {
+                // after open() has finished with its callback
+                setImmediate(function() {
+                    // like ECONNRESET: net.Socket emits 'error', then 'close' with had_error
+                    errPort._client.emit("error", new Error("read ECONNRESET"));
+                    expect(errPort.isOpen).to.be.false;
+                    errPort._client.emit("close", true);
+                    expect(closes).to.equal(1);
+                    done();
+                });
+            });
+        });
+
+        it("should not emit close when the connection attempt fails", function() {
+            const errPort = new TcpRTUBufferedPort("127.0.0.1", { port: 9999 });
+            let closes = 0;
+            errPort.on("close", function() {
+                closes++;
+            });
+            // like ECONNREFUSED: the socket never connects, then emits 'error' and 'close'
+            errPort._client.emit("error", new Error("connect ECONNREFUSED"));
+            errPort._client.emit("close", true);
+            expect(closes).to.equal(0);
+        });
+
+        describe("with an external socket", function() {
+            let net;
+
+            beforeEach(function() {
+                net = require("net"); // the mocked net from before()
+            });
+
+            const externalPort = function(readyState) {
+                const socket = new net.Socket();
+                socket.readyState = readyState;
+                const extPort = new TcpRTUBufferedPort("127.0.0.1", { socket: socket });
+                const closes = [];
+                extPort.on("close", function() {
+                    closes.push(true);
+                });
+                return { socket: socket, port: extPort, closes: closes };
+            };
+
+            it("should not emit close when a connecting socket fails to connect", function() {
+                const ext = externalPort("opening");
+                ext.socket.emit("error", new Error("connect ECONNREFUSED"));
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(0);
+            });
+
+            it("should emit close when a connecting socket connects and then errors", function() {
+                const ext = externalPort("opening");
+                ext.socket.emit("connect");
+                ext.socket.emit("error", new Error("read ECONNRESET"));
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(1);
+            });
+
+            it("should emit close when an open socket errors", function() {
+                const ext = externalPort("open");
+                ext.socket.emit("error", new Error("read ECONNRESET"));
+                expect(ext.port.isOpen).to.be.false;
+                ext.socket.emit("close", true);
+                expect(ext.closes).to.have.length(1);
+            });
+        });
+    });
 });
