@@ -102,6 +102,20 @@ describe("ModbusRTU", function() {
                 });
             });
 
+            it("should report a code mismatch rather than a length error", function(done) {
+                // a reply carrying a different function code, and a length that does not
+                // match either — the situation when an earlier request's answer arrives
+                // after its transaction identifier has been reused. Reporting the length
+                // first points at the byte count and away from the actual cause.
+                modbusRTU.writeFC3(7, 8, 3, function(err) {
+                    expect(err.message).to.equal(
+                        "Unexpected data error, expected code 3 got 1"
+                    );
+
+                    done();
+                });
+            });
+
             it("should fail with an exception", function(done) {
                 modbusRTU.writeFC3(5, 8, 3, function(err) {
                     expect(err.message).to.have.string("Modbus exception");

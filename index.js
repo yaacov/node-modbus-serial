@@ -537,6 +537,18 @@ function _onReceive(data) {
         }
     }
 
+    /* check message code
+     * if we do not expect this message
+     * raise an error
+     */
+    if (code !== transaction.nextCode) {
+        error = "Unexpected data error, expected " +
+            "code " + transaction.nextCode + " got " + code;
+        if (transaction.next)
+            next(new Error(error));
+        return;
+    }
+
     /* check message length
      * if we do not expect this data
      * raise an error
@@ -555,18 +567,6 @@ function _onReceive(data) {
     if (Number(address) !== Number(transaction.nextAddress)) {
         error = "Unexpected data error, expected " +
               "address " + transaction.nextAddress + " got " + address;
-        if (transaction.next)
-            next(new Error(error));
-        return;
-    }
-
-    /* check message code
-     * if we do not expect this message
-     * raise an error
-     */
-    if (code !== transaction.nextCode) {
-        error = "Unexpected data error, expected " +
-            "code " + transaction.nextCode + " got " + code;
         if (transaction.next)
             next(new Error(error));
         return;
