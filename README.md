@@ -108,8 +108,9 @@ This module has not been tested on every single version of NodeJS. For best resu
 | FC6 "Preset Single Register" | `writeRegister(addr, value)` |
  | FC15 "Force Multiple Coil" | `writeCoils(addr, valueAry)` |
 | FC16 "Preset Multiple Registers" | `writeRegisters(addr, valueAry)` |
+| FC17 "Report Server ID" (supported ports: TCP, RTU, Telnet) | `reportServerID(deviceIdCode)` |
 | FC22 "Mask Write Register" | `maskWriteRegister(addr, andMask, orMask)` |
-| FC43/14 "Read Device Identification" (supported ports: TCP, RTU) | `readDeviceIdentification(id, obj)` |
+| FC43/14 "Read Device Identification" (supported ports: TCP, RTU, Telnet) | `readDeviceIdentification(id, obj)` |
 | CustomFC "Custom Function" | `customFunction(functionCode, data)` |
 
 ###### Client Serial:
@@ -123,7 +124,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 * modbus-TCP (TcpPort): Over TCP/IP line.
 * modbus-RTU (UdpPort): Over C701 server, commercial UDP to serial bridge.
 * modbus-RTU (TcpRTUBufferedPort): Over TCP/IP line, TCP/IP serial RTU buffered device.
-* modbus-RTU (TelnetPort): Over Telnet server, TCP/IP serial bridge.
+* modbus-RTU (TelnetPort): Over Telnet server, TCP/IP serial bridge. Sends the RTU frames unchanged, so it also fits raw TCP serial servers such as ser2net.
 
 ###### Server
 
