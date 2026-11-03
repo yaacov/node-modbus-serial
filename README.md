@@ -124,6 +124,7 @@ This module has not been tested on every single version of NodeJS. For best resu
 * modbus-RTU (UdpPort): Over C701 server, commercial UDP to serial bridge.
 * modbus-RTU (TcpRTUBufferedPort): Over TCP/IP line, TCP/IP serial RTU buffered device.
 * modbus-RTU (TelnetPort): Over Telnet server, TCP/IP serial bridge.
+* modbus-ASCII (AsciiTcpPort): Over TCP/IP line, e.g. a serial to ethernet gateway in transparent mode.
 
 ###### Server
 
@@ -361,6 +362,32 @@ function read() {
     client.readHoldingRegisters(5, 2)
         .then(console.log);
 }
+```
+----
+###### Read and Write Modbus ASCII over TCP
+Useful with RS485 to Ethernet gateways set to "transparent" (raw TCP) mode,
+where the gateway passes the ASCII frames through unchanged.
+``` javascript
+// create an empty modbus client
+const Modbus = require("modbus-serial");
+const client = new Modbus();
+
+// open connection to the gateway
+client.connectAsciiTCP(
+    "127.0.0.1",
+    {
+        port: 502,
+        startOfSlaveFrameChar: 0x3A  // optional: slave frame delimiter
+    })
+    .then(function() {
+        client.setID(1);
+
+        // read the 2 registers starting at address 5
+        // on device number 1.
+        return client.readHoldingRegisters(5, 2);
+    })
+    .then(console.log)
+    .catch(console.error);
 ```
 ----
 ##### "modbusdb" is an elegant wrapper over the Modbus protocol

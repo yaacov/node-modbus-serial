@@ -56,12 +56,16 @@ export class ModbusRTU {
   connectRTUBuffered(path: string, options: SerialPortOptions): Promise<void>;
   connectAsciiSerial(path: string, options: SerialPortOptions, next: Function): void;
   connectAsciiSerial(path: string, options: SerialPortOptions): Promise<void>;
+  connectAsciiTCP(ip: string, options: AsciiTcpPortOptions, next: Function): void;
+  connectAsciiTCP(ip: string, options: AsciiTcpPortOptions): Promise<void>;
   linkTCP(socket: Socket, options: TcpPortOptions, next: Function): void;
   linkTCP(socket: Socket, options: TcpPortOptions): Promise<void>;
   linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions, next: Function): void;
   linkTcpRTUBuffered(socket: Socket, options: TcpRTUPortOptions): Promise<void>;
   linkTelnet(socket: Socket, options: TelnetPortOptions, next: Function): void;
   linkTelnet(socket: Socket, options: TelnetPortOptions): Promise<void>;
+  linkAsciiTCP(socket: Socket, options: AsciiTcpPortOptions, next: Function): void;
+  linkAsciiTCP(socket: Socket, options: AsciiTcpPortOptions): Promise<void>;
   connectRTUSocket(socket: Socket, next: Function): void;
   connectRTUSocket(socket: Socket): Promise<void>;
 
@@ -197,6 +201,16 @@ export interface TcpRTUPortOptions {
   port?: number;
   localAddress?: string;
   family?: number;
+}
+
+export interface AsciiTcpPortOptions {
+  port?: number;
+  localAddress?: string;
+  family?: number;
+  ip?: string;
+  timeout?: number;
+  socket?: Socket;
+  startOfSlaveFrameChar?: number;
 }
 
 export interface TelnetPortOptions {
