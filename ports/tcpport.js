@@ -83,6 +83,7 @@ class TcpPort extends EventEmitter {
 
         // init a socket
         this._client = this._externalSocket || new net.Socket(this.socketOpts);
+        this._clientClosed = false;
         this._writeCompleted = Promise.resolve();
 
         if (options.timeout) this._client.setTimeout(options.timeout);
@@ -135,6 +136,7 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("connect", function() {
+            self._clientClosed = false;
             self.openFlag = true;
             self._writeCompleted = Promise.resolve();
             modbusSerialDebug("TCP port: signal connect");
@@ -143,6 +145,7 @@ class TcpPort extends EventEmitter {
         });
 
         this._client.on("close", function(had_error) {
+            self._clientClosed = true;
             if (self.openFlag)  {
                 self.openFlag = false;
                 self._clientRcvData = Buffer.alloc(0); // Reset the variable that storing all received data
@@ -201,6 +204,13 @@ class TcpPort extends EventEmitter {
      * @param {function(Error=):void} callback
      */
     close(callback) {
+        if (this._client.destroyed) {
+            if (callback) {
+                if (this._clientClosed) process.nextTick(callback);
+                else this._client.once("close", () => callback());
+            }
+            return;
+        }
         this.callback = callback;
         // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
         this._client.end();

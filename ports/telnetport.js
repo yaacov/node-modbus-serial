@@ -61,6 +61,7 @@ class TelnetPort extends EventEmitter {
 
         // create a socket
         this._client = this._externalSocket || new net.Socket();
+        this._clientClosed = false;
         if (options.timeout) this._client.setTimeout(options.timeout);
 
         // register the port data event
@@ -123,11 +124,13 @@ class TelnetPort extends EventEmitter {
         });
 
         this._client.on("connect", function() {
+            self._clientClosed = false;
             self.openFlag = true;
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
+            self._clientClosed = true;
             self.openFlag = false;
             handleCallback(had_error);
             self.emit("close");
@@ -196,6 +199,13 @@ class TelnetPort extends EventEmitter {
      * @param callback
      */
     close(callback) {
+        if (this._client.destroyed) {
+            if (callback) {
+                if (this._clientClosed) process.nextTick(callback);
+                else this._client.once("close", () => callback());
+            }
+            return;
+        }
         this.callback = callback;
         this._client.end();
         this.removeAllListeners();
