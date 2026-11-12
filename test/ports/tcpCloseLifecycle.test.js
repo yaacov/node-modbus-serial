@@ -213,16 +213,19 @@ for (const kind of ["tcpport", "tcprtubufferedport", "telnetport"]) {
             await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
             const adapter = new Port("127.0.0.1", { port: server.address().port });
             const client = new Modbus(adapter);
+            const open = () => new Promise((resolve, reject) => {
+                client.open(error => error ? reject(error) : resolve());
+            });
             let calls = 0;
             try {
-                await client.open();
+                await open();
                 await bounded(client.close());
                 const closing = new Promise((resolve, reject) => client.close(function(error) {
                     calls++;
                     if (error) reject(error);
                     else resolve();
                 }));
-                await client.open();
+                await open();
                 await bounded(closing);
                 assert.strictEqual(client.isOpen, true);
                 assert.strictEqual(calls, 1);
