@@ -302,14 +302,20 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 callback(error);
                 return;
             }
-            if (values.length === length) {
-                for (i = 0; i < length; i++) {
-                    tryAndHandlePromiseOrValue(i, values);
+            _handlePromiseOrValue(values, function(err, resolvedValues) {
+                if (err) {
+                    callback(err);
+                    return;
                 }
-            } else {
-                const error = new Error("Requested address length and response length do not match");
-                callback(error);
-            }
+                if (resolvedValues.length === length) {
+                    for (let i = 0; i < length; i++) {
+                        tryAndHandlePromiseOrValue(i, resolvedValues);
+                    }
+                } else {
+                    const error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                }
+            });
         }
 
     }
@@ -446,14 +452,20 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
                 callback(error);
                 return;
             }
-            if (values.length === length) {
-                for (i = 0; i < length; i++) {
-                    tryAndHandlePromiseOrValue(i, values);
+            _handlePromiseOrValue(values, function(err, resolvedValues) {
+                if (err) {
+                    callback(err);
+                    return;
                 }
-            } else {
-                const error = new Error("Requested address length and response length do not match");
-                callback(error);
-            }
+                if (resolvedValues.length === length) {
+                    for (let i = 0; i < length; i++) {
+                        tryAndHandlePromiseOrValue(i, resolvedValues);
+                    }
+                } else {
+                    const error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                }
+            });
         }
 
     }
@@ -575,20 +587,26 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
                 return;
             }
 
-            if (values.length === length) {
-                for (var i = 0; i < length; i++) {
-                    tryAndHandlePromiseOrValues(i, values);
+            _handlePromiseOrValue(values, function(err, resolvedValues) {
+                if (err) {
+                    callback(err);
+                    return;
                 }
-            } else {
-                const error = new Error("Requested address length and response length do not match");
-                callback(error);
-            }
+                if (resolvedValues.length === length) {
+                    for (let i = 0; i < length; i++) {
+                        tryAndHandlePromiseOrValues(i, resolvedValues);
+                    }
+                } else {
+                    const error = new Error("Requested address length and response length do not match");
+                    callback(error);
+                }
+            });
         }
 
     }
     else if (vector.getInputRegister) {
 
-        for (i = 0; i < length; i++) {
+        for (let i = 0; i < length; i++) {
             const cb = buildCb(i);
             try {
                 if (vector.getInputRegister.length === 3) {
