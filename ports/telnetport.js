@@ -201,6 +201,7 @@ class TelnetPort extends EventEmitter {
      */
     close(callback) {
         if (this._client.destroyed) {
+            this.removeAllListeners();
             if (callback) {
                 if (this._clientClosed) process.nextTick(callback);
                 else this._client.once("close", () => callback());

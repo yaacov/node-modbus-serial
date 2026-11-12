@@ -191,3 +191,53 @@ for (const kind of ["tcpport", "tcprtubufferedport", "telnetport"]) {
         }
     });
 }
+
+describe("Telnet closed-session listeners", function() {
+    for (const withCallback of [false, true]) {
+        it("cleans up listeners before reopening " + (withCallback ? "with" : "without") + " a close callback", async function() {
+            const Port = require("../../ports/telnetport");
+            const peers = [];
+            const server = net.createServer(function(peer) {
+                peers.push(peer);
+                let request = Buffer.alloc(0);
+                peer.on("data", function(data) {
+                    request = Buffer.concat([request, data]);
+                    if (request.length < 8) return;
+                    assert.strictEqual(request.toString("hex"), "110300170001369e");
+                    peer.write(Buffer.from("110302123474f0", "hex"));
+                });
+            });
+            await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+            const adapter = new Port("127.0.0.1", { port: server.address().port });
+            let oldDeliveries = 0;
+            let callbacks = 0;
+            try {
+                await new Promise((resolve, reject) => adapter.open(error => error ? reject(error) : resolve()));
+                adapter.on("data", () => { oldDeliveries++; });
+                adapter.on("close", () => {});
+                const peerClosed = new Promise(resolve => adapter._client.once("close", resolve));
+                peers[0].end();
+                await peerClosed;
+                if (withCallback) adapter.close(() => { callbacks++; });
+                else adapter.close();
+                await new Promise(resolve => setImmediate(resolve));
+                const retainedData = adapter.listenerCount("data");
+                const retainedClose = adapter.listenerCount("close");
+
+                await new Promise((resolve, reject) => adapter.open(error => error ? reject(error) : resolve()));
+                const received = new Promise(resolve => adapter.once("data", resolve));
+                adapter.write(Buffer.from("110300170001369e", "hex"));
+                assert.strictEqual((await bounded(received)).toString("hex"), "110302123474f0");
+                assert.strictEqual(oldDeliveries, 0);
+                assert.strictEqual(retainedData, 0);
+                assert.strictEqual(retainedClose, 0);
+                assert.strictEqual(callbacks, withCallback ? 1 : 0);
+                await bounded(new Promise(resolve => adapter.close(resolve)));
+            } finally {
+                adapter._client.destroy();
+                peers.forEach(peer => peer.destroy());
+                await new Promise(resolve => server.close(resolve));
+            }
+        });
+    }
+});
