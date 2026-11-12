@@ -213,6 +213,7 @@ class TcpRTUBufferedPort extends EventEmitter {
     open(callback) {
         if(this._externalSocket === null) {
             this.callback = callback;
+            this._clientClosed = false;
             this._client.connect(this.connectOptions);
         } else if(this.openFlag) {
             modbusSerialDebug("TcpRTUBuffered port: external socket is opened");

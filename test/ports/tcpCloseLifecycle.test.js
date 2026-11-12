@@ -143,3 +143,51 @@ for (const method of ["connectTCP", "connectTcpRTUBuffered", "connectTelnet"]) {
         });
     });
 }
+
+for (const kind of ["tcpport", "tcprtubufferedport", "telnetport"]) {
+    describe(kind + " reused socket close lifecycle", function() {
+        for (const firstAttemptSucceeds of [false, true]) {
+            it("waits for a failed reopen after " + (firstAttemptSucceeds ? "success" : "failure"), async function() {
+                const Port = require("../../ports/" + kind);
+                const peers = [];
+                const server = net.createServer(socket => peers.push(socket));
+                await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+                const adapter = new Port("127.0.0.1", { port: server.address().port });
+                let closeCount = 0;
+                adapter._client.on("close", () => { closeCount++; });
+                try {
+                    if (!firstAttemptSucceeds) await new Promise(resolve => server.close(resolve));
+                    const firstClose = new Promise(resolve => adapter._client.once("close", resolve));
+                    const opening = new Promise((resolve, reject) => adapter.open(error => error ? reject(error) : resolve()));
+                    if (firstAttemptSucceeds) {
+                        await opening;
+                        await bounded(new Promise(resolve => adapter.close(resolve)));
+                    } else {
+                        await assert.rejects(opening, { code: "ECONNREFUSED" });
+                    }
+                    await firstClose;
+                    if (firstAttemptSucceeds) await new Promise(resolve => server.close(resolve));
+
+                    const secondClose = new Promise(resolve => adapter._client.once("close", resolve));
+                    await bounded(new Promise((resolve, reject) => adapter.open(function(error) {
+                        try {
+                            assert.strictEqual(error.code, "ECONNREFUSED");
+                        } catch (failure) { reject(failure); return; }
+                        adapter.close(function(closeError) {
+                            try {
+                                assert.ifError(closeError);
+                                assert.strictEqual(closeCount, 2);
+                                resolve();
+                            } catch (failure) { reject(failure); }
+                        });
+                    })));
+                    await secondClose;
+                } finally {
+                    adapter._client.destroy();
+                    peers.forEach(peer => peer.destroy());
+                    if (server.listening) await new Promise(resolve => server.close(resolve));
+                }
+            });
+        }
+    });
+}

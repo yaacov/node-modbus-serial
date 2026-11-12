@@ -189,6 +189,7 @@ class TcpPort extends EventEmitter {
     open(callback) {
         if (this._externalSocket === null) {
             this.callback = callback;
+            this._clientClosed = false;
             this._client.connect(this.connectOptions);
         } else if (this.openFlag) {
             modbusSerialDebug("TCP port: external socket is opened");
