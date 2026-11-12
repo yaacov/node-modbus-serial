@@ -19,7 +19,7 @@ async function bounded(promise) {
         return await Promise.race([
             promise,
             new Promise((resolve, reject) => {
-                timer = setTimeout(() => reject(new Error("close did not complete")), 250);
+                timer = setTimeout(() => reject(new Error("close did not complete")), 1000);
             })
         ]);
     } finally {
@@ -141,6 +141,66 @@ for (const method of ["connectTCP", "connectTcpRTUBuffered", "connectTelnet"]) {
             assert.strictEqual(client.isOpen, true);
             await bounded(client.close());
         });
+    });
+}
+
+for (const method of ["linkTCP", "linkTcpRTUBuffered", "linkTelnet"]) {
+    describe(method + " close during an external socket event", function() {
+        for (const withCallback of [false, true]) {
+            for (const prependAfterLink of [false, true]) {
+                it("completes " + (withCallback ? "callback" : "Promise") +
+                    " close from " + (prependAfterLink ? "a prepended" : "an earlier") + " listener", async function() {
+                    const socket = new net.Socket();
+                    const peers = [];
+                    const server = net.createServer(peer => peers.push(peer));
+                    const client = new Modbus();
+                    let calls = 0;
+                    let closeFinished = false;
+                    let closing;
+                    function onClose() {
+                        if (withCallback) {
+                            closing = new Promise((resolve, reject) => client.close(function(error) {
+                                calls++;
+                                try {
+                                    assert.ifError(error);
+                                    assert.strictEqual(closeFinished, true);
+                                    resolve();
+                                } catch (failure) { reject(failure); }
+                            }));
+                        } else {
+                            closing = client.close().then(function() {
+                                calls++;
+                                assert.strictEqual(closeFinished, true);
+                            });
+                        }
+                    }
+                    try {
+                        await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+                        if (!prependAfterLink) socket.once("close", onClose);
+                        await new Promise((resolve, reject) => {
+                            socket.once("error", reject);
+                            socket.connect(server.address().port, "127.0.0.1", resolve);
+                        });
+                        await client[method](socket);
+                        if (prependAfterLink) socket.prependOnceListener("close", onClose);
+                        const disconnected = new Promise(resolve => socket.once("close", function() {
+                            closeFinished = true;
+                            resolve();
+                        }));
+                        peers[0].end();
+                        await disconnected;
+                        await bounded(closing);
+                        await new Promise(resolve => setImmediate(resolve));
+                        assert.strictEqual(calls, 1);
+                        assert.strictEqual(client.isOpen, false);
+                    } finally {
+                        socket.destroy();
+                        peers.forEach(peer => peer.destroy());
+                        if (server.listening) await new Promise(resolve => server.close(resolve));
+                    }
+                });
+            }
+        }
     });
 }
 

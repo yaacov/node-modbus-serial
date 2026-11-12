@@ -231,8 +231,12 @@ class TcpRTUBufferedPort extends EventEmitter {
     close(callback) {
         if (this._client.destroyed) {
             if (callback) {
-                if (this._clientClosed) process.nextTick(callback);
-                else this._client.once("close", () => callback());
+                // An earlier socket listener may call close() during the close event.
+                // Let that event finish before deciding whether to wait for it.
+                process.nextTick(() => {
+                    if (this._clientClosed) callback();
+                    else this._client.once("close", () => callback());
+                });
             }
             return;
         }
