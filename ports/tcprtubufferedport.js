@@ -73,6 +73,7 @@ class TcpRTUBufferedPort extends EventEmitter {
         // create a socket
         modbus._client = this._externalSocket || new net.Socket();
         this._clientClosed = false;
+        this._clientCloseCount = 0;
         if (options.timeout) this._client.setTimeout(options.timeout);
 
         // register the port data event
@@ -137,6 +138,7 @@ class TcpRTUBufferedPort extends EventEmitter {
 
         this._client.on("close", function(had_error) {
             modbus._clientClosed = true;
+            modbus._clientCloseCount++;
             if (modbus.openFlag) {
                 modbus.openFlag = false;
                 modbusSerialDebug("TCP buffered port: signal close: " + had_error);
@@ -231,12 +233,16 @@ class TcpRTUBufferedPort extends EventEmitter {
     close(callback) {
         if (this._client.destroyed) {
             if (callback) {
-                // An earlier socket listener may call close() during the close event.
-                // Let that event finish before deciding whether to wait for it.
-                process.nextTick(() => {
-                    if (this._clientClosed) callback();
-                    else this._client.once("close", () => callback());
-                });
+                if (this._clientClosed) process.nextTick(callback);
+                else {
+                    // An earlier listener may call close() during the close event.
+                    // Count events so a subsequent open() cannot erase that evidence.
+                    const closeCount = this._clientCloseCount;
+                    process.nextTick(() => {
+                        if (this._clientCloseCount !== closeCount) callback();
+                        else this._client.once("close", () => callback());
+                    });
+                }
             }
             return;
         }

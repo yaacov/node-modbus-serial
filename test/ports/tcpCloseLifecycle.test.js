@@ -206,6 +206,36 @@ for (const method of ["linkTCP", "linkTcpRTUBuffered", "linkTelnet"]) {
 
 for (const kind of ["tcpport", "tcprtubufferedport", "telnetport"]) {
     describe(kind + " reused socket close lifecycle", function() {
+        it("completes an old close callback while the next session stays open", async function() {
+            const Port = require("../../ports/" + kind);
+            const peers = [];
+            const server = net.createServer(socket => peers.push(socket));
+            await new Promise(resolve => server.listen(0, "127.0.0.1", resolve));
+            const adapter = new Port("127.0.0.1", { port: server.address().port });
+            const client = new Modbus(adapter);
+            let calls = 0;
+            try {
+                await client.open();
+                await bounded(client.close());
+                const closing = new Promise((resolve, reject) => client.close(function(error) {
+                    calls++;
+                    if (error) reject(error);
+                    else resolve();
+                }));
+                await client.open();
+                await bounded(closing);
+                assert.strictEqual(client.isOpen, true);
+                assert.strictEqual(calls, 1);
+                assert.strictEqual(adapter._client.listenerCount("close"), 1);
+                await bounded(client.close());
+                assert.strictEqual(calls, 1);
+            } finally {
+                adapter._client.destroy();
+                peers.forEach(peer => peer.destroy());
+                if (server.listening) await new Promise(resolve => server.close(resolve));
+            }
+        });
+
         for (const firstAttemptSucceeds of [false, true]) {
             it("waits for a failed reopen after " + (firstAttemptSucceeds ? "success" : "failure"), async function() {
                 const Port = require("../../ports/" + kind);

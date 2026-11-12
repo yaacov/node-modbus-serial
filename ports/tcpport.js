@@ -84,6 +84,7 @@ class TcpPort extends EventEmitter {
         // init a socket
         this._client = this._externalSocket || new net.Socket(this.socketOpts);
         this._clientClosed = false;
+        this._clientCloseCount = 0;
         this._writeCompleted = Promise.resolve();
 
         if (options.timeout) this._client.setTimeout(options.timeout);
@@ -146,6 +147,7 @@ class TcpPort extends EventEmitter {
 
         this._client.on("close", function(had_error) {
             self._clientClosed = true;
+            self._clientCloseCount++;
             if (self.openFlag)  {
                 self.openFlag = false;
                 self._clientRcvData = Buffer.alloc(0); // Reset the variable that storing all received data
@@ -207,12 +209,16 @@ class TcpPort extends EventEmitter {
     close(callback) {
         if (this._client.destroyed) {
             if (callback) {
-                // An earlier socket listener may call close() during the close event.
-                // Let that event finish before deciding whether to wait for it.
-                process.nextTick(() => {
-                    if (this._clientClosed) callback();
-                    else this._client.once("close", () => callback());
-                });
+                if (this._clientClosed) process.nextTick(callback);
+                else {
+                    // An earlier listener may call close() during the close event.
+                    // Count events so a subsequent open() cannot erase that evidence.
+                    const closeCount = this._clientCloseCount;
+                    process.nextTick(() => {
+                        if (this._clientCloseCount !== closeCount) callback();
+                        else this._client.once("close", () => callback());
+                    });
+                }
             }
             return;
         }
