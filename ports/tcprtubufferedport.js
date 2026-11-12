@@ -72,6 +72,8 @@ class TcpRTUBufferedPort extends EventEmitter {
 
         // create a socket
         modbus._client = this._externalSocket || new net.Socket();
+        this._clientClosed = false;
+        this._clientCloseCount = 0;
         if (options.timeout) this._client.setTimeout(options.timeout);
 
         // register the port data event
@@ -129,11 +131,14 @@ class TcpRTUBufferedPort extends EventEmitter {
         });
 
         this._client.on("connect", function() {
+            modbus._clientClosed = false;
             modbus.openFlag = true;
             handleCallback();
         });
 
         this._client.on("close", function(had_error) {
+            modbus._clientClosed = true;
+            modbus._clientCloseCount++;
             if (modbus.openFlag) {
                 modbus.openFlag = false;
                 modbusSerialDebug("TCP buffered port: signal close: " + had_error);
@@ -210,6 +215,7 @@ class TcpRTUBufferedPort extends EventEmitter {
     open(callback) {
         if(this._externalSocket === null) {
             this.callback = callback;
+            this._clientClosed = false;
             this._client.connect(this.connectOptions);
         } else if(this.openFlag) {
             modbusSerialDebug("TcpRTUBuffered port: external socket is opened");
@@ -225,6 +231,21 @@ class TcpRTUBufferedPort extends EventEmitter {
      * @param callback
      */
     close(callback) {
+        if (this._client.destroyed) {
+            if (callback) {
+                if (this._clientClosed) process.nextTick(callback);
+                else {
+                    // An earlier listener may call close() during the close event.
+                    // Count events so a subsequent open() cannot erase that evidence.
+                    const closeCount = this._clientCloseCount;
+                    process.nextTick(() => {
+                        if (this._clientCloseCount !== closeCount) callback();
+                        else this._client.once("close", () => callback());
+                    });
+                }
+            }
+            return;
+        }
         this.callback = callback;
         // DON'T pass callback to `end()` here, it will be handled by client.on('close') handler
         this._client.end();
