@@ -303,8 +303,8 @@ function _handleReadMultipleRegisters(requestBuffer, vector, unitID, callback) {
                 return;
             }
             _handlePromiseOrValue(values, function(err, resolvedValues) {
-                if (err) {
-                    callback(err);
+                if (err || !resolvedValues) {
+                    callback(err || new Error("No register values returned"));
                     return;
                 }
                 if (resolvedValues.length === length) {
@@ -453,8 +453,8 @@ function _handleReadMultipleRegistersEnron(requestBuffer, vector, unitID, enronT
                 return;
             }
             _handlePromiseOrValue(values, function(err, resolvedValues) {
-                if (err) {
-                    callback(err);
+                if (err || !resolvedValues) {
+                    callback(err || new Error("No register values returned"));
                     return;
                 }
                 if (resolvedValues.length === length) {
@@ -588,8 +588,8 @@ function _handleReadInputRegisters(requestBuffer, vector, unitID, callback) {
             }
 
             _handlePromiseOrValue(values, function(err, resolvedValues) {
-                if (err) {
-                    callback(err);
+                if (err || !resolvedValues) {
+                    callback(err || new Error("No register values returned"));
                     return;
                 }
                 if (resolvedValues.length === length) {

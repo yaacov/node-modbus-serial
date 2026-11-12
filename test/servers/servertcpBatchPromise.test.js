@@ -23,6 +23,13 @@ for (const mode of modes) {
             "a Promise of an array": () => Promise.resolve(values),
             "an asynchronously resolved array": () => new Promise(resolve => setImmediate(() => resolve(values))),
             "a rejected Promise": () => Promise.reject(Object.assign(new Error("Read failed"), { modbusErrorCode: 2 })),
+            "a Promise rejected with an ordinary Error": () => Promise.reject(new Error("Read failed")),
+            "a Promise rejected with undefined": () => Promise.reject(),
+            "a Promise rejected with null": () => Promise.reject(null),
+            "a Promise rejected with false": () => Promise.reject(false),
+            "a Promise rejected with zero": () => Promise.reject(0),
+            "a Promise rejected with an empty string": () => Promise.reject(""),
+            "a Promise rejected with NaN": () => Promise.reject(NaN),
             "a Promise with the wrong array length": () => Promise.resolve(values.slice(0, 1)),
             "a synchronous error": () => { throw new Error("Read failed"); }
         };
