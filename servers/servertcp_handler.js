@@ -106,6 +106,11 @@ function _handleReadCoilsOrInputDiscretes(requestBuffer, vector, unitID, callbac
     const isGetCoil = (fc === 1 && vector.getCoil);
     const isGetDiscreteInput = (fc === 2 && vector.getDiscreteInput);
 
+    if (!isGetCoil && !isGetDiscreteInput) {
+        callback({ modbusErrorCode: 0x01, msg: "Illegal function" });
+        return;
+    }
+
     // read coils
     if (isGetCoil || isGetDiscreteInput) {
         let callbackInvoked = false;
