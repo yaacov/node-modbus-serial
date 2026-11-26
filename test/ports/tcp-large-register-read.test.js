@@ -17,8 +17,16 @@ describe("TCP RTU buffered maximum register responses", function() {
                         response[8] = 2 * count;
                         for (let i = 0; i < count; i++) response.writeUInt16BE(1000 + i, 9 + 2 * i);
                         if (fragmented) {
+                            let received = 0;
+                            const receivePrefix = chunk => {
+                                received += chunk.length;
+                                if (received === 200) {
+                                    client._port._client.removeListener("data", receivePrefix);
+                                    socket.write(response.subarray(200));
+                                }
+                            };
+                            client._port._client.on("data", receivePrefix);
                             socket.write(response.subarray(0, 200));
-                            setImmediate(() => socket.write(response.subarray(200)));
                         } else {
                             socket.write(response);
                         }
