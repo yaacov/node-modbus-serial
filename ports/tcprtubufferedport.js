@@ -11,7 +11,8 @@ const EXCEPTION_LENGTH = 3;
 const MIN_DATA_LENGTH = 6;
 const MIN_MBAP_LENGTH = 6;
 const MAX_TRANSACTIONS = 64; // maximum transaction to wait for
-const MAX_BUFFER_LENGTH = 256;
+// A Modbus TCP ADU can contain a 253-byte PDU plus its 7-byte MBAP header.
+const MAX_BUFFER_LENGTH = 260;
 const CRC_LENGTH = 2;
 
 const MODBUS_PORT = 502;
